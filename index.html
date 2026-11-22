@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OmniDownloader - Connecting to Phone Server...</title>
+  <title>OmniDownloader Bridge</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -17,21 +17,21 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px;
     }
     .card {
       background: #18181b;
       border: 1px solid #27272a;
-      border-radius: 20px;
-      padding: 40px 30px;
-      max-width: 440px;
+      border-radius: 24px;
+      padding: 40px 32px;
+      max-width: 480px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 10px 40px rgba(168, 85, 247, 0.15);
+      box-shadow: 0 20px 50px rgba(168, 85, 247, 0.12);
     }
     .loader {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       border: 4px solid #27272a;
       border-top-color: #a855f7;
       border-radius: 50%;
@@ -39,73 +39,209 @@
       margin: 0 auto 24px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
-    p { font-size: 0.875rem; color: #a1a1aa; line-height: 1.5; }
-    .url-box {
-      margin-top: 20px;
-      padding: 12px;
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #c084fc;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 1.35rem; font-weight: 700; margin-bottom: 8px; color: #ffffff; }
+    p { font-size: 0.88rem; color: #a1a1aa; line-height: 1.5; }
+    .status-box {
+      margin-top: 24px;
+      padding: 16px;
       background: #09090b;
       border: 1px solid #3f3f46;
-      border-radius: 12px;
+      border-radius: 14px;
+      text-align: left;
+    }
+    .status-label { font-size: 0.75rem; color: #71717a; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; }
+    .url-text {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: #c084fc;
       word-break: break-all;
     }
-    .btn {
+    .actions {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn-primary {
       display: inline-block;
-      margin-top: 16px;
-      padding: 10px 20px;
-      background: #9333ea;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #9333ea, #7c3aed);
       color: white;
       text-decoration: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn-secondary {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #27272a;
+      color: #e4e4e7;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      border: 1px solid #3f3f46;
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 0.75rem;
+      color: #71717a;
+      line-height: 1.4;
     }
   </style>
 </head>
 <body>
   <div class="card">
+    <div class="badge">
+      <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#a855f7;"></span>
+      Permanent Gateway
+    </div>
     <div class="loader" id="spinner"></div>
-    <h1>OmniDownloader Bridge</h1>
-    <p id="status-text">Fetching latest live tunnel from phone...</p>
-    <div id="target-url" class="url-box" style="display:none;"></div>
-    <a id="direct-btn" href="#" class="btn" style="display:none;">Open Downloader Directly</a>
+    <h1 id="headline">Connecting to Phone Server</h1>
+    <p id="subtext">Resolving live tunnel from your Android device...</p>
+
+    <div class="status-box" id="status-box" style="display: none;">
+      <div class="status-label">Active Tunnel</div>
+      <div class="url-text" id="target-url-text">--</div>
+    </div>
+
+    <div class="actions" id="action-buttons" style="display: none;">
+      <a id="launch-btn" href="#" class="btn-primary">Launch OmniDownloader</a>
+      <a id="wifi-btn" href="http://192.168.1.13:5000" class="btn-secondary">On Home Wi-Fi? Open Local IP (192.168.1.13:5000)</a>
+    </div>
+
+    <p class="note">
+      Bookmark this permanent link! Your phone automatically updates this page whenever it reboots or changes networks.
+    </p>
   </div>
 
   <script>
-    const statusText = document.getElementById('status-text');
-    const targetUrlBox = document.getElementById('target-url');
-    const directBtn = document.getElementById('direct-btn');
-    const spinner = document.getElementById('spinner');
+    const GITHUB_REPO = "abhianand123/ytdown";
+    const LOCAL_IP = "http://192.168.1.13:5000";
 
-    // Fetch url.txt with cache busting
-    fetch('url.txt?t=' + Date.now())
-      .then(response => {
-        if (!response.ok) throw new Error("Status " + response.status);
-        return response.text();
-      })
-      .then(text => {
-        const url = text.trim();
-        if (url && url.startsWith('http')) {
-          statusText.textContent = "Live server found! Redirecting...";
-          targetUrlBox.textContent = url;
-          targetUrlBox.style.display = 'block';
-          directBtn.href = url;
-          directBtn.style.display = 'inline-block';
-          // Instant redirect
-          setTimeout(() => {
-            window.location.replace(url);
-          }, 600);
-        } else {
-          throw new Error("No valid tunnel URL found in url.txt");
+    const headline = document.getElementById('headline');
+    const subtext = document.getElementById('subtext');
+    const spinner = document.getElementById('spinner');
+    const statusBox = document.getElementById('status-box');
+    const targetUrlText = document.getElementById('target-url-text');
+    const actionButtons = document.getElementById('action-buttons');
+    const launchBtn = document.getElementById('launch-btn');
+    const wifiBtn = document.getElementById('wifi-btn');
+
+    let attemptCount = 0;
+
+    async function fetchLatestUrl() {
+      // Priority 1: GitHub API (Instant, bypasses CDN cache completely)
+      try {
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/url.txt?ref=main&t=${Date.now()}`, {
+          headers: { 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.content) {
+            const decoded = atob(data.content.replace(/\s/g, '')).trim();
+            if (decoded && decoded.startsWith('http')) return decoded;
+          }
         }
-      })
-      .catch(err => {
-        spinner.style.display = 'none';
-        statusText.innerHTML = "Server is currently offline or restarting.<br><br>Make sure your phone server is running.";
-      });
+      } catch (e) {
+        console.warn("GitHub API fetch fallback", e);
+      }
+
+      // Priority 2: Raw GitHub
+      try {
+        const res = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/url.txt?t=${Date.now()}`);
+        if (res.ok) {
+          const text = (await res.text()).trim();
+          if (text && text.startsWith('http')) return text;
+        }
+      } catch (e) {
+        console.warn("Raw fetch fallback", e);
+      }
+
+      // Priority 3: Local url.txt
+      try {
+        const res = await fetch(`url.txt?t=${Date.now()}`);
+        if (res.ok) {
+          const text = (await res.text()).trim();
+          if (text && text.startsWith('http')) return text;
+        }
+      } catch (e) {
+        console.warn("Local url.txt fallback", e);
+      }
+
+      return null;
+    }
+
+    async function verifyHealth(baseUrl) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(`${baseUrl}/api/health`, {
+          signal: controller.signal,
+          mode: 'cors'
+        });
+        clearTimeout(timeout);
+        return res.ok;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function connect() {
+      attemptCount++;
+      subtext.textContent = attemptCount > 1 
+        ? `Re-verifying phone connection (Attempt ${attemptCount})...` 
+        : "Fetching active tunnel credentials...";
+
+      const tunnelUrl = await fetchLatestUrl();
+
+      if (!tunnelUrl) {
+        headline.textContent = "Waiting for Phone Server";
+        subtext.textContent = "Phone server has not published a tunnel yet. Retrying in 4s...";
+        actionButtons.style.display = 'flex';
+        setTimeout(connect, 4000);
+        return;
+      }
+
+      targetUrlText.textContent = tunnelUrl;
+      statusBox.style.display = 'block';
+      launchBtn.href = tunnelUrl;
+      actionButtons.style.display = 'flex';
+
+      // Pre-flight health check
+      subtext.textContent = "Verifying server readiness...";
+      const isAlive = await verifyHealth(tunnelUrl);
+
+      if (isAlive) {
+        spinner.style.borderTopColor = "#10b981";
+        headline.textContent = "Phone Server Online!";
+        subtext.textContent = "Launching OmniDownloader...";
+        setTimeout(() => {
+          window.location.replace(tunnelUrl);
+        }, 500);
+      } else {
+        headline.textContent = "Phone is Reconnecting";
+        subtext.textContent = `Tunnel registered, but phone is still establishing connection. Auto-retrying in 3s...`;
+        setTimeout(connect, 3000);
+      }
+    }
+
+    // Start resolution
+    connect();
   </script>
 </body>
 </html>
