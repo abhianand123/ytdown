@@ -1,0 +1,703 @@
+#!/usr/bin/env python3
+"""
+OmniDownloader - Universal Video Downloader & Clipper Web Server
+Designed for desktop, home servers, and Android (Termux) hosting.
+Preserves existing yt_downloader.py and provides full format parity with it.
+"""
+
+import os
+import re
+import sys
+import time
+import uuid
+import shutil
+import logging
+import threading
+import subprocess
+from pathlib import Path
+from datetime import datetime, timedelta
+
+from flask import Flask, request, jsonify, render_template, send_file, Response
+import yt_dlp
+from yt_dlp.utils import download_range_func
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s: %(message)s",
+    datefmt="%H:%M:%S"
+)
+logger = logging.getLogger("OmniDownloader")
+
+app = Flask(__name__, template_folder="templates", static_folder="static")
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
+
+BASE_DIR = Path(__file__).resolve().parent
+DOWNLOAD_DIR = BASE_DIR / "web_downloads"
+DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+# In-memory job tracker
+JOBS = {}
+JOBS_LOCK = threading.Lock()
+
+# Supported platform patterns
+PLATFORM_PATTERNS = [
+    (r"(youtube\.com|youtu\.be)", "YouTube"),
+    (r"music\.youtube\.com", "YouTube Music"),
+    (r"instagram\.com", "Instagram"),
+    (r"pinterest\.(com|cl|co|de|es|fr|it|jp|ru)", "Pinterest"),
+    (r"pin\.it", "Pinterest"),
+    (r"tiktok\.com", "TikTok"),
+    (r"(twitter\.com|x\.com)", "X / Twitter"),
+    (r"reddit\.com", "Reddit"),
+    (r"facebook\.com", "Facebook"),
+    (r"vimeo\.com", "Vimeo"),
+    (r"soundcloud\.com", "SoundCloud"),
+    (r"twitch\.tv", "Twitch"),
+]
+
+def detect_platform(url: str) -> str:
+    url_lower = url.lower()
+    for pattern, name in PLATFORM_PATTERNS:
+        if re.search(pattern, url_lower):
+            return name
+    return "Universal (yt-dlp)"
+
+def safe_filename(name: str, maxlen: int = 100) -> str:
+    cleaned = re.sub(r'[<>:"/\\|?*]', '_', name)
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned[:maxlen] if cleaned else "download"
+
+def parse_time_seconds(time_val) -> float:
+    if time_val is None:
+        return None
+    val_str = str(time_val).strip()
+    if not val_str:
+        return None
+    parts = val_str.split(':')
+    try:
+        if len(parts) == 1:
+            return float(parts[0])
+        elif len(parts) == 2:
+            return float(parts[0]) * 60 + float(parts[1])
+        elif len(parts) == 3:
+            return float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
+    except ValueError:
+        return None
+    return None
+
+def format_seconds(seconds: float) -> str:
+    if seconds is None:
+        return "Unknown"
+    sec = int(round(seconds))
+    m, s = divmod(sec, 60)
+    h, m = divmod(m, 60)
+    if h > 0:
+        return f"{h:02d}:{m:02d}:{s:02d}"
+    return f"{m:02d}:{s:02d}"
+
+def format_bytes(num_bytes) -> str:
+    if not num_bytes:
+        return "?"
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if num_bytes < 1024.0:
+            return f"{num_bytes:.1f} {unit}"
+        num_bytes /= 1024.0
+    return f"{num_bytes:.1f} TB"
+
+def codec_short(vcodec: str) -> str:
+    if not vcodec or vcodec == "none": return "?"
+    vc = vcodec.lower()
+    if "av01" in vc: return "AV1"
+    if "vp9"  in vc: return "VP9"
+    if "vp8"  in vc: return "VP8"
+    if "avc"  in vc or "h264" in vc: return "H.264"
+    if "hev"  in vc or "h265" in vc: return "H.265"
+    return vcodec.split(".")[0].upper()[:6]
+
+def dr_priority(f) -> int:
+    dr = (f.get("dynamic_range") or "sdr").lower()
+    if "dv"  in dr: return 4
+    if "hdr" in dr: return 3
+    if "hlg" in dr: return 2
+    return 1
+
+
+# ── Spatial 8D / 16D Audio Engine ───────────────────────────────
+def build_spatial_audio_filter(mode="8d", intensity=7, speed="normal", bass_boost=True, reverb=True):
+    """
+    Constructs an FFmpeg audio filtergraph for 8D or 16D binaural spatial audio.
+    Simulates sound rotating 360 degrees around the listener's head with psychoacoustic reverb.
+    """
+    speed_map = {
+        "slow": 0.08,      # ~12.5 seconds per 360 rotation
+        "normal": 0.125,   # ~8 seconds per 360 rotation
+        "fast": 0.20       # ~5 seconds per 360 rotation
+    }
+    hz = speed_map.get(str(speed).lower(), 0.125)
+    if mode == "16d":
+        hz *= 1.6  # 16D orbits faster in multi-axis trajectory
+
+    # Intensity (1-10 or string mild/medium/intense)
+    try:
+        val = float(intensity)
+        val = max(1.0, min(10.0, val))
+        width = 0.5 + (val / 10.0) * 0.5   # Maps 1..10 -> 0.55 .. 1.0
+    except (ValueError, TypeError):
+        intensity_map = {"mild": 0.65, "medium": 0.85, "intense": 1.0}
+        width = intensity_map.get(str(intensity).lower(), 0.85)
+
+    filters = []
+
+    # 1. 360-degree Binaural Pan Rotation via apulsator (Left-Right 180° phase offset)
+    filters.append(f"apulsator=mode=sine:hz={hz:.3f}:width={width:.2f}:offset_l=0:offset_r=0.5")
+
+    # 2. Stereo Field Enhancement
+    if mode == "16d":
+        filters.append("stereowiden=delay=25:feedback=0.4:crossfeed=0.3:drymix=0.7")
+    else:
+        filters.append("extrastereo=m=1.25")
+
+    # 3. Acoustic Hall / Spatial Reverb
+    if reverb:
+        if mode == "16d":
+            filters.append("aecho=0.8:0.85:35|55:0.25|0.2")
+        else:
+            filters.append("aecho=0.8:0.8:40|55:0.2|0.15")
+
+    # 4. Bass Preservation & Warmth
+    if bass_boost:
+        filters.append("bass=g=3.5:f=110")
+
+    return ",".join(filters)
+
+def embed_artwork_into_mp3(mp3_path: Path, thumb_path: Path):
+    """Embeds thumbnail artwork into an MP3 file using mutagen."""
+    try:
+        from mutagen.id3 import ID3, APIC
+        from mutagen.mp3 import MP3
+        try:
+            audio = MP3(str(mp3_path), ID3=ID3)
+        except Exception:
+            return
+        if audio.tags is None:
+            audio.add_tags()
+        mime = "image/jpeg"
+        ext = thumb_path.suffix.lower()
+        if "png" in ext: mime = "image/png"
+        elif "webp" in ext: mime = "image/webp"
+
+        with open(thumb_path, "rb") as f:
+            audio.tags.add(APIC(
+                encoding=3,
+                mime=mime,
+                type=3, # Cover front
+                desc="Cover",
+                data=f.read()
+            ))
+        audio.save()
+        logger.info(f"Embedded cover artwork into {mp3_path.name}")
+    except Exception as e:
+        logger.warning(f"Could not embed ID3 artwork into {mp3_path.name}: {e}")
+
+
+# ── Background Storage Auto-Cleaner ───────────────────────────────
+def cleanup_old_files():
+    """Periodically purges files older than 30 minutes to save phone storage."""
+    while True:
+        try:
+            time.sleep(300)  # Check every 5 minutes
+            cutoff = datetime.now() - timedelta(minutes=30)
+            with JOBS_LOCK:
+                expired_jobs = []
+                for job_id, job in JOBS.items():
+                    if job.get("created_at") and job["created_at"] < cutoff:
+                        expired_jobs.append(job_id)
+                        job_folder = DOWNLOAD_DIR / job_id
+                        if job_folder.exists():
+                            try:
+                                shutil.rmtree(job_folder, ignore_errors=True)
+                                logger.info(f"Cleaned up expired job folder: {job_id}")
+                            except Exception as e:
+                                logger.warning(f"Failed to remove {job_folder}: {e}")
+                for job_id in expired_jobs:
+                    del JOBS[job_id]
+        except Exception as e:
+            logger.error(f"Error in cleanup worker: {e}")
+
+cleanup_thread = threading.Thread(target=cleanup_old_files, daemon=True)
+cleanup_thread.start()
+
+
+# ── Routes ────────────────────────────────────────────────────────
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/8d")
+def spatial_studio():
+    return render_template("8d.html")
+
+@app.route("/api/health", methods=["GET", "OPTIONS"])
+def health():
+    if request.method == "OPTIONS":
+        return Response(status=204)
+    ffmpeg_available = bool(shutil.which("ffmpeg"))
+    return jsonify({
+        "status": "online",
+        "timestamp": datetime.now().isoformat(),
+        "ffmpeg": ffmpeg_available,
+        "platform": sys.platform
+    })
+
+@app.route("/api/info", methods=["POST"])
+def get_info():
+    data = request.get_json(force=True, silent=True) or {}
+    url = (data.get("url") or "").strip()
+    if not url:
+        return jsonify({"success": False, "error": "Please provide a valid URL"}), 400
+
+    platform = detect_platform(url)
+    logger.info(f"Fetching metadata for [{platform}]: {url}")
+
+    ydl_opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "extract_flat": False,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            meta = ydl.extract_info(url, download=False)
+    except Exception as e:
+        logger.error(f"Metadata extraction failed: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"Failed to fetch media information: {str(e)}"
+        }), 400
+
+    if not meta:
+        return jsonify({"success": False, "error": "No media found at this URL"}), 404
+
+    # Playlist or multi-item detection
+    entries = meta.get("entries")
+    if entries:
+        is_playlist = True
+        title = meta.get("title") or "Playlist / Collection"
+        thumbnail = meta.get("thumbnail") or (entries[0].get("thumbnail") if len(entries) > 0 else "")
+        duration = sum((e.get("duration") or 0) for e in entries if isinstance(e, dict))
+        author = meta.get("uploader") or meta.get("channel") or "Various"
+        total_items = len(entries)
+    else:
+        is_playlist = False
+        title = meta.get("title") or "Untitled Media"
+        thumbnail = meta.get("thumbnail") or ""
+        duration = meta.get("duration")
+        author = meta.get("uploader") or meta.get("channel") or meta.get("artist") or "Unknown"
+        total_items = 1
+
+    # Extract all video formats with full metadata (matching yt_downloader.py parity)
+    raw_formats = meta.get("formats", [])
+    video_fmts = [
+        f for f in raw_formats
+        if f.get("vcodec") not in (None, "none", "") and f.get("height")
+    ]
+
+    seen = set()
+    formats_list = []
+
+    for f in sorted(video_fmts,
+                    key=lambda x: (x.get("height") or 0,
+                                   x.get("fps")    or 0,
+                                   dr_priority(x)),
+                    reverse=True):
+        dr = (f.get("dynamic_range") or "SDR").upper()
+        codec = codec_short(f.get("vcodec", ""))
+        height = f.get("height")
+        fps = round(f.get("fps") or 0)
+        key = (height, fps, dr, codec)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        filesize = f.get("filesize") or f.get("filesize_approx")
+        ext = f.get("ext", "mp4")
+
+        # Label resolution
+        res_label = f"{height}p"
+        if height >= 2160: res_label += " (4K Ultra HD)"
+        elif height >= 1440: res_label += " (2K QHD)"
+        elif height >= 1080: res_label += " (Full HD)"
+        elif height >= 720: res_label += " (HD)"
+
+        formats_list.append({
+            "format_id": f.get("format_id"),
+            "height": height,
+            "resolution": res_label,
+            "fps": fps,
+            "dynamic_range": dr,
+            "codec": codec,
+            "ext": ext,
+            "filesize": format_bytes(filesize),
+            "filesize_bytes": filesize or 0,
+            "has_audio": f.get("acodec") not in (None, "none", ""),
+            "is_hdr": "HDR" in dr or "DV" in dr or "HLG" in dr
+        })
+
+    # Audio format options
+    audio_formats = [
+        {"id": "mp3_320", "label": "MP3 (320 kbps Premium + Album Art)", "format": "mp3", "quality": "320"},
+        {"id": "m4a_aac", "label": "M4A / AAC (Native Stream, Apple & Android)", "format": "m4a", "quality": "best"},
+        {"id": "flac", "label": "FLAC (Lossless Studio Quality)", "format": "flac", "quality": "lossless"},
+    ]
+
+    return jsonify({
+        "success": True,
+        "title": title,
+        "author": author,
+        "thumbnail": thumbnail,
+        "duration": duration,
+        "duration_formatted": format_seconds(duration) if duration else "--:--",
+        "platform": platform,
+        "is_playlist": is_playlist,
+        "item_count": total_items,
+        "formats": formats_list,
+        "audio_formats": audio_formats,
+        "webpage_url": meta.get("webpage_url", url)
+    })
+
+def run_download_task(job_id: str, url: str, options: dict):
+    """Worker function executed in a background thread."""
+    job_folder = DOWNLOAD_DIR / job_id
+    job_folder.mkdir(parents=True, exist_ok=True)
+
+    download_mode = options.get("mode", "video")  # 'video', 'audio', 'thumbnail', '8d', '16d'
+    spatial_audio = options.get("spatial_audio", "none").lower()
+    if download_mode in ("8d", "16d"):
+        spatial_audio = download_mode
+        download_mode = "audio"
+        audio_codec = "mp3"
+
+    spatial_intensity = options.get("spatial_intensity", 7)
+    spatial_speed = options.get("spatial_speed", "normal")
+    spatial_bass = options.get("spatial_bass", True)
+    spatial_reverb = options.get("spatial_reverb", True)
+
+    format_id = options.get("format_id")
+    has_audio = options.get("has_audio", False)
+    audio_codec = options.get("audio_codec", "mp3")
+    container = options.get("container", "mp4").lower()
+    is_trim = options.get("trim", False)
+    start_sec = parse_time_seconds(options.get("start_time"))
+    end_sec = parse_time_seconds(options.get("end_time"))
+
+    ffmpeg_available = bool(shutil.which("ffmpeg"))
+
+    # Progress hook callback
+    def progress_hook(d):
+        status = d.get("status")
+        with JOBS_LOCK:
+            if status == "downloading":
+                total = d.get("total_bytes") or d.get("total_bytes_estimate") or 0
+                downloaded = d.get("downloaded_bytes", 0)
+                speed = d.get("speed") or 0
+                eta = d.get("eta") or 0
+                percent = round((downloaded / total * 100), 1) if total > 0 else 0
+
+                JOBS[job_id]["status"] = "downloading"
+                JOBS[job_id]["progress"] = percent
+                JOBS[job_id]["speed"] = f"{speed / (1024*1024):.2f} MB/s" if speed else "Calculating..."
+                JOBS[job_id]["eta"] = f"{int(eta)}s" if eta else "..."
+            elif status == "finished":
+                JOBS[job_id]["status"] = "processing"
+                JOBS[job_id]["progress"] = 99
+                JOBS[job_id]["message"] = "Processing / converting final media..."
+
+    ydl_opts = {
+        "outtmpl": str(job_folder / "%(title).80s.%(ext)s"),
+        "progress_hooks": [progress_hook],
+        "quiet": True,
+        "no_warnings": True,
+    }
+
+    # 1. THUMBNAIL MODE
+    if download_mode == "thumbnail":
+        try:
+            with JOBS_LOCK:
+                JOBS[job_id]["status"] = "processing"
+                JOBS[job_id]["progress"] = 50
+                JOBS[job_id]["message"] = "Fetching high-resolution thumbnail..."
+
+            with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
+                info = ydl.extract_info(url, download=False)
+                thumb_url = info.get("thumbnail")
+                title = safe_filename(info.get("title", "thumbnail"))
+
+            if not thumb_url:
+                raise Exception("No thumbnail URL found for this media.")
+
+            import requests
+            resp = requests.get(thumb_url, timeout=15)
+            resp.raise_for_status()
+
+            ext = "jpg"
+            if "png" in thumb_url.lower(): ext = "png"
+            elif "webp" in thumb_url.lower(): ext = "webp"
+
+            out_file = job_folder / f"{title}.{ext}"
+            out_file.write_bytes(resp.content)
+
+            with JOBS_LOCK:
+                JOBS[job_id]["status"] = "finished"
+                JOBS[job_id]["progress"] = 100
+                JOBS[job_id]["filename"] = out_file.name
+                JOBS[job_id]["file_path"] = str(out_file)
+                JOBS[job_id]["file_size"] = format_bytes(out_file.stat().st_size)
+            return
+        except Exception as e:
+            with JOBS_LOCK:
+                JOBS[job_id]["status"] = "error"
+                JOBS[job_id]["error"] = str(e)
+            return
+
+    # 2. AUDIO ONLY MODE
+    elif download_mode == "audio":
+        ydl_opts["format"] = "bestaudio/best"
+        ydl_opts["writethumbnail"] = True
+        if ffmpeg_available:
+            codec_to_use = "mp3"
+            quality_to_use = "320"
+            if audio_codec == "m4a":
+                codec_to_use = "m4a"
+                quality_to_use = "0"
+            elif audio_codec == "flac":
+                codec_to_use = "flac"
+                quality_to_use = "0"
+
+            ydl_opts["postprocessors"] = [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": codec_to_use,
+                    "preferredquality": quality_to_use
+                },
+                {"key": "FFmpegMetadata", "add_metadata": True},
+                {"key": "EmbedThumbnail"}
+            ]
+
+    # 3. VIDEO MODE (Matches yt_downloader.py quality and merger options)
+    else:
+        if format_id and format_id != "best":
+            # If user picked an exact format ID:
+            fmt_str = format_id if has_audio else f"{format_id}+bestaudio/best"
+        else:
+            # Best available video + audio
+            fmt_str = "bestvideo+bestaudio/best"
+
+        ydl_opts["format"] = fmt_str
+
+        if ffmpeg_available:
+            ydl_opts["merge_output_format"] = container
+            if container == "mp4":
+                ydl_opts["postprocessor_args"] = {
+                    "merger": ["-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart"]
+                }
+            else:
+                ydl_opts["postprocessor_args"] = {
+                    "merger": ["-c:v", "copy", "-c:a", "copy"]
+                }
+            ydl_opts["postprocessors"] = [{"key": "FFmpegMetadata", "add_metadata": True}]
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+
+        files = [f for f in job_folder.iterdir() if f.is_file() and not f.name.endswith(".part") and not f.name.endswith(".temp")]
+        if not files:
+            raise Exception("Download succeeded but no output file was generated.")
+
+        final_file = files[0]
+
+        # Fast post-download trimming (Instant, 0% CPU re-encoding overhead, works across all platforms)
+        if is_trim and start_sec is not None and end_sec is not None and end_sec > start_sec:
+            with JOBS_LOCK:
+                JOBS[job_id]["status"] = "processing"
+                JOBS[job_id]["message"] = f"Trimming clip ({format_seconds(start_sec)} -> {format_seconds(end_sec)})..."
+
+            duration = end_sec - start_sec
+            trimmed_file = job_folder / f"clip_{final_file.name}"
+            trim_cmd = [
+                "ffmpeg", "-y",
+                "-ss", str(start_sec),
+                "-i", str(final_file),
+                "-t", str(duration),
+                "-c", "copy",
+                "-avoid_negative_ts", "1",
+                str(trimmed_file)
+            ]
+            logger.info(f"Executing fast stream trim: {' '.join(trim_cmd)}")
+            res = subprocess.run(trim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode == 0 and trimmed_file.exists() and trimmed_file.stat().st_size > 0:
+                final_file.unlink(missing_ok=True)
+                final_file = trimmed_file
+                logger.info(f"Fast trim succeeded: {final_file.name} ({format_bytes(final_file.stat().st_size)})")
+            else:
+                logger.warning(f"Fast copy trim returned {res.returncode}. Falling back to safe re-encode trim...")
+                trim_cmd_fallback = [
+                    "ffmpeg", "-y",
+                    "-ss", str(start_sec),
+                    "-i", str(final_file),
+                    "-t", str(duration),
+                    "-c:v", "libx264", "-preset", "ultrafast", "-crf", "22",
+                    "-c:a", "aac", "-b:a", "128k",
+                    "-avoid_negative_ts", "1",
+                    str(trimmed_file)
+                ]
+                res_fallback = subprocess.run(trim_cmd_fallback, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if res_fallback.returncode == 0 and trimmed_file.exists() and trimmed_file.stat().st_size > 0:
+                    final_file.unlink(missing_ok=True)
+                    final_file = trimmed_file
+
+        # Fast 8D / 16D Spatial Audio Rendering (Binaural 360 Pan, Hall Reverb, Bass Boost)
+        spatial_mode = "16d" if (spatial_audio == "16d") else ("8d" if (spatial_audio == "8d") else None)
+        if spatial_mode and ffmpeg_available:
+            with JOBS_LOCK:
+                JOBS[job_id]["status"] = "processing"
+                JOBS[job_id]["message"] = f"Mastering {spatial_mode.upper()} Spatial Audio (Intensity: {spatial_intensity}/10)..."
+
+            spatial_filter = build_spatial_audio_filter(
+                mode=spatial_mode,
+                intensity=spatial_intensity,
+                speed=spatial_speed,
+                bass_boost=spatial_bass,
+                reverb=spatial_reverb
+            )
+            clean_stem = safe_filename(final_file.stem, 70)
+            spatial_out = job_folder / f"[{spatial_mode.upper()}] {clean_stem}.mp3"
+            spatial_cmd = [
+                "ffmpeg", "-y",
+                "-i", str(final_file),
+                "-af", spatial_filter,
+                "-acodec", "libmp3lame",
+                "-b:a", "320k",
+                "-movflags", "+faststart",
+                str(spatial_out)
+            ]
+            logger.info(f"Rendering {spatial_mode.upper()} audio: {' '.join(spatial_cmd)}")
+            res_spatial = subprocess.run(spatial_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res_spatial.returncode == 0 and spatial_out.exists() and spatial_out.stat().st_size > 0:
+                # Find any thumbnail in job folder to re-embed
+                thumbs = [f for f in job_folder.iterdir() if f.is_file() and f.suffix.lower() in ('.jpg', '.jpeg', '.png', '.webp') and f != final_file and f != spatial_out]
+                if thumbs:
+                    embed_artwork_into_mp3(spatial_out, thumbs[0])
+                final_file.unlink(missing_ok=True)
+                final_file = spatial_out
+                logger.info(f"{spatial_mode.upper()} spatial render complete: {final_file.name} ({format_bytes(final_file.stat().st_size)})")
+            else:
+                logger.warning(f"Spatial audio render failed ({res_spatial.stderr}). Keeping standard audio.")
+
+        with JOBS_LOCK:
+            JOBS[job_id]["status"] = "finished"
+            JOBS[job_id]["progress"] = 100
+            JOBS[job_id]["filename"] = final_file.name
+            JOBS[job_id]["file_path"] = str(final_file)
+            JOBS[job_id]["file_size"] = format_bytes(final_file.stat().st_size)
+            logger.info(f"Job {job_id} completed: {final_file.name} ({JOBS[job_id]['file_size']})")
+
+    except Exception as e:
+        logger.error(f"Download failed for job {job_id}: {e}")
+        with JOBS_LOCK:
+            JOBS[job_id]["status"] = "error"
+            JOBS[job_id]["error"] = str(e)
+
+
+@app.route("/api/download", methods=["POST"])
+def start_download():
+    data = request.get_json(force=True, silent=True) or {}
+    url = (data.get("url") or "").strip()
+    if not url:
+        return jsonify({"success": False, "error": "URL is required"}), 400
+
+    job_id = uuid.uuid4().hex[:10]
+
+    with JOBS_LOCK:
+        JOBS[job_id] = {
+            "id": job_id,
+            "status": "queued",
+            "progress": 0,
+            "speed": "",
+            "eta": "",
+            "message": "Initializing download worker...",
+            "filename": None,
+            "file_path": None,
+            "file_size": None,
+            "error": None,
+            "created_at": datetime.now()
+        }
+
+    thread = threading.Thread(
+        target=run_download_task,
+        args=(job_id, url, data),
+        daemon=True
+    )
+    thread.start()
+
+    return jsonify({"success": True, "job_id": job_id})
+
+@app.route("/api/status/<job_id>")
+def job_status(job_id):
+    with JOBS_LOCK:
+        job = JOBS.get(job_id)
+        if not job:
+            return jsonify({"success": False, "error": "Job not found"}), 404
+        return jsonify({"success": True, "job": job})
+
+@app.route("/api/file/<job_id>")
+def download_file(job_id):
+    with JOBS_LOCK:
+        job = JOBS.get(job_id)
+        if not job or job.get("status") != "finished":
+            return "File is not ready or does not exist", 404
+        file_path = job.get("file_path")
+        filename = job.get("filename")
+
+    if not file_path or not os.path.exists(file_path):
+        return "File not found on server", 404
+
+    # Trigger browser file download
+    response = send_file(
+        file_path,
+        as_attachment=True,
+        download_name=filename
+    )
+
+    # Optional: Schedule deletion 5 minutes after being served
+    def delayed_remove():
+        time.sleep(300)
+        try:
+            p = Path(file_path)
+            if p.parent.exists():
+                shutil.rmtree(p.parent, ignore_errors=True)
+                logger.info(f"Cleaned up served download {job_id}")
+        except Exception:
+            pass
+
+    threading.Thread(target=delayed_remove, daemon=True).start()
+
+    return response
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    print("\n" + "="*60)
+    print("  🚀 OmniDownloader Server Started")
+    print(f"  📡 Local Access   : http://localhost:{port}")
+    print(f"  🌐 Network Access : http://0.0.0.0:{port}")
+    print("="*60 + "\n")
+    app.run(host="0.0.0.0", port=port, threaded=True)
