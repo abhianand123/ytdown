@@ -3,98 +3,221 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Professional 8D and 16D spatial audio console. Transform any song into 360-degree binaural rotation with live preview and lossless MP3 export.">
+  <meta name="description" content="Spatial Audio Master Console: Transform any stereo audio into 8D or 16D 360° binaural audio with tactile Neumorphic Soft UI.">
   <title>OmniDownloader: 8D & 16D Spatial Audio Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@100,400;100,500;125,300;125,400;125,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* Hallmark · build · shape: studio-rack · theme: midnight · genre: atmospheric · hero: Settled · nav: Edge · footer: Mast · job: download · built: OmniDownloader Spatial Console */
+    /* Neumorphism / Soft UI Design System · UI/UX Pro Max & Impeccable Standards */
     :root {
-      --color-paper: oklch(14% 0.048 264);
-      --color-paper-2: oklch(18.5% 0.052 264);
-      --color-paper-3: oklch(23% 0.055 264);
-      --color-ink: oklch(95% 0.016 250);
-      --color-ink-2: oklch(88% 0.05 245);
-      --color-muted: oklch(73% 0.04 256);
-      --color-rule: oklch(29% 0.058 264);
-      --color-rule-2: oklch(40% 0.06 262);
-      --color-accent: oklch(80% 0.11 230);
-      --color-accent-hover: oklch(85% 0.12 230);
-      --color-accent-2: oklch(58% 0.1 236);
-      --color-accent-ink: oklch(16% 0.05 264);
-      --color-focus: oklch(84% 0.12 228);
-      --font-display: "Mona Sans", ui-sans-serif, system-ui, sans-serif;
-      --font-body: var(--font-display);
-      --radius-card: 2px;
-      --radius-pill: 2px;
-      --rule-hair: 1px;
-      --shadow-card: 0 16px 36px -16px rgba(0, 0, 0, 0.65);
-      --tracking-display: -0.015em;
-      --display-weight: 300;
-      --display-stretch: 125%;
+      /* Neumorphic Slate Canvas */
+      --nm-bg: #1e232a;
+      --nm-surface: #222730;
+      --nm-surface-light: #272d37;
+      --nm-surface-dark: #1b1f26;
+
+      /* Dual Light Source Shadows */
+      --nm-shadow-light: rgba(255, 255, 255, 0.06);
+      --nm-shadow-dark: rgba(0, 0, 0, 0.55);
+
+      /* Raised Surfaces (Extrusion) */
+      --nm-raised: -6px -6px 14px var(--nm-shadow-light), 6px 6px 14px var(--nm-shadow-dark);
+      --nm-raised-sm: -3px -3px 8px var(--nm-shadow-light), 3px 3px 8px var(--nm-shadow-dark);
+      --nm-raised-btn: -4px -4px 10px var(--nm-shadow-light), 4px 4px 10px var(--nm-shadow-dark);
+
+      /* Inset Surfaces (Debossed / Sunken Wells) */
+      --nm-inset: inset 4px 4px 8px var(--nm-shadow-dark), inset -4px -4px 8px var(--nm-shadow-light);
+      --nm-inset-sm: inset 2px 2px 5px var(--nm-shadow-dark), inset -2px -2px 5px var(--nm-shadow-light);
+      --nm-inset-deep: inset 6px 6px 14px var(--nm-shadow-dark), inset -6px -6px 14px var(--nm-shadow-light);
+
+      /* Tactile Borders for boundary definition */
+      --nm-border: 1px solid rgba(255, 255, 255, 0.05);
+      --nm-border-inset: 1px solid rgba(0, 0, 0, 0.3);
+
+      /* High-Contrast Accessible Text (WCAG AA >= 4.5:1) */
+      --color-text-primary: #f8fafc;
+      --color-text-muted: #94a3b8;
+      --color-text-dim: #64748b;
+
+      /* Electric Azure Accent Signals */
+      --color-accent: #38bdf8;
+      --color-accent-hover: #0ea5e9;
+      --color-accent-glow: rgba(56, 189, 248, 0.25);
+      --color-focus: #38bdf8;
+
+      /* Radii */
+      --radius-card: 16px;
+      --radius-control: 12px;
+      --radius-pill: 9999px;
+
+      /* Typography */
+      --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     html, body {
+      background-color: var(--nm-bg);
+      color: var(--color-text-primary);
+      font-family: var(--font-sans);
       overflow-x: clip;
       max-width: 100%;
-      background-color: var(--color-paper);
-      color: var(--color-ink);
-      font-family: var(--font-body);
       caret-color: var(--color-accent);
-      scrollbar-color: var(--color-rule-2) var(--color-paper);
+      scrollbar-color: var(--nm-surface-light) var(--nm-bg);
     }
 
-    h1, h2 {
-      font-family: var(--font-display);
-      font-weight: var(--display-weight);
-      font-stretch: var(--display-stretch);
-      letter-spacing: var(--tracking-display);
-      line-height: 1.05;
-      color: var(--color-ink);
-      text-wrap: balance;
+    ::selection {
+      background-color: var(--color-accent);
+      color: #0f172a;
     }
 
-    .well {
-      background-color: var(--color-paper-2);
-      border: 1px solid var(--color-rule);
+    /* Neumorphic Components */
+    .nm-card {
+      background: linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark));
+      box-shadow: var(--nm-raised);
+      border: var(--nm-border);
       border-radius: var(--radius-card);
     }
 
-    .well--raised {
-      background-color: var(--color-paper-3);
-      border: 1px solid var(--color-rule-2);
-      box-shadow: var(--shadow-card);
+    .nm-card-subtle {
+      background: var(--nm-surface);
+      box-shadow: var(--nm-raised-sm);
+      border: var(--nm-border);
+      border-radius: var(--radius-card);
     }
 
-    /* Precision Binaural Azimuth Radar */
-    .azimuth-scope {
+    .nm-well {
+      background: var(--nm-surface-dark);
+      box-shadow: var(--nm-inset);
+      border: var(--nm-border-inset);
+      border-radius: var(--radius-control);
+    }
+
+    .nm-well-sm {
+      background: var(--nm-surface-dark);
+      box-shadow: var(--nm-inset-sm);
+      border: var(--nm-border-inset);
+      border-radius: 8px;
+    }
+
+    .nm-btn {
+      background: linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark));
+      box-shadow: var(--nm-raised-btn);
+      border: var(--nm-border);
+      border-radius: var(--radius-control);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nm-btn:hover {
+      box-shadow: -5px -5px 12px var(--nm-shadow-light), 5px 5px 12px var(--nm-shadow-dark);
+      color: #ffffff;
+    }
+    .nm-btn:active {
+      box-shadow: var(--nm-inset-sm);
+      transform: scale(0.985);
+    }
+    .nm-btn:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
+    }
+
+    .nm-btn-primary {
+      background: linear-gradient(145deg, #0284c7, #0369a1);
+      box-shadow: -4px -4px 10px rgba(255, 255, 255, 0.1), 4px 4px 12px rgba(0, 0, 0, 0.5), 0 0 12px var(--color-accent-glow);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-control);
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nm-btn-primary:hover {
+      background: linear-gradient(145deg, #0ea5e9, #0284c7);
+      box-shadow: -5px -5px 14px rgba(255, 255, 255, 0.14), 5px 5px 14px rgba(0, 0, 0, 0.55), 0 0 16px var(--color-accent-glow);
+    }
+    .nm-btn-primary:active {
+      box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.45), inset -2px -2px 5px rgba(255, 255, 255, 0.1);
+      transform: scale(0.985);
+    }
+    .nm-btn-primary:focus-visible {
+      outline: 2px solid #ffffff;
+      outline-offset: 2px;
+    }
+
+    .nm-btn-subtle {
+      background: var(--nm-surface);
+      box-shadow: var(--nm-raised-sm);
+      border: var(--nm-border);
+      border-radius: 8px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nm-btn-subtle:hover {
+      color: var(--color-text-primary);
+      box-shadow: -4px -4px 8px var(--nm-shadow-light), 4px 4px 8px var(--nm-shadow-dark);
+    }
+    .nm-btn-subtle:active {
+      box-shadow: var(--nm-inset-sm);
+      transform: scale(0.98);
+    }
+    .nm-btn-subtle:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
+    }
+
+    .nm-input {
+      background: var(--nm-surface-dark);
+      box-shadow: var(--nm-inset);
+      border: var(--nm-border-inset);
+      border-radius: var(--radius-control);
+      color: var(--color-text-primary);
+      font-family: var(--font-sans);
+      transition: box-shadow 150ms ease, border-color 150ms ease;
+    }
+    .nm-input:focus {
+      outline: none;
+      box-shadow: var(--nm-inset), 0 0 0 1.5px var(--color-accent);
+      border-color: var(--color-accent);
+    }
+    .nm-input:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
+    }
+
+    /* Milled Neumorphic Azimuth Radar Scope */
+    .nm-azimuth-scope {
       position: relative;
       width: 220px;
       height: 220px;
       margin: 0 auto;
-      border: 1px solid var(--color-rule-2);
       border-radius: 50%;
-      background: radial-gradient(circle at center, var(--color-paper-2) 0%, var(--color-paper) 70%);
+      background: radial-gradient(circle at center, var(--nm-surface-dark) 0%, var(--nm-bg) 80%);
+      box-shadow: var(--nm-inset-deep);
+      border: var(--nm-border-inset);
     }
 
     .azimuth-crosshair-x {
       position: absolute;
       top: 50%;
-      left: 0;
-      right: 0;
+      left: 12px;
+      right: 12px;
       height: 1px;
-      background: var(--color-rule);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .azimuth-crosshair-y {
       position: absolute;
       left: 50%;
-      top: 0;
-      bottom: 0;
+      top: 12px;
+      bottom: 12px;
       width: 1px;
-      background: var(--color-rule);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .azimuth-ring-inner {
@@ -105,7 +228,7 @@
       height: 128px;
       margin-top: -64px;
       margin-left: -64px;
-      border: 1px dashed var(--color-rule);
+      border: 1px dashed rgba(56, 189, 248, 0.25);
       border-radius: 50%;
     }
 
@@ -119,7 +242,7 @@
       margin-left: -8px;
       background-color: var(--color-accent);
       border-radius: 50%;
-      box-shadow: 0 0 14px var(--color-accent);
+      box-shadow: 0 0 14px var(--color-accent), 0 0 4px #ffffff;
       animation: orbit-azimuth 8s linear infinite;
     }
 
@@ -127,12 +250,13 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 8px;
-      height: 8px;
-      margin-top: -4px;
-      margin-left: -4px;
-      background-color: var(--color-ink-2);
+      width: 10px;
+      height: 10px;
+      margin-top: -5px;
+      margin-left: -5px;
+      background-color: #34d399;
       border-radius: 50%;
+      box-shadow: 0 0 10px #34d399;
       animation: orbit-azimuth-alt 5s linear infinite;
     }
 
@@ -146,33 +270,28 @@
       100% { transform: rotate(-180deg) translateX(64px) rotate(180deg); }
     }
 
-    /* Buttons */
-    .mode-btn {
-      white-space: nowrap;
+    /* Range slider custom styling */
+    input[type=range].nm-slider {
+      -webkit-appearance: none;
+      background: var(--nm-surface-dark);
+      box-shadow: var(--nm-inset-sm);
+      border-radius: 9999px;
+      height: 8px;
+      outline: none;
     }
-    .btn-solid {
-      background-color: var(--color-accent);
-      color: var(--color-accent-ink);
-      font-weight: 500;
-      border-radius: var(--radius-pill);
-      white-space: nowrap;
-      transition: background-color 0.15s ease-out;
+    input[type=range].nm-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #0ea5e9, #0284c7);
+      box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.2), 2px 2px 6px rgba(0, 0, 0, 0.6), 0 0 8px var(--color-accent-glow);
+      cursor: pointer;
+      border: 1.5px solid #ffffff;
+      transition: transform 150ms ease;
     }
-    .btn-solid:hover {
-      background-color: var(--color-accent-hover);
-    }
-
-    .btn-outline {
-      border: 1px solid var(--color-rule-2);
-      color: var(--color-ink);
-      background: transparent;
-      border-radius: var(--radius-pill);
-      white-space: nowrap;
-      transition: background-color 0.15s ease-out, border-color 0.15s ease-out;
-    }
-    .btn-outline:hover {
-      background-color: var(--color-paper-2);
-      border-color: var(--color-muted);
+    input[type=range].nm-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
     }
 
     button:disabled, input:disabled {
@@ -180,46 +299,40 @@
       cursor: not-allowed;
     }
 
-    button:active {
-      transform: scale(0.98);
-    }
-
     @media (prefers-reduced-motion: reduce) {
-      .azimuth-beacon, .azimuth-beacon-alt {
+      .azimuth-beacon, .azimuth-beacon-alt, .animate-spin {
         animation: none !important;
-      }
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+        transition: none !important;
       }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-[var(--color-accent)] selection:text-[var(--color-accent-ink)]">
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-sky-500 selection:text-slate-900">
 
-  <!-- Masthead Chrome -->
-  <header class="border-b border-[var(--color-rule)] bg-[var(--color-paper)] sticky top-0 z-50">
+  <!-- Neumorphic Header Bar -->
+  <header class="w-full bg-[var(--nm-surface)] border-b border-[rgba(255,255,255,0.05)] sticky top-0 z-50" style="box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
     <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <a href="/" class="flex items-center space-x-3 group text-white">
-          <div class="w-8 h-8 rounded-sm bg-[var(--color-paper-3)] border border-[var(--color-rule-2)] flex items-center justify-center text-[var(--color-accent)] font-semibold text-xs">
-            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+      
+      <!-- Brand & Mode -->
+      <div class="flex items-center space-x-3.5">
+        <a href="/" class="flex items-center space-x-3.5 group text-white">
+          <div class="w-10 h-10 nm-card flex items-center justify-center text-[var(--color-accent)]">
+            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
           </div>
-          <div class="flex items-baseline space-x-2">
-            <span class="text-base font-semibold tracking-tight text-white">OmniDownloader</span>
-            <span class="text-[11px] text-[var(--color-muted)] border-l border-[var(--color-rule)] pl-2">Spatial Console</span>
+          <div>
+            <span class="text-sm sm:text-base font-semibold tracking-tight text-[var(--color-text-primary)]">OmniDownloader</span>
+            <span class="block text-[11px] text-[var(--color-text-muted)]">360° Spatial Audio DSP</span>
           </div>
         </a>
       </div>
 
       <!-- Mode Switcher -->
-      <nav aria-label="Console Modes" class="flex items-center gap-1 p-1 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-xs rounded-sm">
-        <a href="/" class="px-3 py-1.5 text-[var(--color-muted)] hover:text-white transition flex items-center gap-1.5">
+      <nav aria-label="Console Modes" class="flex items-center gap-1.5 p-1 nm-well rounded-xl text-xs font-medium">
+        <a href="/" class="px-3.5 py-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
           <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
           <span>Downloader</span>
         </a>
-        <a href="/8d" class="px-3 py-1.5 bg-[var(--color-paper-3)] text-white border border-[var(--color-rule-2)] font-medium flex items-center gap-1.5 rounded-sm">
+        <a href="/8d" class="px-3.5 py-1.5 rounded-lg text-[var(--color-accent)] font-medium flex items-center gap-1.5 whitespace-nowrap" style="box-shadow: var(--nm-inset-sm); background: var(--nm-surface-dark);">
           <svg aria-hidden="true" class="w-3.5 h-3.5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
           <span>8D / 16D Studio</span>
         </a>
@@ -231,21 +344,21 @@
 
     <!-- Azimuth Radar & Hero Posture -->
     <section class="text-center space-y-4">
-      <div class="azimuth-scope my-3" id="radar-scope">
+      <div class="nm-azimuth-scope my-3" id="radar-scope">
         <div class="azimuth-crosshair-x"></div>
         <div class="azimuth-crosshair-y"></div>
         <div class="azimuth-ring-inner"></div>
         
         <!-- Cardinal Markers -->
-        <span class="absolute top-1 left-1/2 -translate-x-1/2 text-[9px] text-[var(--color-muted)]">0° FRONT</span>
-        <span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-[var(--color-muted)]">180° REAR</span>
-        <span class="absolute left-1 top-1/2 -translate-y-1/2 text-[9px] text-[var(--color-muted)]">L</span>
-        <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-[var(--color-muted)]">R</span>
+        <span class="absolute top-2 left-1/2 -translate-x-1/2 text-[10px] text-[var(--color-text-muted)] font-mono">0° FRONT</span>
+        <span class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-[var(--color-text-muted)] font-mono">180° REAR</span>
+        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text-muted)] font-mono">L</span>
+        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text-muted)] font-mono">R</span>
 
         <!-- Center Audition Head -->
         <div class="absolute inset-0 flex items-center justify-center">
-          <div class="w-9 h-9 rounded-full bg-[var(--color-paper-3)] border border-[var(--color-rule-2)] flex items-center justify-center text-[var(--color-accent)]">
-            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 11V9a9 9 0 0118 0v2"/></svg>
+          <div class="w-10 h-10 rounded-full nm-card flex items-center justify-center text-[var(--color-accent)]" style="box-shadow: var(--nm-raised-sm);">
+            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 11V9a9 9 0 0118 0v2"/></svg>
           </div>
         </div>
 
@@ -255,21 +368,24 @@
       </div>
 
       <div class="space-y-1">
-        <h1 class="text-3xl sm:text-4xl text-white">Spatial Audio Master Console</h1>
-        <p class="text-sm text-[var(--color-muted)] max-w-lg mx-auto">
+        <h1 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
+          Spatial Audio Master Console
+        </h1>
+        <p class="text-xs sm:text-sm text-[var(--color-text-muted)] max-w-lg mx-auto leading-relaxed">
           Convert any audio track into 360° binaural motion with live headphone preview.
         </p>
       </div>
     </section>
 
     <!-- Source Selection Deck -->
-    <section class="well p-4 sm:p-6 space-y-4">
-      <div class="flex border-b border-[var(--color-rule)] pb-3 gap-2">
+    <section class="nm-card p-5 sm:p-6 space-y-4">
+      <div class="flex p-1 nm-well rounded-xl gap-1.5">
         <button
           id="tab-url-btn"
           type="button"
           onclick="switchInputTab('url')"
-          class="flex-1 py-2 text-xs font-medium rounded-sm bg-[var(--color-paper-3)] text-white border border-[var(--color-rule-2)] transition"
+          class="flex-1 py-2 text-xs font-medium rounded-lg text-[var(--color-accent)] transition"
+          style="box-shadow: var(--nm-inset-sm); background: var(--nm-surface-dark);"
         >
           Paste Web URL
         </button>
@@ -277,25 +393,26 @@
           id="tab-upload-btn"
           type="button"
           onclick="switchInputTab('upload')"
-          class="flex-1 py-2 text-xs font-medium rounded-sm bg-transparent text-[var(--color-muted)] hover:text-white border border-transparent transition"
+          class="flex-1 py-2 text-xs font-medium rounded-lg text-[var(--color-text-muted)] hover:text-white transition"
+          style="box-shadow: none; background: transparent;"
         >
           Upload Audio Track
         </button>
       </div>
 
       <!-- Tab 1: Web URL Input -->
-      <form id="url-input-section" onsubmit="event.preventDefault(); fetchTrackInfo();" class="flex flex-col sm:flex-row gap-2">
+      <form id="url-input-section" onsubmit="event.preventDefault(); fetchTrackInfo();" class="flex flex-col sm:flex-row gap-2.5">
         <div class="relative flex-grow">
           <input
             id="url-input"
             type="text"
             placeholder="Paste YouTube, SoundCloud, or media link… Press Enter ↵"
-            class="w-full pl-3 pr-20 py-2.5 bg-[var(--color-paper)] border border-[var(--color-rule-2)] rounded-sm text-sm text-white placeholder-[var(--color-muted)] focus:outline-none focus:border-[var(--color-accent)] font-mono text-xs transition"
+            class="nm-input w-full pl-3.5 pr-20 py-3 text-xs sm:text-sm text-white placeholder-[var(--color-text-dim)]"
           >
           <button
             type="button"
             onclick="pasteClipboard()"
-            class="absolute right-1.5 top-1.5 px-2.5 py-1 text-[11px] font-medium bg-[var(--color-paper-3)] text-[var(--color-ink-2)] border border-[var(--color-rule)] hover:border-[var(--color-muted)] rounded-sm transition"
+            class="nm-btn-subtle absolute right-2 top-2 px-3 py-1 text-xs font-medium"
           >
             Paste
           </button>
@@ -304,10 +421,10 @@
         <button
           id="inspect-btn"
           type="submit"
-          class="btn-solid py-2.5 px-5 text-xs sm:w-32 flex-shrink-0 flex items-center justify-center gap-1.5"
+          class="nm-btn-primary py-3 px-6 text-xs sm:text-sm sm:w-36 flex-shrink-0 flex items-center justify-center gap-2"
         >
           <span id="inspect-btn-text">Load Track</span>
-          <svg id="inspect-spinner" aria-hidden="true" class="animate-spin h-3.5 w-3.5 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <svg id="inspect-spinner" aria-hidden="true" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
         </button>
       </form>
 
@@ -316,7 +433,7 @@
         <div
           id="drop-zone"
           onclick="document.getElementById('file-input').click()"
-          class="p-6 border border-dashed border-[var(--color-rule-2)] hover:border-[var(--color-accent)] rounded-sm bg-[var(--color-paper)] text-center cursor-pointer transition flex flex-col items-center justify-center space-y-1.5 group"
+          class="p-7 border border-dashed border-slate-600 hover:border-[var(--color-accent)] rounded-xl nm-well text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2 group"
         >
           <input
             id="file-input"
@@ -325,77 +442,78 @@
             class="hidden"
             onchange="handleFileUpload(this.files)"
           >
-          <div class="w-9 h-9 rounded-sm bg-[var(--color-paper-2)] border border-[var(--color-rule)] flex items-center justify-center text-[var(--color-accent)]">
-            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          <div class="w-10 h-10 rounded-xl nm-card flex items-center justify-center text-[var(--color-accent)]">
+            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
           </div>
           <span class="text-xs font-medium text-white group-hover:text-[var(--color-accent)]">Select or drop audio file here</span>
-          <p class="text-[11px] text-[var(--color-muted)]">Supports FLAC, WAV, MP3, AAC, OGG up to 200MB</p>
+          <p class="text-[11px] text-[var(--color-text-muted)]">Supports FLAC, WAV, MP3, AAC, OGG up to 200MB</p>
         </div>
 
-        <div id="upload-progress-box" class="hidden p-3 rounded-sm bg-[var(--color-paper)] border border-[var(--color-rule)] space-y-2">
+        <div id="upload-progress-box" class="hidden p-4 rounded-xl nm-well space-y-2">
           <div class="flex justify-between text-xs">
-            <span id="upload-status-text" class="text-[var(--color-muted)]">Uploading file…</span>
+            <span id="upload-status-text" class="text-[var(--color-text-muted)]">Uploading file…</span>
             <span id="upload-percent-text" class="text-[var(--color-accent)] font-mono">0%</span>
           </div>
-          <div class="w-full bg-[var(--color-paper-3)] h-1 rounded-sm overflow-hidden">
-            <div id="upload-bar-fill" class="bg-[var(--color-accent)] h-1 rounded-sm" style="width: 0%"></div>
+          <div class="w-full nm-well rounded-full h-2 overflow-hidden">
+            <div id="upload-bar-fill" class="bg-[var(--color-accent)] h-full rounded-full transition-all duration-200" style="width: 0%"></div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Studio Deck & Controls -->
-    <section id="studio-card" class="well p-5 sm:p-6 space-y-6 hidden">
+    <section id="studio-card" class="nm-card p-5 sm:p-6 space-y-6 hidden">
 
       <!-- Track Identification -->
-      <div class="flex items-center gap-3 p-3 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-sm">
-        <img id="track-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237dd3fc'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E" alt="Thumbnail" class="w-14 h-14 object-cover flex-shrink-0 border border-[var(--color-rule-2)] rounded-sm">
-        <div class="flex-grow space-y-0.5 overflow-hidden text-left">
-          <div class="inline-block px-1.5 py-0.2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[10px] text-[var(--color-accent)]">
+      <div class="flex items-center gap-3.5 p-3.5 nm-well rounded-xl">
+        <img id="track-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237dd3fc'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E" alt="Thumbnail" class="w-14 h-14 object-cover flex-shrink-0 rounded-lg border border-slate-700">
+        <div class="flex-grow space-y-1 overflow-hidden text-left">
+          <div class="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
             <span id="track-badge">Stream Ready</span>
           </div>
           <h2 id="track-title" class="text-sm font-semibold text-white truncate">--</h2>
-          <p id="track-meta" class="text-xs text-[var(--color-muted)] font-mono">--</p>
+          <p id="track-meta" class="text-xs text-[var(--color-text-muted)] font-mono">--</p>
         </div>
       </div>
 
       <!-- 1. Spatial Engine Selector -->
-      <div class="space-y-2 text-left">
-        <span class="text-xs text-[var(--color-muted)]">1. Spatial audio engine</span>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      <div class="space-y-2.5 text-left">
+        <span class="text-xs font-medium text-[var(--color-text-muted)]">1. Spatial audio engine</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             type="button"
             id="mode-card-8d"
             onclick="setSpatialMode('8d')"
-            class="mode-btn p-3.5 border border-[var(--color-accent)] bg-[var(--color-paper-3)] text-left rounded-sm transition cursor-pointer"
+            class="p-4 nm-card rounded-xl text-left transition cursor-pointer border border-[var(--color-accent)]"
+            style="background: var(--nm-surface-dark); box-shadow: var(--nm-inset-sm);"
           >
             <div class="flex items-center justify-between mb-1">
               <span class="text-xs font-semibold text-white whitespace-nowrap">8D Spatial Audio</span>
               <span class="text-[10px] text-[var(--color-accent)] font-medium">360° Circular</span>
             </div>
-            <p class="text-[11px] text-[var(--color-muted)]">Smooth circular binaural panning orbiting the stereo field.</p>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">Smooth circular binaural panning orbiting the stereo field.</p>
           </button>
 
           <button
             type="button"
             id="mode-card-16d"
             onclick="setSpatialMode('16d')"
-            class="mode-btn p-3.5 border border-[var(--color-rule)] bg-[var(--color-paper)] text-left rounded-sm hover:border-[var(--color-rule-2)] transition cursor-pointer"
+            class="p-4 nm-card rounded-xl text-left transition cursor-pointer"
           >
             <div class="flex items-center justify-between mb-1">
               <span class="text-xs font-semibold text-white whitespace-nowrap">16D Ultra Spatial</span>
-              <span class="text-[10px] text-[var(--color-muted)] font-medium">Spherical Orbit</span>
+              <span class="text-[10px] text-[var(--color-text-muted)] font-medium">Spherical Orbit</span>
             </div>
-            <p class="text-[11px] text-[var(--color-muted)]">Spherical dual-delay reflections with acoustic crossfeed widening.</p>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">Spherical dual-delay reflections with acoustic crossfeed widening.</p>
           </button>
         </div>
       </div>
 
       <!-- 2. Intensity Slider & Presets -->
-      <div class="p-4 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-sm space-y-3 text-left">
+      <div class="p-4 nm-well rounded-xl space-y-3.5 text-left">
         <div class="flex items-center justify-between">
-          <span class="text-xs text-[var(--color-muted)]">2. Effect intensity</span>
-          <span id="intensity-value-badge" class="text-xs text-[var(--color-accent)] font-medium">
+          <span class="text-xs font-medium text-[var(--color-text-muted)]">2. Effect intensity</span>
+          <span id="intensity-value-badge" class="text-xs text-[var(--color-accent)] font-semibold font-mono">
             Level 7 / 10
           </span>
         </div>
@@ -409,72 +527,72 @@
           step="1"
           oninput="updateIntensity(this.value)"
           onchange="updateIntensity(this.value)"
-          class="w-full h-1 bg-[var(--color-paper-3)] rounded-none appearance-none cursor-pointer accent-[var(--color-accent)]"
+          class="nm-slider w-full cursor-pointer"
         >
 
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-[var(--color-muted)] pt-1">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-[var(--color-text-muted)] pt-1">
           <span id="intensity-desc" class="text-[11px]">Balanced (Concert Immersion · 85% Pan Width)</span>
-          <div class="flex gap-1.5 self-end sm:self-auto">
-            <button id="preset-mild" type="button" onclick="setIntensityPreset(4)" class="px-2 py-0.5 rounded-sm bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[11px] hover:border-[var(--color-muted)] transition">Mild</button>
-            <button id="preset-balanced" type="button" onclick="setIntensityPreset(7)" class="px-2 py-0.5 rounded-sm bg-[var(--color-paper-3)] border border-[var(--color-accent)] text-[var(--color-accent)] text-[11px] font-medium transition">Balanced</button>
-            <button id="preset-extreme" type="button" onclick="setIntensityPreset(10)" class="px-2 py-0.5 rounded-sm bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[11px] hover:border-[var(--color-muted)] transition">Extreme (10/10)</button>
+          <div class="flex gap-2 self-end sm:self-auto">
+            <button id="preset-mild" type="button" onclick="setIntensityPreset(4)" class="nm-btn-subtle px-2.5 py-1 text-[11px]">Mild</button>
+            <button id="preset-balanced" type="button" onclick="setIntensityPreset(7)" class="nm-btn-subtle px-2.5 py-1 text-[11px] text-[var(--color-accent)] font-medium" style="box-shadow: var(--nm-inset-sm); background: var(--nm-surface-dark);">Balanced</button>
+            <button id="preset-extreme" type="button" onclick="setIntensityPreset(10)" class="nm-btn-subtle px-2.5 py-1 text-[11px]">Extreme (10/10)</button>
           </div>
         </div>
       </div>
 
       <!-- 3. Speed & Acoustic Options -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-        <div class="p-3.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-sm space-y-2">
-          <span class="text-xs text-[var(--color-muted)]">Orbit rotation speed</span>
-          <div class="grid grid-cols-3 gap-1.5 text-xs">
-            <button type="button" onclick="setSpeed('slow')" id="speed-slow" class="py-1.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-muted)] rounded-sm">Slow (12s)</button>
-            <button type="button" onclick="setSpeed('normal')" id="speed-normal" class="py-1.5 bg-[var(--color-paper-3)] border border-[var(--color-accent)] text-white font-medium rounded-sm">Normal (8s)</button>
-            <button type="button" onclick="setSpeed('fast')" id="speed-fast" class="py-1.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-muted)] rounded-sm">Fast (5s)</button>
+        <div class="p-4 nm-card rounded-xl space-y-2.5">
+          <span class="text-xs font-medium text-[var(--color-text-muted)]">Orbit rotation speed</span>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <button type="button" onclick="setSpeed('slow')" id="speed-slow" class="nm-btn py-2 text-[11px]">Slow (12s)</button>
+            <button type="button" onclick="setSpeed('normal')" id="speed-normal" class="nm-btn py-2 text-[11px] text-[var(--color-accent)] font-medium" style="box-shadow: var(--nm-inset-sm); background: var(--nm-surface-dark);">Normal (8s)</button>
+            <button type="button" onclick="setSpeed('fast')" id="speed-fast" class="nm-btn py-2 text-[11px]">Fast (5s)</button>
           </div>
         </div>
 
-        <div class="p-3.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-sm space-y-2">
-          <span class="text-xs text-[var(--color-muted)]">Acoustic enhancements</span>
-          <div class="space-y-1.5 text-xs">
-            <label class="flex items-center gap-2 cursor-pointer text-[var(--color-ink-2)]">
-              <input type="checkbox" id="bass-boost" checked class="rounded-none bg-[var(--color-paper-2)] border-[var(--color-rule-2)] text-[var(--color-accent)] focus:ring-0">
+        <div class="p-4 nm-card rounded-xl space-y-2.5">
+          <span class="text-xs font-medium text-[var(--color-text-muted)]">Acoustic enhancements</span>
+          <div class="space-y-2 text-xs">
+            <label class="flex items-center gap-2.5 cursor-pointer text-[var(--color-text-primary)]">
+              <input type="checkbox" id="bass-boost" checked class="w-4 h-4 rounded text-sky-500 bg-slate-800 border-slate-600 focus:ring-0">
               <span class="text-[11px]">Deep Bass Preservation (+3.5dB warm shelf)</span>
             </label>
-            <label class="flex items-center gap-2 cursor-pointer text-[var(--color-ink-2)]">
-              <input type="checkbox" id="hall-reverb" checked class="rounded-none bg-[var(--color-paper-2)] border-[var(--color-rule-2)] text-[var(--color-accent)] focus:ring-0">
-              <span class="text-[11px]">Concert Hall Reverb (3D acoustic reflections)</span>
+            <label class="flex items-center gap-2.5 cursor-pointer text-[var(--color-text-primary)]">
+              <input type="checkbox" id="hall-reverb" checked class="w-4 h-4 rounded text-sky-500 bg-slate-800 border-slate-600 focus:ring-0">
+              <span class="text-[11px]">Concert Hall Reverb (3D room reflections)</span>
             </label>
           </div>
         </div>
       </div>
 
       <!-- 4. Optional Clip Trimming -->
-      <div class="p-3.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-sm space-y-2 text-left">
+      <div class="p-4 nm-card rounded-xl space-y-2.5 text-left">
         <div class="flex items-center justify-between">
-          <span class="text-xs text-[var(--color-muted)]">Trim segment (optional)</span>
-          <input type="checkbox" id="trim-toggle" onchange="toggleTrimSection()" class="rounded-none bg-[var(--color-paper-2)] border-[var(--color-rule-2)] text-[var(--color-accent)] focus:ring-0">
+          <span class="text-xs font-medium text-[var(--color-text-muted)]">Trim segment (optional)</span>
+          <input type="checkbox" id="trim-toggle" onchange="toggleTrimSection()" class="w-4 h-4 rounded text-sky-500 bg-slate-800 border-slate-600 focus:ring-0">
         </div>
 
-        <div id="trim-controls" class="grid grid-cols-2 gap-2 pt-1 hidden">
+        <div id="trim-controls" class="grid grid-cols-2 gap-3 pt-1 hidden">
           <div>
-            <label class="text-[10px] text-[var(--color-muted)] font-mono">Start (MM:SS)</label>
-            <input type="text" id="trim-start" value="00:00" class="w-full mt-1 px-2.5 py-1.5 bg-[var(--color-paper-2)] border border-[var(--color-rule-2)] text-white font-mono text-xs rounded-sm">
+            <label class="text-[11px] text-[var(--color-text-muted)] font-mono">Start (MM:SS)</label>
+            <input type="text" id="trim-start" value="00:00" class="nm-input w-full mt-1 px-3 py-1.5 text-xs font-mono">
           </div>
           <div>
-            <label class="text-[10px] text-[var(--color-muted)] font-mono">End (MM:SS)</label>
-            <input type="text" id="trim-end" value="00:30" class="w-full mt-1 px-2.5 py-1.5 bg-[var(--color-paper-2)] border border-[var(--color-rule-2)] text-white font-mono text-xs rounded-sm">
+            <label class="text-[11px] text-[var(--color-text-muted)] font-mono">End (MM:SS)</label>
+            <input type="text" id="trim-end" value="00:30" class="nm-input w-full mt-1 px-3 py-1.5 text-xs font-mono">
           </div>
         </div>
       </div>
 
       <!-- 5. Headphone Audition Bar -->
-      <div class="p-4 bg-[var(--color-paper-3)] border border-[var(--color-rule-2)] rounded-sm space-y-3 text-left">
+      <div class="p-4 sm:p-5 nm-well rounded-xl space-y-3.5 text-left">
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
-            <h3 class="text-xs font-semibold text-white">Live Headphone Audition</h3>
-            <p class="text-[11px] text-[var(--color-muted)]">Experience spatial combinations instantly before downloading.</p>
+            <h3 class="text-xs sm:text-sm font-semibold text-white">Live Headphone Audition</h3>
+            <p class="text-[11px] text-[var(--color-text-muted)]">Experience spatial combinations instantly before downloading.</p>
           </div>
-          <span id="preview-status-pill" class="text-[11px] text-[var(--color-muted)] font-medium">Ready</span>
+          <span id="preview-status-pill" class="text-[11px] text-[var(--color-accent)] font-medium px-2 py-0.5 nm-card rounded-md">Ready</span>
         </div>
 
         <audio id="live-audio-preview" controls class="w-full h-8"></audio>
@@ -484,13 +602,13 @@
             type="button"
             id="btn-quick-preview"
             onclick="generateQuickPreview()"
-            class="btn-outline px-3.5 py-1.5 text-xs flex items-center gap-1.5"
+            class="nm-btn px-4 py-2 text-xs flex items-center gap-2"
           >
             <svg aria-hidden="true" class="w-3.5 h-3.5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
             <span id="preview-btn-text">Render 15s Quick Preview</span>
-            <svg id="preview-spinner" aria-hidden="true" class="animate-spin h-3 w-3 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+            <svg id="preview-spinner" aria-hidden="true" class="animate-spin h-3.5 w-3.5 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
           </button>
-          <span class="text-[11px] text-[var(--color-muted)]">Wear headphones</span>
+          <span class="text-[11px] text-[var(--color-text-dim)]">Wear headphones</span>
         </div>
       </div>
 
@@ -499,54 +617,54 @@
         id="render-btn"
         type="button"
         onclick="startSpatialRender()"
-        class="btn-solid w-full py-3.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 whitespace-nowrap"
+        class="nm-btn-primary w-full py-4 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 whitespace-nowrap"
       >
-        <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
         <span id="render-btn-text">Master & Export Full Track (320kbps MP3)</span>
       </button>
 
     </section>
 
     <!-- Progress Card -->
-    <section id="progress-card" class="well p-5 space-y-3 hidden text-left">
-      <div class="flex items-center justify-between text-xs">
-        <div class="flex items-center gap-2">
+    <section id="progress-card" class="nm-card p-5 sm:p-6 space-y-3.5 hidden text-left">
+      <div class="flex items-center justify-between text-xs sm:text-sm">
+        <div class="flex items-center gap-2.5">
           <svg aria-hidden="true" class="animate-spin h-4 w-4 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          <span id="progress-title" class="font-medium text-white">Mastering Spatial Audio…</span>
+          <span id="progress-title" class="font-semibold text-white">Mastering Spatial Audio…</span>
         </div>
-        <span id="progress-percent" class="font-mono text-[var(--color-accent)]">0%</span>
+        <span id="progress-percent" class="font-mono text-sm font-bold text-[var(--color-accent)]">0%</span>
       </div>
 
-      <div class="w-full bg-[var(--color-paper-3)] h-1.5 rounded-sm overflow-hidden">
-        <div id="progress-bar-fill" class="bg-[var(--color-accent)] h-1.5 rounded-sm" style="width: 0%"></div>
+      <div class="w-full nm-well rounded-full h-2.5 overflow-hidden p-0.5">
+        <div id="progress-bar-fill" class="bg-[var(--color-accent)] h-full rounded-full transition-all duration-300" style="width: 0%; box-shadow: 0 0 8px var(--color-accent-glow);"></div>
       </div>
 
-      <p id="progress-detail" class="text-[11px] text-[var(--color-muted)]">Applying psychoacoustic 360° binaural pan…</p>
+      <p id="progress-detail" class="text-[11px] text-[var(--color-text-muted)] font-mono">Applying psychoacoustic 360° binaural pan…</p>
     </section>
 
     <!-- Success Delivery Card -->
-    <section id="success-card" class="well--raised p-5 space-y-4 hidden text-left">
-      <div class="flex items-center gap-2 text-xs text-[var(--color-accent)] font-medium">
-        <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+    <section id="success-card" class="nm-card p-6 space-y-4 hidden text-left">
+      <div class="flex items-center gap-2 text-xs text-[var(--color-accent)] font-semibold">
+        <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
         <span>Spatial Master Ready for Playback</span>
       </div>
 
       <div>
-        <h3 class="text-sm font-semibold text-white">Export Complete</h3>
-        <p id="success-filename" class="text-xs text-[var(--color-muted)] font-mono mt-0.5">--</p>
+        <h3 class="text-sm sm:text-base font-semibold text-white">Export Complete</h3>
+        <p id="success-filename" class="text-xs text-[var(--color-text-muted)] font-mono mt-0.5">--</p>
       </div>
 
-      <div class="p-3 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-sm space-y-2">
-        <span class="text-[11px] text-[var(--color-muted)]">Listen to master:</span>
+      <div class="p-3.5 nm-well rounded-xl space-y-2">
+        <span class="text-[11px] text-[var(--color-text-muted)]">Listen to master:</span>
         <audio id="audio-final-player" controls class="w-full h-8"></audio>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-2 pt-1">
-        <a id="download-trigger-btn" href="#" class="btn-solid py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-1.5 flex-1">
-          <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <a id="download-trigger-btn" href="#" class="nm-btn-primary py-3 px-5 text-xs font-semibold flex items-center justify-center gap-2 flex-1">
+          <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           <span>Download MP3 to Device</span>
         </a>
-        <button type="button" onclick="scrollToSettings()" class="btn-outline py-2.5 px-4 text-xs font-medium">
+        <button type="button" onclick="scrollToSettings()" class="nm-btn py-3 px-5 text-xs font-medium">
           Adjust Parameters
         </button>
       </div>
@@ -554,8 +672,8 @@
 
   </main>
 
-  <footer class="border-t border-[var(--color-rule)] py-6 text-center text-[11px] text-[var(--color-muted)]">
-    OmniDownloader Spatial Audio Console · Powered by FFmpeg 360° Binaural DSP
+  <footer class="border-t border-[rgba(255,255,255,0.05)] py-5 text-center text-xs text-[var(--color-text-dim)] bg-[var(--nm-surface)]">
+    OmniDownloader Spatial Audio Console · Neumorphic Soft UI
   </footer>
 
   <script>
@@ -575,13 +693,29 @@
       const uploadSection = document.getElementById('upload-input-section');
 
       if (tab === 'url') {
-        urlBtn.className = "flex-1 py-2 text-xs font-medium rounded-sm bg-[var(--color-paper-3)] text-white border border-[var(--color-rule-2)] transition";
-        uploadBtn.className = "flex-1 py-2 text-xs font-medium rounded-sm bg-transparent text-[var(--color-muted)] hover:text-white border border-transparent transition";
+        urlBtn.style.boxShadow = "var(--nm-inset-sm)";
+        urlBtn.style.background = "var(--nm-surface-dark)";
+        urlBtn.classList.add('text-[var(--color-accent)]');
+        urlBtn.classList.remove('text-[var(--color-text-muted)]');
+
+        uploadBtn.style.boxShadow = "none";
+        uploadBtn.style.background = "transparent";
+        uploadBtn.classList.remove('text-[var(--color-accent)]');
+        uploadBtn.classList.add('text-[var(--color-text-muted)]');
+
         urlSection.classList.remove('hidden');
         uploadSection.classList.add('hidden');
       } else {
-        uploadBtn.className = "flex-1 py-2 text-xs font-medium rounded-sm bg-[var(--color-paper-3)] text-white border border-[var(--color-rule-2)] transition";
-        urlBtn.className = "flex-1 py-2 text-xs font-medium rounded-sm bg-transparent text-[var(--color-muted)] hover:text-white border border-transparent transition";
+        uploadBtn.style.boxShadow = "var(--nm-inset-sm)";
+        uploadBtn.style.background = "var(--nm-surface-dark)";
+        uploadBtn.classList.add('text-[var(--color-accent)]');
+        uploadBtn.classList.remove('text-[var(--color-text-muted)]');
+
+        urlBtn.style.boxShadow = "none";
+        urlBtn.style.background = "transparent";
+        urlBtn.classList.remove('text-[var(--color-accent)]');
+        urlBtn.classList.add('text-[var(--color-text-muted)]');
+
         uploadSection.classList.remove('hidden');
         urlSection.classList.add('hidden');
       }
@@ -770,12 +904,24 @@
       const beacon2 = document.getElementById('beacon-2');
 
       if (mode === '8d') {
-        card8d.className = "p-3.5 border border-[var(--color-accent)] bg-[var(--color-paper-3)] text-left rounded-sm transition cursor-pointer";
-        card16d.className = "p-3.5 border border-[var(--color-rule)] bg-[var(--color-paper)] text-left rounded-sm hover:border-[var(--color-rule-2)] transition cursor-pointer";
+        card8d.style.boxShadow = "var(--nm-inset-sm)";
+        card8d.style.background = "var(--nm-surface-dark)";
+        card8d.classList.add('border-[var(--color-accent)]');
+
+        card16d.style.boxShadow = "var(--nm-raised)";
+        card16d.style.background = "linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark))";
+        card16d.classList.remove('border-[var(--color-accent)]');
+
         beacon2.classList.add('hidden');
       } else {
-        card16d.className = "p-3.5 border border-[var(--color-accent)] bg-[var(--color-paper-3)] text-left rounded-sm transition cursor-pointer";
-        card8d.className = "p-3.5 border border-[var(--color-rule)] bg-[var(--color-paper)] text-left rounded-sm hover:border-[var(--color-rule-2)] transition cursor-pointer";
+        card16d.style.boxShadow = "var(--nm-inset-sm)";
+        card16d.style.background = "var(--nm-surface-dark)";
+        card16d.classList.add('border-[var(--color-accent)]');
+
+        card8d.style.boxShadow = "var(--nm-raised)";
+        card8d.style.background = "linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark))";
+        card8d.classList.remove('border-[var(--color-accent)]');
+
         beacon2.classList.remove('hidden');
       }
       updateButtonLabels();
@@ -802,9 +948,18 @@
       const pBal = document.getElementById('preset-balanced');
       const pExt = document.getElementById('preset-extreme');
       if (pMild && pBal && pExt) {
-        pMild.className = (currentIntensity === 4) ? "px-2 py-0.5 rounded-sm bg-[var(--color-paper-3)] border border-[var(--color-accent)] text-[var(--color-accent)] text-[11px] font-medium transition" : "px-2 py-0.5 rounded-sm bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[11px] hover:border-[var(--color-muted)] transition";
-        pBal.className = (currentIntensity === 7) ? "px-2 py-0.5 rounded-sm bg-[var(--color-paper-3)] border border-[var(--color-accent)] text-[var(--color-accent)] text-[11px] font-medium transition" : "px-2 py-0.5 rounded-sm bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[11px] hover:border-[var(--color-muted)] transition";
-        pExt.className = (currentIntensity === 10) ? "px-2 py-0.5 rounded-sm bg-[var(--color-paper-3)] border border-[var(--color-accent)] text-[var(--color-accent)] text-[11px] font-medium transition" : "px-2 py-0.5 rounded-sm bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[11px] hover:border-[var(--color-muted)] transition";
+        [pMild, pBal, pExt].forEach(p => {
+          p.style.boxShadow = "var(--nm-raised-sm)";
+          p.style.background = "var(--nm-surface)";
+          p.classList.remove('text-[var(--color-accent)]', 'font-semibold');
+        });
+
+        const activePreset = (currentIntensity === 4) ? pMild : (currentIntensity === 7) ? pBal : (currentIntensity === 10) ? pExt : null;
+        if (activePreset) {
+          activePreset.style.boxShadow = "var(--nm-inset-sm)";
+          activePreset.style.background = "var(--nm-surface-dark)";
+          activePreset.classList.add('text-[var(--color-accent)]', 'font-semibold');
+        }
       }
 
       updateButtonLabels();
@@ -819,9 +974,13 @@
       ['slow', 'normal', 'fast'].forEach(s => {
         const btn = document.getElementById(`speed-${s}`);
         if (s === speed) {
-          btn.className = "py-1.5 bg-[var(--color-paper-3)] border border-[var(--color-accent)] text-white font-medium rounded-sm";
+          btn.style.boxShadow = "var(--nm-inset-sm)";
+          btn.style.background = "var(--nm-surface-dark)";
+          btn.classList.add('text-[var(--color-accent)]', 'font-medium');
         } else {
-          btn.className = "py-1.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-muted)] rounded-sm";
+          btn.style.boxShadow = "var(--nm-raised-btn)";
+          btn.style.background = "linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark))";
+          btn.classList.remove('text-[var(--color-accent)]', 'font-medium');
         }
       });
 
