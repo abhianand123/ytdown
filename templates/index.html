@@ -501,6 +501,19 @@
     checkServerStatus();
     setInterval(checkServerStatus, 30000);
 
+    // Enter key triggers fetchMediaInfo
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlInput = document.getElementById('url-input');
+      if (urlInput) {
+        urlInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            fetchMediaInfo();
+          }
+        });
+      }
+    });
+
     // Paste from clipboard
     async function pasteClipboard() {
       try {
