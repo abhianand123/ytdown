@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Master any music track into 360-degree 8D and 16D spatial audio with real-time preview and instant download.">
   <title>OmniDownloader - 8D & 16D Spatial Audio Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,9 +30,31 @@
     }
   </script>
   <style>
-    body { background-color: #09090b; color: #fafafa; }
-    .glass { background: rgba(24, 24, 27, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .glass-active { background: rgba(147, 51, 234, 0.14); border-color: rgba(168, 85, 247, 0.5); }
+    /* Hallmark · build · shape: studio-rack · theme: obsidian · genre: atmospheric · hero: Settled · nav: Edge · footer: Mast · job: download · built: OmniDownloader 8D Studio */
+    :root {
+      --color-bg: #09090b;
+      --color-surface: rgba(24, 24, 27, 0.7);
+      --color-surface-active: rgba(147, 51, 234, 0.14);
+      --color-border: rgba(255, 255, 255, 0.08);
+      --color-border-active: rgba(168, 85, 247, 0.5);
+      --color-text: #fafafa;
+      --color-accent: #6b21a8;
+      --color-accent-ink: #faf5ff;
+      --color-accent-light: #c084fc;
+      --color-accent-ring: rgba(168, 85, 247, 0.35);
+      --color-cyan: #38bdf8;
+      --color-indigo: #818cf8;
+    }
+    html, body {
+      overflow-x: clip;
+      max-width: 100%;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      caret-color: var(--color-accent);
+      scrollbar-color: var(--color-accent) var(--color-bg);
+    }
+    .glass { background: var(--color-surface); backdrop-filter: blur(12px); border: 1px solid var(--color-border); }
+    .glass-active { background: var(--color-surface-active); border-color: var(--color-border-active); }
     
     /* 3D Orbit Animation */
     .orbit-container {
@@ -47,8 +70,8 @@
       width: 190px;
       height: 80px;
       margin-top: -40px;
-      margin-left: -95px;
-      border: 2px dashed rgba(168, 85, 247, 0.35);
+      margin-left: -96px;
+      border: 2px dashed var(--color-accent-ring);
       border-radius: 50%;
       transform: rotateX(65deg);
       transform-style: preserve-3d;
@@ -57,43 +80,59 @@
       position: absolute;
       width: 18px;
       height: 18px;
-      background: #c084fc;
+      background: var(--color-accent-light);
       border-radius: 50%;
-      box-shadow: 0 0 20px #a855f7, 0 0 40px #a855f7;
+      box-shadow: 0 0 20px var(--color-accent), 0 0 40px var(--color-accent);
       animation: rotate-orbit 8s linear infinite;
     }
     .orbit-planet-2 {
       position: absolute;
       width: 14px;
       height: 14px;
-      background: #38bdf8;
+      background: var(--color-cyan);
       border-radius: 50%;
-      box-shadow: 0 0 16px #38bdf8;
+      box-shadow: 0 0 16px var(--color-cyan);
       animation: rotate-orbit-alt 5s linear infinite;
     }
     @keyframes rotate-orbit {
-      0% { transform: rotate(0deg) translateX(95px) rotate(0deg); }
-      100% { transform: rotate(360deg) translateX(95px) rotate(-360deg); }
+      0% { transform: rotate(0deg) translateX(96px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(96px) rotate(-360deg); }
     }
     @keyframes rotate-orbit-alt {
-      0% { transform: rotate(180deg) translateX(70px) rotate(-180deg); }
-      100% { transform: rotate(-180deg) translateX(70px) rotate(180deg); }
+      0% { transform: rotate(180deg) translateX(72px) rotate(-180deg); }
+      100% { transform: rotate(-180deg) translateX(72px) rotate(180deg); }
     }
     /* Wavebars */
     .wave-bar {
       width: 3px;
       height: 14px;
-      background: #a855f7;
+      background: var(--color-accent);
       border-radius: 2px;
       animation: wave-anim 1.2s ease-in-out infinite;
     }
-    .wave-bar:nth-child(2) { animation-delay: 0.2s; height: 22px; background: #c084fc; }
-    .wave-bar:nth-child(3) { animation-delay: 0.4s; height: 18px; background: #38bdf8; }
-    .wave-bar:nth-child(4) { animation-delay: 0.1s; height: 26px; background: #818cf8; }
-    .wave-bar:nth-child(5) { animation-delay: 0.5s; height: 12px; background: #a855f7; }
+    .wave-bar:nth-child(2) { animation-delay: 0.2s; height: 22px; background: var(--color-accent-light); }
+    .wave-bar:nth-child(3) { animation-delay: 0.4s; height: 18px; background: var(--color-cyan); }
+    .wave-bar:nth-child(4) { animation-delay: 0.1s; height: 26px; background: var(--color-indigo); }
+    .wave-bar:nth-child(5) { animation-delay: 0.5s; height: 12px; background: var(--color-accent); }
     @keyframes wave-anim {
       0%, 100% { transform: scaleY(0.4); }
       50% { transform: scaleY(1.3); }
+    }
+
+    button:disabled, input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .orbit-planet, .orbit-planet-2, .wave-bar {
+        animation: none !important;
+      }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
@@ -104,12 +143,12 @@
     <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <a href="/" class="flex items-center space-x-3 group">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+          <div class="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform">
+            <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
           </div>
           <div>
-            <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">OmniDownloader</span>
-            <span class="ml-2 text-xs font-mono py-0.5 px-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">8D Studio</span>
+            <span class="text-lg font-bold tracking-tight text-white">OmniDownloader</span>
+            <span class="ml-2 text-xs font-medium py-0.5 px-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">8D Studio</span>
           </div>
         </a>
       </div>
@@ -117,11 +156,11 @@
       <!-- Mode Switcher Tabs -->
       <div class="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-900/90 border border-zinc-800 text-xs">
         <a href="/" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white font-medium transition flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
           Video Downloader
         </a>
         <a href="/8d" class="px-3 py-1.5 rounded-lg bg-purple-600 text-white font-semibold shadow-sm flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+          <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
           8D / 16D Audio
         </a>
       </div>
@@ -143,7 +182,7 @@
         <!-- Center Headphone Icon -->
         <div class="absolute inset-0 flex items-center justify-center">
           <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-purple-500/40 shadow-xl shadow-purple-500/20 flex items-center justify-center">
-            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 11V9a9 9 0 0118 0v2"/></svg>
+            <svg aria-hidden="true" class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 11V9a9 9 0 0118 0v2"/></svg>
           </div>
         </div>
       </div>
@@ -157,7 +196,7 @@
       </div>
 
       <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight">
-        8D & 16D <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Spatial Audio Studio</span>
+        8D & 16D <span class="text-purple-400 font-extrabold">Spatial Audio Studio</span>
       </h1>
       <p class="text-zinc-400 text-sm sm:text-base max-w-xl mx-auto">
         Transform any song or upload your own tracks into 360° rotating spatial audio. Listen to live previews and customize every detail!
@@ -174,16 +213,16 @@
           onclick="switchInputTab('url')"
           class="flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl bg-purple-600 text-white shadow-sm flex items-center justify-center gap-2 transition"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
           Paste Web URL
         </button>
         <button
           id="tab-upload-btn"
           onclick="switchInputTab('upload')"
-          class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center justify-center gap-2 transition border border-zinc-800"
+          class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center justify-center gap-2 transition border border-zinc-800 whitespace-nowrap"
         >
-          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-          Upload Your Own Music File
+          <svg aria-hidden="true" class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          <span class="whitespace-nowrap">Upload Your Own Music File</span>
         </button>
       </div>
 
@@ -193,11 +232,11 @@
           <input
             id="url-input"
             type="text"
-            placeholder="Paste song link (YouTube, YT Music, SoundCloud, Reels)... Press Enter ↵"
+            placeholder="Paste song link (YouTube, YT Music, SoundCloud, Reels)… Press Enter ↵"
             class="w-full pl-11 pr-24 py-3.5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-mono text-sm transition"
           >
           <div class="absolute left-3.5 top-3.5 text-zinc-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
           </div>
           <button
             type="button"
@@ -211,10 +250,10 @@
         <button
           id="inspect-btn"
           type="submit"
-          class="sm:w-36 py-3.5 px-5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 transition flex items-center justify-center gap-2 text-sm flex-shrink-0"
+          class="sm:w-36 py-3.5 px-5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 transition flex items-center justify-center gap-2 text-sm flex-shrink-0"
         >
           <span id="inspect-btn-text">Load Track</span>
-          <svg id="inspect-spinner" class="animate-spin h-4 w-4 text-white hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <svg aria-hidden="true" id="inspect-spinner" class="animate-spin h-4 w-4 text-white hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
         </button>
       </form>
 
@@ -233,7 +272,7 @@
             onchange="handleFileUpload(this.files)"
           >
           <div class="w-12 h-12 rounded-full bg-purple-500/10 text-purple-400 group-hover:scale-110 transition flex items-center justify-center border border-purple-500/20">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
           </div>
           <div>
             <span class="text-sm font-bold text-white group-hover:text-purple-300">Click or Drag & Drop audio file here</span>
@@ -243,11 +282,11 @@
 
         <div id="upload-progress-box" class="hidden p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
           <div class="flex justify-between text-xs">
-            <span id="upload-status-text" class="text-zinc-400 font-medium">Uploading file...</span>
+            <span id="upload-status-text" class="text-zinc-400 font-medium">Uploading file…</span>
             <span id="upload-percent-text" class="text-purple-400 font-mono font-bold">0%</span>
           </div>
           <div class="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-            <div id="upload-bar-fill" class="bg-gradient-to-r from-purple-500 to-cyan-400 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+            <div id="upload-bar-fill" class="bg-purple-500 h-1.5 rounded-full " style="width: 0%"></div>
           </div>
         </div>
       </div>
@@ -259,9 +298,9 @@
       
       <!-- Track Banner Preview -->
       <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-zinc-900/80 border border-zinc-800">
-        <img id="track-thumb" src="" alt="Thumbnail" class="w-20 h-20 rounded-xl object-cover shadow-md flex-shrink-0 border border-zinc-700/60">
+        <img id="track-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b5cf6'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E" alt="Thumbnail" class="w-20 h-20 rounded-xl object-cover shadow-md flex-shrink-0 border border-zinc-700/60">
         <div class="flex-grow text-center sm:text-left space-y-1 overflow-hidden">
-          <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-xs font-mono font-semibold border border-purple-500/20">
+          <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-xs font-semibold border border-purple-500/20">
             <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
             <span id="track-badge">Audio Stream Ready</span>
           </div>
@@ -272,7 +311,7 @@
 
       <!-- 1. Spatial Engine Selector (8D vs 16D) -->
       <div class="space-y-3">
-        <label class="text-xs uppercase tracking-wider font-bold text-zinc-400">1. Select Spatial Audio Engine</label>
+        <label class="text-xs font-semibold text-zinc-400">1. Spatial audio engine</label>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <!-- 8D Card -->
           <div
@@ -282,10 +321,10 @@
           >
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-sm font-bold text-purple-300 flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+                <svg aria-hidden="true" class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
                 8D Spatial Audio
               </span>
-              <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono">360° Circular</span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">360° Circular</span>
             </div>
             <p class="text-xs text-zinc-400">Smooth circular panning moving around your head. The iconic YouTube 8D experience.</p>
           </div>
@@ -298,10 +337,10 @@
           >
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-sm font-bold text-cyan-300 flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <svg aria-hidden="true" class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 16D Ultra Spatial
               </span>
-              <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">Spherical Orbit</span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-medium">Spherical Orbit</span>
             </div>
             <p class="text-xs text-zinc-400">Multi-axis spherical motion with wider stereo acoustics and dynamic dual-delay reflections.</p>
           </div>
@@ -311,11 +350,11 @@
       <!-- 2. Intensity Slider (State Persisted) -->
       <div class="p-4 sm:p-5 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
         <div class="flex items-center justify-between">
-          <label class="text-xs uppercase tracking-wider font-bold text-zinc-300 flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-            2. Effect Intensity
+          <label class="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+            <svg aria-hidden="true" class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+            2. Effect intensity
           </label>
-          <span id="intensity-value-badge" class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono text-xs font-bold">
+          <span id="intensity-value-badge" class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold">
             Level 7 / 10
           </span>
         </div>
@@ -346,7 +385,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <!-- Speed -->
         <div class="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2">
-          <label class="text-xs uppercase tracking-wider font-bold text-zinc-400">Orbit Rotation Speed</label>
+          <label class="text-xs font-semibold text-zinc-400">Orbit rotation speed</label>
           <div class="grid grid-cols-3 gap-2">
             <button type="button" onclick="setSpeed('slow')" id="speed-slow" class="py-2 text-xs rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium transition">Slow (12s)</button>
             <button type="button" onclick="setSpeed('normal')" id="speed-normal" class="py-2 text-xs rounded-lg bg-purple-600 text-white font-bold transition shadow-sm">Standard (8s)</button>
@@ -356,15 +395,15 @@
 
         <!-- Toggles -->
         <div class="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2.5">
-          <label class="text-xs uppercase tracking-wider font-bold text-zinc-400">Acoustic Enhancements</label>
+          <label class="text-xs font-semibold text-zinc-400">Acoustic enhancements</label>
           <div class="space-y-2 text-xs">
             <label class="flex items-center gap-2 cursor-pointer text-zinc-300">
               <input type="checkbox" id="bass-boost" checked class="rounded bg-zinc-800 border-zinc-700 text-purple-600 focus:ring-0">
-              <span>🔊 Deep Bass Preservation (Keeps punch full)</span>
+              <svg class="w-4 h-4 inline-block text-purple-400 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg><span>Deep Bass Preservation (Keeps punch full)</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-zinc-300">
               <input type="checkbox" id="hall-reverb" checked class="rounded bg-zinc-800 border-zinc-700 text-purple-600 focus:ring-0">
-              <span>🏛 Concert Hall Reverb (3D Room presence)</span>
+              <svg class="w-4 h-4 inline-block text-purple-400 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span>Concert Hall Reverb (3D Room presence)</span>
             </label>
           </div>
         </div>
@@ -374,7 +413,7 @@
       <div class="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-xs uppercase tracking-wider font-bold text-zinc-400">Trim Segment (Optional)</span>
+            <span class="text-xs font-semibold text-zinc-400">Trim segment (optional)</span>
             <span class="text-xs text-zinc-500">Convert only a specific section</span>
           </div>
           <input type="checkbox" id="trim-toggle" onchange="toggleTrimSection()" class="rounded bg-zinc-800 border-zinc-700 text-purple-600 focus:ring-0">
@@ -397,10 +436,10 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="p-1.5 rounded-lg bg-purple-500/20 text-purple-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+              <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
             </span>
             <div>
-              <h4 class="text-sm font-bold text-white">Experience All Combos: Live 8D Preview</h4>
+              <h3 class="text-sm font-bold text-white">Experience All Combos: Live 8D Preview</h3>
               <p class="text-xs text-zinc-400">Put on headphones to test different intensities and speeds right now!</p>
             </div>
           </div>
@@ -417,12 +456,12 @@
                 onclick="generateQuickPreview()"
                 class="px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded-lg font-bold flex items-center gap-1.5 transition"
               >
-                <span id="preview-btn-text">🎧 Render 15s Quick Preview</span>
-                <svg id="preview-spinner" class="animate-spin h-3.5 w-3.5 text-white hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                <svg class="w-3.5 h-3.5 text-purple-300 inline-block mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg><span id="preview-btn-text">Render 15s Quick Preview</span>
+                <svg aria-hidden="true" id="preview-spinner" class="animate-spin h-3.5 w-3.5 text-white hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
               </button>
-              <span id="preview-status-pill" class="text-zinc-500 font-mono text-[11px]">Ready to audition</span>
+              <span id="preview-status-pill" class="text-zinc-500 text-[11px]">Ready to audition</span>
             </div>
-            <span class="text-[11px] text-zinc-500 font-mono">Headphones recommended</span>
+            <span class="text-[11px] text-zinc-500">Headphones recommended</span>
           </div>
         </div>
       </div>
@@ -431,10 +470,10 @@
       <button
         id="render-btn"
         onclick="startSpatialRender()"
-        class="w-full py-4 px-6 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:via-indigo-500 hover:to-cyan-400 text-white font-extrabold text-base rounded-xl shadow-xl shadow-purple-500/25 transition transform active:scale-[0.99] flex items-center justify-center gap-2"
+        class="w-full py-4 px-6 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white font-extrabold text-base rounded-xl shadow-xl shadow-purple-500/25 transition transform active:scale-[0.99] flex items-center justify-center gap-2 whitespace-nowrap"
       >
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        <span id="render-btn-text">Master & Download Full Track (320kbps MP3)</span>
+        <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <span id="render-btn-text"><span class="whitespace-nowrap">Master & Download Full Track (320kbps MP3)</span></span>
       </button>
 
     </div>
@@ -443,23 +482,23 @@
     <div id="progress-card" class="glass p-6 rounded-2xl shadow-xl space-y-4 hidden">
       <div class="flex items-center justify-between text-sm">
         <div class="flex items-center gap-2.5">
-          <svg class="animate-spin h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          <span id="progress-title" class="font-bold text-white">Rendering Spatial Audio...</span>
+          <svg aria-hidden="true" class="animate-spin h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span id="progress-title" class="font-bold text-white">Rendering Spatial Audio…</span>
         </div>
         <span id="progress-percent" class="font-mono text-purple-400 font-bold">0%</span>
       </div>
 
       <div class="w-full bg-zinc-800 rounded-full h-2.5 overflow-hidden">
-        <div id="progress-bar-fill" class="bg-gradient-to-r from-purple-500 to-cyan-400 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+        <div id="progress-bar-fill" class="bg-purple-500 h-2.5 rounded-full " style="width: 0%"></div>
       </div>
 
-      <p id="progress-detail" class="text-xs font-mono text-zinc-400 text-center">Applying psychoacoustic 360° filters...</p>
+      <p id="progress-detail" class="text-xs text-zinc-400 text-center">Applying psychoacoustic 360° filters…</p>
     </div>
 
     <!-- Success & Direct Download Card -->
     <div id="success-card" class="glass p-6 rounded-2xl shadow-xl space-y-5 hidden text-center border border-emerald-500/30">
       <div class="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <svg aria-hidden="true" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
       </div>
 
       <div class="space-y-1">
@@ -470,18 +509,18 @@
       <!-- Mastered Audio Player -->
       <div class="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
         <div class="flex items-center justify-center gap-2 text-xs text-emerald-300 font-semibold mb-1">
-          <span>🎧 Listen to your final 8D master:</span>
+          <svg class="w-4 h-4 text-emerald-400 inline-block mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg><span>Listen to your final master:</span>
         </div>
         <audio id="audio-final-player" controls class="w-full"></audio>
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <a id="download-trigger-btn" href="#" class="py-3 px-6 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-lg shadow-purple-500/20 transition flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           Download MP3 to Device
         </a>
-        <button onclick="scrollToSettings()" class="py-3 px-5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-sm transition">
-          Change Intensity / Settings
+        <button onclick="scrollToSettings()" class="py-3 px-5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-sm transition whitespace-nowrap">
+          <span class="whitespace-nowrap">Change Intensity / Settings</span>
         </button>
       </div>
     </div>
@@ -535,7 +574,7 @@
       progressBox.classList.remove('hidden');
       progressBar.style.width = '20%';
       percentText.textContent = '20%';
-      statusText.textContent = `Uploading ${file.name}...`;
+      statusText.textContent = `Uploading ${file.name}…`;
 
       const formData = new FormData();
       formData.append('file', file);
@@ -654,7 +693,7 @@
       const inspectSpinner = document.getElementById('inspect-spinner');
 
       inspectBtn.disabled = true;
-      inspectText.textContent = "Loading...";
+      inspectText.textContent = "Loading…";
       inspectSpinner.classList.remove('hidden');
       currentUploadId = null;
 
@@ -793,8 +832,8 @@
         renderBtnText.textContent = `Master & Download ${modeUpper} Audio (Intensity: ${sliderVal}/10)`;
       }
       const previewText = document.getElementById('preview-btn-text');
-      if (previewText && !previewText.textContent.includes("...")) {
-        previewText.textContent = `🎧 Render 15s Quick Preview (${modeUpper} · ${sliderVal}/10)`;
+      if (previewText && !previewText.textContent.includes("…")) {
+        previewText.textContent = `Render 15s Quick Preview (${modeUpper} · ${sliderVal}/10)`;
       }
     }
     }
@@ -813,9 +852,9 @@
       const previewPill = document.getElementById('preview-status-pill');
 
       previewBtn.disabled = true;
-      previewText.textContent = "Rendering 15s preview...";
+      previewText.textContent = "Rendering 15s preview…";
       previewSpinner.classList.remove('hidden');
-      previewPill.textContent = "Processing audio snippet...";
+      previewPill.textContent = "Processing audio snippet…";
 
       const sliderIntensity = parseInt(document.getElementById('intensity-slider').value) || currentIntensity;
       const bassBoost = document.getElementById('bass-boost').checked;
@@ -854,7 +893,7 @@
       } catch (err) {
         alert("Preview failed: " + err.message);
         previewBtn.disabled = false;
-        previewText.textContent = "🎧 Render 15s Quick Preview";
+        previewText.textContent = "Render 15s Quick Preview";
         previewSpinner.classList.add('hidden');
         previewPill.textContent = "Preview error";
       }
@@ -877,7 +916,7 @@
           if (job.status === 'finished') {
             clearInterval(interval);
             previewBtn.disabled = false;
-            previewText.textContent = "🎧 Re-Audition 15s Preview";
+            previewText.textContent = "Re-Audition 15s Preview";
             previewSpinner.classList.add('hidden');
             previewPill.textContent = `Auditioning ${currentSpatialMode.toUpperCase()} at Level ${document.getElementById('intensity-slider').value}/10`;
 
@@ -889,7 +928,7 @@
             clearInterval(interval);
             alert("Preview render error: " + (job.error || "Unknown"));
             previewBtn.disabled = false;
-            previewText.textContent = "🎧 Render 15s Quick Preview";
+            previewText.textContent = "Render 15s Quick Preview";
             previewSpinner.classList.add('hidden');
           }
         } catch (e) {
@@ -973,11 +1012,11 @@
           document.getElementById('progress-bar-fill').style.width = `${percent}%`;
 
           if (status === 'downloading') {
-            document.getElementById('progress-title').textContent = "Downloading audio stream...";
+            document.getElementById('progress-title').textContent = "Downloading audio stream…";
             document.getElementById('progress-detail').textContent = `Speed: ${job.speed || '--'} • ETA: ${job.eta || '--'}`;
           } else if (status === 'processing') {
-            document.getElementById('progress-title').textContent = job.message || "Mastering Spatial 8D Acoustics...";
-            document.getElementById('progress-detail').textContent = `Applying 360° binaural pan (Intensity: ${document.getElementById('intensity-slider').value}/10) & hall reverb...`;
+            document.getElementById('progress-title').textContent = job.message || "Mastering Spatial 8D Acoustics…";
+            document.getElementById('progress-detail').textContent = `Applying 360° binaural pan (Intensity: ${document.getElementById('intensity-slider').value}/10) & hall reverb…`;
           } else if (status === 'finished') {
             clearInterval(pollInterval);
             finishJob(jobId, job);
