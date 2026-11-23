@@ -41,6 +41,8 @@ def add_cors_headers(response):
 BASE_DIR = Path(__file__).resolve().parent
 DOWNLOAD_DIR = BASE_DIR / "web_downloads"
 DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR = BASE_DIR / "uploads"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # In-memory job tracker
 JOBS = {}
@@ -228,6 +230,13 @@ def cleanup_old_files():
                                 logger.warning(f"Failed to remove {job_folder}: {e}")
                 for job_id in expired_jobs:
                     del JOBS[job_id]
+
+            # Cleanup expired uploaded audio files (> 1 hour old)
+            upload_cutoff = datetime.now() - timedelta(hours=1)
+            for f in UPLOAD_DIR.iterdir():
+                if f.is_file() and datetime.fromtimestamp(f.stat().st_mtime) < upload_cutoff:
+                    try: f.unlink()
+                    except: pass
         except Exception as e:
             logger.error(f"Error in cleanup worker: {e}")
 
@@ -243,6 +252,78 @@ def index():
 @app.route("/8d")
 def spatial_studio():
     return render_template("8d.html")
+
+@app.route("/api/upload", methods=["POST"])
+def upload_audio():
+    if "file" not in request.files:
+        return jsonify({"success": False, "error": "No file uploaded"}), 400
+    file = request.files["file"]
+    if not file or not file.filename:
+        return jsonify({"success": False, "error": "Empty filename"}), 400
+
+    ext = Path(file.filename).suffix.lower()
+    allowed = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".webm", ".wma"}
+    if ext not in allowed:
+        return jsonify({"success": False, "error": f"Unsupported format '{ext}'. Supported: MP3, WAV, FLAC, M4A, AAC, OGG."}), 400
+
+    upload_id = uuid.uuid4().hex[:10]
+    clean_stem = safe_filename(Path(file.filename).stem, 80)
+    saved_path = UPLOAD_DIR / f"{upload_id}_{clean_stem}{ext}"
+    file.save(str(saved_path))
+
+    duration = 0
+    title = clean_stem
+    artist = "Local Audio File"
+
+    try:
+        cmd = [
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration:format_tags=title,artist",
+            "-of", "default=noprint_wrappers=1:nokey=0",
+            str(saved_path)
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        for line in res.stdout.splitlines():
+            if line.startswith("duration="):
+                try: duration = float(line.split("=")[1])
+                except: pass
+            elif line.startswith("TAG:title="):
+                val = line.split("=", 1)[1].strip()
+                if val: title = val
+            elif line.startswith("TAG:artist="):
+                val = line.split("=", 1)[1].strip()
+                if val: artist = val
+    except Exception as e:
+        logger.warning(f"Metadata probe failed for upload: {e}")
+
+    filesize = saved_path.stat().st_size
+
+    return jsonify({
+        "success": True,
+        "upload_id": upload_id,
+        "filename": file.filename,
+        "title": title,
+        "author": artist,
+        "duration": round(duration),
+        "duration_formatted": format_seconds(round(duration)) if duration else "--:--",
+        "platform": "Local Audio File",
+        "filesize": format_bytes(filesize),
+        "stream_url": f"/api/raw_audio/{upload_id}"
+    })
+
+@app.route("/api/raw_audio/<upload_id>")
+def serve_raw_audio(upload_id):
+    matches = list(UPLOAD_DIR.glob(f"{upload_id}_*"))
+    if not matches:
+        return "Audio file not found", 404
+    file_path = matches[0]
+    ext = file_path.suffix.lower()
+    mime = "audio/mpeg"
+    if ext == ".wav": mime = "audio/wav"
+    elif ext == ".flac": mime = "audio/flac"
+    elif ext in (".m4a", ".aac"): mime = "audio/mp4"
+    elif ext in (".ogg", ".opus"): mime = "audio/ogg"
+    return send_file(str(file_path), mimetype=mime, conditional=True)
 
 @app.route("/api/health", methods=["GET", "OPTIONS"])
 def health():
@@ -515,14 +596,36 @@ def run_download_task(job_id: str, url: str, options: dict):
             ydl_opts["postprocessors"] = [{"key": "FFmpegMetadata", "add_metadata": True}]
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+        upload_id = options.get("upload_id")
+        is_preview = bool(options.get("is_preview", False))
+        if is_preview:
+            is_trim = True
+            start_sec = 0.0
+            end_sec = 15.0
 
-        files = [f for f in job_folder.iterdir() if f.is_file() and not f.name.endswith(".part") and not f.name.endswith(".temp")]
-        if not files:
-            raise Exception("Download succeeded but no output file was generated.")
+        if upload_id:
+            with JOBS_LOCK:
+                JOBS[job_id]["status"] = "processing"
+                JOBS[job_id]["progress"] = 25
+                JOBS[job_id]["message"] = "Loading uploaded audio track..."
 
-        final_file = files[0]
+            matches = list(UPLOAD_DIR.glob(f"{upload_id}_*"))
+            if not matches:
+                raise Exception("Uploaded audio file was not found on server.")
+            source_file = matches[0]
+            clean_name = source_file.name[len(upload_id)+1:]
+            final_file = job_folder / clean_name
+            shutil.copy2(source_file, final_file)
+            logger.info(f"Loaded uploaded audio: {final_file.name}")
+        else:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+
+            files = [f for f in job_folder.iterdir() if f.is_file() and not f.name.endswith(".part") and not f.name.endswith(".temp")]
+            if not files:
+                raise Exception("Download succeeded but no output file was generated.")
+
+            final_file = files[0]
 
         # Fast post-download trimming (Instant, 0% CPU re-encoding overhead, works across all platforms)
         if is_trim and start_sec is not None and end_sec is not None and end_sec > start_sec:
@@ -621,8 +724,9 @@ def run_download_task(job_id: str, url: str, options: dict):
 def start_download():
     data = request.get_json(force=True, silent=True) or {}
     url = (data.get("url") or "").strip()
-    if not url:
-        return jsonify({"success": False, "error": "URL is required"}), 400
+    upload_id = data.get("upload_id")
+    if not url and not upload_id:
+        return jsonify({"success": False, "error": "URL or uploaded audio file is required"}), 400
 
     job_id = uuid.uuid4().hex[:10]
 
@@ -633,7 +737,45 @@ def start_download():
             "progress": 0,
             "speed": "",
             "eta": "",
-            "message": "Initializing download worker...",
+            "message": "Initializing worker...",
+            "filename": None,
+            "file_path": None,
+            "file_size": None,
+            "error": None,
+            "created_at": datetime.now()
+        }
+
+    thread = threading.Thread(
+        target=run_download_task,
+        args=(job_id, url, data),
+        daemon=True
+    )
+    thread.start()
+
+    return jsonify({"success": True, "job_id": job_id})
+
+@app.route("/api/preview", methods=["POST"])
+def generate_preview():
+    data = request.get_json(force=True, silent=True) or {}
+    url = (data.get("url") or "").strip()
+    upload_id = data.get("upload_id")
+    if not url and not upload_id:
+        return jsonify({"success": False, "error": "URL or uploaded audio file is required"}), 400
+
+    job_id = "prev_" + uuid.uuid4().hex[:8]
+    data["is_preview"] = True
+    data["trim"] = True
+    data["start_time"] = "00:00"
+    data["end_time"] = "00:15"
+
+    with JOBS_LOCK:
+        JOBS[job_id] = {
+            "id": job_id,
+            "status": "queued",
+            "progress": 0,
+            "speed": "",
+            "eta": "",
+            "message": "Generating fast 15s 8D preview...",
             "filename": None,
             "file_path": None,
             "file_size": None,
