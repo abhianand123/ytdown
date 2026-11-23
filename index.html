@@ -86,6 +86,18 @@
       font-size: 0.9rem;
       transition: all 0.2s;
     }
+    .btn-8d {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
+    }
     .btn-secondary {
       display: inline-block;
       padding: 10px 20px;
@@ -120,7 +132,8 @@
     </div>
 
     <div class="actions" id="action-buttons" style="display: none;">
-      <a id="launch-btn" href="#" class="btn-primary">Launch OmniDownloader</a>
+      <a id="launch-8d-btn" href="#" class="btn-8d">🎧 Launch 8D / 16D Spatial Audio Studio</a>
+      <a id="launch-btn" href="#" class="btn-primary">🎬 Launch Universal Video Downloader</a>
       <a id="wifi-btn" href="http://192.168.1.13:5000" class="btn-secondary">On Home Wi-Fi? Open Local IP (192.168.1.13:5000)</a>
     </div>
 
@@ -141,6 +154,8 @@
     const actionButtons = document.getElementById('action-buttons');
     const launchBtn = document.getElementById('launch-btn');
     const wifiBtn = document.getElementById('wifi-btn');
+
+    const launch8dBtn = document.getElementById('launch-8d-btn');
 
     let attemptCount = 0;
 
@@ -220,6 +235,7 @@
       targetUrlText.textContent = tunnelUrl;
       statusBox.style.display = 'block';
       launchBtn.href = tunnelUrl;
+      launch8dBtn.href = tunnelUrl + "/8d";
       actionButtons.style.display = 'flex';
 
       // Pre-flight health check
@@ -229,9 +245,14 @@
       if (isAlive) {
         spinner.style.borderTopColor = "#10b981";
         headline.textContent = "Phone Server Online!";
-        subtext.textContent = "Launching OmniDownloader...";
+        
+        // Check if user specifically requested 8D mode or if redirecting normally
+        const is8D = window.location.search.includes('8d') || window.location.hash.includes('8d');
+        const targetDestination = is8D ? (tunnelUrl + "/8d") : tunnelUrl;
+        subtext.textContent = is8D ? "Launching 8D / 16D Spatial Audio Studio..." : "Launching OmniDownloader...";
+        
         setTimeout(() => {
-          window.location.replace(tunnelUrl);
+          window.location.replace(targetDestination);
         }, 500);
       } else {
         headline.textContent = "Phone is Reconnecting";
