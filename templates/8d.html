@@ -31,7 +31,7 @@
   <style>
     body { background-color: #09090b; color: #fafafa; }
     .glass { background: rgba(24, 24, 27, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .glass-active { background: rgba(147, 51, 234, 0.12); border-color: rgba(168, 85, 247, 0.4); }
+    .glass-active { background: rgba(147, 51, 234, 0.14); border-color: rgba(168, 85, 247, 0.5); }
     
     /* 3D Orbit Animation */
     .orbit-container {
@@ -160,24 +160,47 @@
         8D & 16D <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Spatial Audio Studio</span>
       </h1>
       <p class="text-zinc-400 text-sm sm:text-base max-w-xl mx-auto">
-        Transform any song into a 360° rotating spatial masterpiece. Wear headphones for the full binaural concert immersion!
+        Transform any song or upload your own tracks into 360° rotating spatial audio. Listen to live previews and customize every detail!
       </p>
     </div>
 
-    <!-- URL Input Card -->
+    <!-- Dual Source Selection Card: URL or Local Upload -->
     <div class="glass p-4 sm:p-6 rounded-2xl shadow-xl space-y-4">
-      <div class="flex flex-col sm:flex-row gap-3">
+      
+      <!-- Source Tabs -->
+      <div class="flex border-b border-zinc-800 pb-3 gap-2">
+        <button
+          id="tab-url-btn"
+          onclick="switchInputTab('url')"
+          class="flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl bg-purple-600 text-white shadow-sm flex items-center justify-center gap-2 transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          Paste Web URL
+        </button>
+        <button
+          id="tab-upload-btn"
+          onclick="switchInputTab('upload')"
+          class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center justify-center gap-2 transition border border-zinc-800"
+        >
+          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          Upload Your Own Music File
+        </button>
+      </div>
+
+      <!-- Tab 1: Web URL Input -->
+      <form id="url-input-section" onsubmit="event.preventDefault(); fetchTrackInfo();" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-grow">
           <input
             id="url-input"
             type="text"
-            placeholder="Paste song URL (YouTube, YouTube Music, SoundCloud, Reels)..."
+            placeholder="Paste song link (YouTube, YT Music, SoundCloud, Reels)... Press Enter ↵"
             class="w-full pl-11 pr-24 py-3.5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-mono text-sm transition"
           >
           <div class="absolute left-3.5 top-3.5 text-zinc-500">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
           </div>
           <button
+            type="button"
             onclick="pasteClipboard()"
             class="absolute right-2.5 top-2.5 px-3 py-1.5 text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg border border-zinc-700 transition"
           >
@@ -187,13 +210,48 @@
 
         <button
           id="inspect-btn"
-          onclick="fetchTrackInfo()"
+          type="submit"
           class="sm:w-36 py-3.5 px-5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 transition flex items-center justify-center gap-2 text-sm flex-shrink-0"
         >
           <span id="inspect-btn-text">Load Track</span>
           <svg id="inspect-spinner" class="animate-spin h-4 w-4 text-white hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
         </button>
+      </form>
+
+      <!-- Tab 2: Upload Own Audio File -->
+      <div id="upload-input-section" class="hidden space-y-3">
+        <div
+          id="drop-zone"
+          onclick="document.getElementById('file-input').click()"
+          class="p-6 border-2 border-dashed border-zinc-700 hover:border-purple-500/70 rounded-2xl bg-zinc-900/60 hover:bg-zinc-900/90 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2 group"
+        >
+          <input
+            id="file-input"
+            type="file"
+            accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.opus"
+            class="hidden"
+            onchange="handleFileUpload(this.files)"
+          >
+          <div class="w-12 h-12 rounded-full bg-purple-500/10 text-purple-400 group-hover:scale-110 transition flex items-center justify-center border border-purple-500/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          </div>
+          <div>
+            <span class="text-sm font-bold text-white group-hover:text-purple-300">Click or Drag & Drop audio file here</span>
+            <p class="text-xs text-zinc-500 mt-1">Supports MP3, WAV, FLAC, M4A, AAC, OGG up to 200MB</p>
+          </div>
+        </div>
+
+        <div id="upload-progress-box" class="hidden p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+          <div class="flex justify-between text-xs">
+            <span id="upload-status-text" class="text-zinc-400 font-medium">Uploading file...</span>
+            <span id="upload-percent-text" class="text-purple-400 font-mono font-bold">0%</span>
+          </div>
+          <div class="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+            <div id="upload-bar-fill" class="bg-gradient-to-r from-purple-500 to-cyan-400 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+          </div>
+        </div>
       </div>
+
     </div>
 
     <!-- Track Metadata & Studio Controls -->
@@ -205,7 +263,7 @@
         <div class="flex-grow text-center sm:text-left space-y-1 overflow-hidden">
           <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-xs font-mono font-semibold border border-purple-500/20">
             <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-            Audio Stream Detected
+            <span id="track-badge">Audio Stream Ready</span>
           </div>
           <h2 id="track-title" class="text-base sm:text-lg font-bold text-white truncate">--</h2>
           <p id="track-meta" class="text-xs text-zinc-400">--</p>
@@ -250,7 +308,7 @@
         </div>
       </div>
 
-      <!-- 2. Intensity Slider (Requested by user) -->
+      <!-- 2. Intensity Slider (State Persisted) -->
       <div class="p-4 sm:p-5 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
         <div class="flex items-center justify-between">
           <label class="text-xs uppercase tracking-wider font-bold text-zinc-300 flex items-center gap-1.5">
@@ -270,15 +328,16 @@
           value="7"
           step="1"
           oninput="updateIntensity(this.value)"
-          class="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
+          onchange="updateIntensity(this.value)"
+          class="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
         >
 
         <div class="flex items-center justify-between text-xs text-zinc-400">
           <span id="intensity-desc">Balanced (Concert Immersion - 85% Pan Width)</span>
           <div class="flex gap-1.5">
-            <button onclick="setIntensityPreset(4)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs">Mild</button>
-            <button onclick="setIntensityPreset(7)" class="px-2 py-0.5 rounded bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 text-xs font-semibold">Balanced</button>
-            <button onclick="setIntensityPreset(10)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs">Extreme</button>
+            <button id="preset-mild" type="button" onclick="setIntensityPreset(4)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs transition">Mild</button>
+            <button id="preset-balanced" type="button" onclick="setIntensityPreset(7)" class="px-2 py-0.5 rounded bg-purple-600 text-white text-xs font-semibold shadow-sm transition">Balanced</button>
+            <button id="preset-extreme" type="button" onclick="setIntensityPreset(10)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs transition">Extreme (10/10)</button>
           </div>
         </div>
       </div>
@@ -289,9 +348,9 @@
         <div class="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2">
           <label class="text-xs uppercase tracking-wider font-bold text-zinc-400">Orbit Rotation Speed</label>
           <div class="grid grid-cols-3 gap-2">
-            <button onclick="setSpeed('slow')" id="speed-slow" class="py-2 text-xs rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium transition">Slow (12s)</button>
-            <button onclick="setSpeed('normal')" id="speed-normal" class="py-2 text-xs rounded-lg bg-purple-600 text-white font-bold transition shadow-sm">Standard (8s)</button>
-            <button onclick="setSpeed('fast')" id="speed-fast" class="py-2 text-xs rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium transition">Fast (5s)</button>
+            <button type="button" onclick="setSpeed('slow')" id="speed-slow" class="py-2 text-xs rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium transition">Slow (12s)</button>
+            <button type="button" onclick="setSpeed('normal')" id="speed-normal" class="py-2 text-xs rounded-lg bg-purple-600 text-white font-bold transition shadow-sm">Standard (8s)</button>
+            <button type="button" onclick="setSpeed('fast')" id="speed-fast" class="py-2 text-xs rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium transition">Fast (5s)</button>
           </div>
         </div>
 
@@ -315,8 +374,8 @@
       <div class="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-xs uppercase tracking-wider font-bold text-zinc-400">Trim Clip (Optional)</span>
-            <span class="text-xs text-zinc-500">Only convert a highlight segment</span>
+            <span class="text-xs uppercase tracking-wider font-bold text-zinc-400">Trim Segment (Optional)</span>
+            <span class="text-xs text-zinc-500">Convert only a specific section</span>
           </div>
           <input type="checkbox" id="trim-toggle" onchange="toggleTrimSection()" class="rounded bg-zinc-800 border-zinc-700 text-purple-600 focus:ring-0">
         </div>
@@ -333,14 +392,49 @@
         </div>
       </div>
 
-      <!-- Action Button -->
+      <!-- 5. PREVIEW SECTION (Experience all combos before downloading!) -->
+      <div class="p-5 rounded-xl bg-purple-950/20 border border-purple-500/30 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-purple-500/20 text-purple-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+            </span>
+            <div>
+              <h4 class="text-sm font-bold text-white">Experience All Combos: Live 8D Preview</h4>
+              <p class="text-xs text-zinc-400">Put on headphones to test different intensities and speeds right now!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- In-Browser Interactive Preview Player -->
+        <div id="preview-player-box" class="space-y-3">
+          <audio id="live-audio-preview" controls class="w-full"></audio>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-zinc-400">
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="btn-quick-preview"
+                onclick="generateQuickPreview()"
+                class="px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded-lg font-bold flex items-center gap-1.5 transition"
+              >
+                <span id="preview-btn-text">🎧 Render 15s Quick Preview</span>
+                <svg id="preview-spinner" class="animate-spin h-3.5 w-3.5 text-white hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+              </button>
+              <span id="preview-status-pill" class="text-zinc-500 font-mono text-[11px]">Ready to audition</span>
+            </div>
+            <span class="text-[11px] text-zinc-500 font-mono">Headphones recommended</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button: Download Full Track -->
       <button
         id="render-btn"
         onclick="startSpatialRender()"
         class="w-full py-4 px-6 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:via-indigo-500 hover:to-cyan-400 text-white font-extrabold text-base rounded-xl shadow-xl shadow-purple-500/25 transition transform active:scale-[0.99] flex items-center justify-center gap-2"
       >
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
-        <span id="render-btn-text">Master & Download 8D Audio (320kbps MP3)</span>
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <span id="render-btn-text">Master & Download Full Track (320kbps MP3)</span>
       </button>
 
     </div>
@@ -362,23 +456,23 @@
       <p id="progress-detail" class="text-xs font-mono text-zinc-400 text-center">Applying psychoacoustic 360° filters...</p>
     </div>
 
-    <!-- Success & Player Card -->
-    <div id="success-card" class="glass p-6 rounded-2xl shadow-xl space-y-5 hidden text-center">
+    <!-- Success & Direct Download Card -->
+    <div id="success-card" class="glass p-6 rounded-2xl shadow-xl space-y-5 hidden text-center border border-emerald-500/30">
       <div class="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
       </div>
 
       <div class="space-y-1">
-        <h3 class="text-xl font-extrabold text-white">Spatial Audio Render Complete!</h3>
+        <h3 class="text-xl font-extrabold text-white">Spatial Audio Mastered!</h3>
         <p id="success-filename" class="text-xs text-zinc-400 font-mono">--</p>
       </div>
 
-      <!-- In-Browser Audio Player (Plug in headphones!) -->
+      <!-- Mastered Audio Player -->
       <div class="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
-        <div class="flex items-center justify-center gap-2 text-xs text-purple-300 font-semibold mb-2">
-          <span>🎧 Put on headphones to test the 360° effect now:</span>
+        <div class="flex items-center justify-center gap-2 text-xs text-emerald-300 font-semibold mb-1">
+          <span>🎧 Listen to your final 8D master:</span>
         </div>
-        <audio id="audio-preview-player" controls class="w-full"></audio>
+        <audio id="audio-final-player" controls class="w-full"></audio>
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -386,8 +480,8 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           Download MP3 to Device
         </a>
-        <button onclick="resetStudio()" class="py-3 px-5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-sm transition">
-          Create Another Track
+        <button onclick="scrollToSettings()" class="py-3 px-5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-sm transition">
+          Change Intensity / Settings
         </button>
       </div>
     </div>
@@ -399,11 +493,140 @@
   </footer>
 
   <script>
+    let activeInputTab = 'url';
     let currentSpatialMode = '8d';
     let currentIntensity = 7;
     let currentSpeed = 'normal';
+    let currentUploadId = null;
     let loadedTrackData = null;
     let pollInterval = null;
+
+    // Switch between Web URL and Upload Local File
+    function switchInputTab(tab) {
+      activeInputTab = tab;
+      const urlBtn = document.getElementById('tab-url-btn');
+      const uploadBtn = document.getElementById('tab-upload-btn');
+      const urlSection = document.getElementById('url-input-section');
+      const uploadSection = document.getElementById('upload-input-section');
+
+      if (tab === 'url') {
+        urlBtn.className = "flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl bg-purple-600 text-white shadow-sm flex items-center justify-center gap-2 transition";
+        uploadBtn.className = "flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center justify-center gap-2 transition border border-zinc-800";
+        urlSection.classList.remove('hidden');
+        uploadSection.classList.add('hidden');
+      } else {
+        uploadBtn.className = "flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl bg-purple-600 text-white shadow-sm flex items-center justify-center gap-2 transition";
+        urlBtn.className = "flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center justify-center gap-2 transition border border-zinc-800";
+        uploadSection.classList.remove('hidden');
+        urlSection.classList.add('hidden');
+      }
+    }
+
+    // Handle Local File Upload
+    async function handleFileUpload(files) {
+      if (!files || files.length === 0) return;
+      const file = files[0];
+
+      const progressBox = document.getElementById('upload-progress-box');
+      const progressBar = document.getElementById('upload-bar-fill');
+      const percentText = document.getElementById('upload-percent-text');
+      const statusText = document.getElementById('upload-status-text');
+
+      progressBox.classList.remove('hidden');
+      progressBar.style.width = '20%';
+      percentText.textContent = '20%';
+      statusText.textContent = `Uploading ${file.name}...`;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload');
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const p = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = `${p}%`;
+            percentText.textContent = `${p}%`;
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText);
+            if (data.success) {
+              currentUploadId = data.upload_id;
+              loadedTrackData = data;
+              displayTrackInfo(data, true);
+              progressBox.classList.add('hidden');
+            } else {
+              alert("Upload failed: " + (data.error || "Unknown error"));
+              progressBox.classList.add('hidden');
+            }
+          } else {
+            alert("Upload failed with server status " + xhr.status);
+            progressBox.classList.add('hidden');
+          }
+        };
+
+        xhr.onerror = () => {
+          alert("Network error while uploading audio file.");
+          progressBox.classList.add('hidden');
+        };
+
+        xhr.send(formData);
+
+      } catch (err) {
+        alert("Upload error: " + err.message);
+        progressBox.classList.add('hidden');
+      }
+    }
+
+    // Drag and Drop listeners
+    const dropZone = document.getElementById('drop-zone');
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('border-purple-500', 'bg-purple-950/20');
+      }, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('border-purple-500', 'bg-purple-950/20');
+      }, false);
+    });
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFileUpload(files);
+    }, false);
+
+    // Enter Key Handler for URL input
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlInput = document.getElementById('url-input');
+      if (urlInput) {
+        urlInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            fetchTrackInfo();
+          }
+        });
+      }
+
+      // Slider listener for both input and change events
+      const slider = document.getElementById('intensity-slider');
+      if (slider) {
+        const handleSliderChange = () => {
+          updateIntensity(slider.value);
+        };
+        slider.addEventListener('input', handleSliderChange);
+        slider.addEventListener('change', handleSliderChange);
+      }
+    });
 
     // Paste from clipboard
     async function pasteClipboard() {
@@ -418,7 +641,7 @@
       }
     }
 
-    // Fetch Track Information
+    // Fetch Track Information for URL
     async function fetchTrackInfo() {
       const url = document.getElementById('url-input').value.trim();
       if (!url) {
@@ -431,8 +654,9 @@
       const inspectSpinner = document.getElementById('inspect-spinner');
 
       inspectBtn.disabled = true;
-      inspectText.textContent = "Inspecting...";
+      inspectText.textContent = "Loading...";
       inspectSpinner.classList.remove('hidden');
+      currentUploadId = null;
 
       try {
         const res = await fetch('/api/info', {
@@ -446,7 +670,7 @@
         if (!data.success) throw new Error(data.error || "Failed");
 
         loadedTrackData = data;
-        displayTrackInfo(data);
+        displayTrackInfo(data, false);
       } catch (err) {
         alert("Could not load track: " + err.message);
       } finally {
@@ -456,12 +680,29 @@
       }
     }
 
-    function displayTrackInfo(data) {
+    function displayTrackInfo(data, isUpload) {
       document.getElementById('track-title').textContent = data.title || "Unknown Title";
       document.getElementById('track-meta').textContent = `${data.author || 'Artist'} • ${data.duration_formatted || '--:--'} • ${data.platform || 'Audio'}`;
+      
+      const thumb = document.getElementById('track-thumb');
       if (data.thumbnail) {
-        document.getElementById('track-thumb').src = data.thumbnail;
+        thumb.src = data.thumbnail;
+        thumb.classList.remove('hidden');
+      } else {
+        // Placeholder music icon
+        thumb.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a855f7'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E";
       }
+
+      document.getElementById('track-badge').textContent = isUpload ? "Uploaded Audio Ready" : "Web Stream Ready";
+      
+      // If upload, set stream URL in preview player immediately
+      if (isUpload && data.stream_url) {
+        const player = document.getElementById('live-audio-preview');
+        player.src = data.stream_url;
+        player.load();
+        document.getElementById('preview-status-pill').textContent = "Local audio loaded for audition";
+      }
+
       document.getElementById('studio-card').classList.remove('hidden');
       document.getElementById('studio-card').scrollIntoView({ behavior: 'smooth' });
     }
@@ -471,36 +712,50 @@
       const card8d = document.getElementById('mode-card-8d');
       const card16d = document.getElementById('mode-card-16d');
       const orbitRing2 = document.getElementById('orbit-ring-2');
-      const renderBtnText = document.getElementById('render-btn-text');
 
       if (mode === '8d') {
         card8d.className = "p-4 rounded-xl border cursor-pointer transition glass-active text-left";
         card16d.className = "p-4 rounded-xl border cursor-pointer transition glass text-left hover:border-zinc-700";
         orbitRing2.classList.add('hidden');
-        renderBtnText.textContent = "Master & Download 8D Audio (320kbps MP3)";
       } else {
         card16d.className = "p-4 rounded-xl border cursor-pointer transition glass-active text-left";
         card8d.className = "p-4 rounded-xl border cursor-pointer transition glass text-left hover:border-zinc-700";
         orbitRing2.classList.remove('hidden');
-        renderBtnText.textContent = "Master & Download 16D Audio (320kbps MP3)";
       }
+      updateButtonLabels();
     }
 
     function updateIntensity(val) {
-      currentIntensity = parseInt(val);
-      document.getElementById('intensity-value-badge').textContent = `Level ${val} / 10`;
-      const desc = document.getElementById('intensity-desc');
-      if (val <= 3) {
-        desc.textContent = "Subtle (Mild Panning - 60% Width)";
-      } else if (val <= 7) {
-        desc.textContent = "Balanced (Concert Immersion - 85% Width - Recommended)";
-      } else {
-        desc.textContent = "Extreme (Stadium Orbit - 100% Width + Max Reverb)";
+      currentIntensity = parseInt(val) || 7;
+      const slider = document.getElementById('intensity-slider');
+      if (slider && slider.value != currentIntensity) {
+        slider.value = currentIntensity;
       }
+      document.getElementById('intensity-value-badge').textContent = `Level ${currentIntensity} / 10`;
+      
+      const desc = document.getElementById('intensity-desc');
+      if (currentIntensity <= 3) {
+        desc.textContent = `Mild (Subtle Spatial Motion - ${Math.round(50 + currentIntensity * 5)}% Pan Width)`;
+      } else if (currentIntensity <= 7) {
+        desc.textContent = `Balanced (Concert Immersion - ${Math.round(50 + currentIntensity * 5)}% Pan Width - Default)`;
+      } else {
+        desc.textContent = `Extreme (Stadium Orbit - 100% Pan Width + Ultra Reverb)`;
+      }
+
+      // Update preset highlights
+      const pMild = document.getElementById('preset-mild');
+      const pBal = document.getElementById('preset-balanced');
+      const pExt = document.getElementById('preset-extreme');
+      if (pMild && pBal && pExt) {
+        pMild.className = (currentIntensity === 4) ? "px-2 py-0.5 rounded bg-purple-600 text-white text-xs font-semibold shadow-sm transition" : "px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs transition";
+        pBal.className = (currentIntensity === 7) ? "px-2 py-0.5 rounded bg-purple-600 text-white text-xs font-semibold shadow-sm transition" : "px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs transition";
+        pExt.className = (currentIntensity === 10) ? "px-2 py-0.5 rounded bg-purple-600 text-white text-xs font-semibold shadow-sm transition" : "px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs transition";
+      }
+
+      updateButtonLabels();
     }
 
     function setIntensityPreset(val) {
-      document.getElementById('intensity-slider').value = val;
       updateIntensity(val);
     }
 
@@ -519,6 +774,8 @@
       if (speed === 'slow') planet1.style.animationDuration = '12s';
       else if (speed === 'normal') planet1.style.animationDuration = '8s';
       else if (speed === 'fast') planet1.style.animationDuration = '5s';
+
+      updateButtonLabels();
     }
 
     function toggleTrimSection() {
@@ -528,10 +785,126 @@
       else controls.classList.add('hidden');
     }
 
-    // Trigger Download Job
+    function updateButtonLabels() {
+      const modeUpper = currentSpatialMode.toUpperCase();
+      const sliderVal = document.getElementById('intensity-slider') ? document.getElementById('intensity-slider').value : currentIntensity;
+      const renderBtnText = document.getElementById('render-btn-text');
+      if (renderBtnText) {
+        renderBtnText.textContent = `Master & Download ${modeUpper} Audio (Intensity: ${sliderVal}/10)`;
+      }
+      const previewText = document.getElementById('preview-btn-text');
+      if (previewText && !previewText.textContent.includes("...")) {
+        previewText.textContent = `🎧 Render 15s Quick Preview (${modeUpper} · ${sliderVal}/10)`;
+      }
+    }
+    }
+
+    // 15-Second Quick Preview Generator
+    async function generateQuickPreview() {
+      const url = document.getElementById('url-input').value.trim();
+      if (!url && !currentUploadId) {
+        alert("Please paste a URL or upload a track first.");
+        return;
+      }
+
+      const previewBtn = document.getElementById('btn-quick-preview');
+      const previewText = document.getElementById('preview-btn-text');
+      const previewSpinner = document.getElementById('preview-spinner');
+      const previewPill = document.getElementById('preview-status-pill');
+
+      previewBtn.disabled = true;
+      previewText.textContent = "Rendering 15s preview...";
+      previewSpinner.classList.remove('hidden');
+      previewPill.textContent = "Processing audio snippet...";
+
+      const sliderIntensity = parseInt(document.getElementById('intensity-slider').value) || currentIntensity;
+      const bassBoost = document.getElementById('bass-boost').checked;
+      const reverb = document.getElementById('hall-reverb').checked;
+
+      const payload = {
+        url: url,
+        upload_id: currentUploadId,
+        mode: "audio",
+        audio_codec: "mp3",
+        spatial_audio: currentSpatialMode,
+        spatial_intensity: sliderIntensity,
+        spatial_speed: currentSpeed,
+        spatial_bass: bassBoost,
+        spatial_reverb: reverb,
+        is_preview: true,
+        trim: true,
+        start_time: "00:00",
+        end_time: "00:15"
+      };
+
+      try {
+        const res = await fetch('/api/preview', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error("Status " + res.status);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "Failed");
+
+        // Poll preview job
+        pollPreviewJob(data.job_id);
+
+      } catch (err) {
+        alert("Preview failed: " + err.message);
+        previewBtn.disabled = false;
+        previewText.textContent = "🎧 Render 15s Quick Preview";
+        previewSpinner.classList.add('hidden');
+        previewPill.textContent = "Preview error";
+      }
+    }
+
+    function pollPreviewJob(jobId) {
+      const previewBtn = document.getElementById('btn-quick-preview');
+      const previewText = document.getElementById('preview-btn-text');
+      const previewSpinner = document.getElementById('preview-spinner');
+      const previewPill = document.getElementById('preview-status-pill');
+
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/status/${jobId}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data.success) return;
+
+          const job = data.job;
+          if (job.status === 'finished') {
+            clearInterval(interval);
+            previewBtn.disabled = false;
+            previewText.textContent = "🎧 Re-Audition 15s Preview";
+            previewSpinner.classList.add('hidden');
+            previewPill.textContent = `Auditioning ${currentSpatialMode.toUpperCase()} at Level ${document.getElementById('intensity-slider').value}/10`;
+
+            const player = document.getElementById('live-audio-preview');
+            player.src = `/api/file/${jobId}`;
+            player.load();
+            player.play().catch(e => console.log("Autoplay prevented", e));
+          } else if (job.status === 'error') {
+            clearInterval(interval);
+            alert("Preview render error: " + (job.error || "Unknown"));
+            previewBtn.disabled = false;
+            previewText.textContent = "🎧 Render 15s Quick Preview";
+            previewSpinner.classList.add('hidden');
+          }
+        } catch (e) {
+          console.error("Preview poll", e);
+        }
+      }, 800);
+    }
+
+    // Trigger Full Download Job
     async function startSpatialRender() {
       const url = document.getElementById('url-input').value.trim();
-      if (!url) return;
+      if (!url && !currentUploadId) {
+        alert("Please load a URL or upload a file first.");
+        return;
+      }
 
       const isTrim = document.getElementById('trim-toggle').checked;
       const startTime = document.getElementById('trim-start').value;
@@ -539,12 +912,16 @@
       const bassBoost = document.getElementById('bass-boost').checked;
       const reverb = document.getElementById('hall-reverb').checked;
 
+      // Always read exact slider value directly from DOM
+      const sliderIntensity = parseInt(document.getElementById('intensity-slider').value) || currentIntensity;
+
       const payload = {
         url: url,
+        upload_id: currentUploadId,
         mode: "audio",
         audio_codec: "mp3",
         spatial_audio: currentSpatialMode,
-        spatial_intensity: currentIntensity,
+        spatial_intensity: sliderIntensity,
         spatial_speed: currentSpeed,
         spatial_bass: bassBoost,
         spatial_reverb: reverb,
@@ -596,11 +973,11 @@
           document.getElementById('progress-bar-fill').style.width = `${percent}%`;
 
           if (status === 'downloading') {
-            document.getElementById('progress-title').textContent = "Downloading source audio...";
+            document.getElementById('progress-title').textContent = "Downloading audio stream...";
             document.getElementById('progress-detail').textContent = `Speed: ${job.speed || '--'} • ETA: ${job.eta || '--'}`;
           } else if (status === 'processing') {
             document.getElementById('progress-title').textContent = job.message || "Mastering Spatial 8D Acoustics...";
-            document.getElementById('progress-detail').textContent = "Applying FFmpeg 360° binaural pan & acoustic hall reverb...";
+            document.getElementById('progress-detail').textContent = `Applying 360° binaural pan (Intensity: ${document.getElementById('intensity-slider').value}/10) & hall reverb...`;
           } else if (status === 'finished') {
             clearInterval(pollInterval);
             finishJob(jobId, job);
@@ -619,7 +996,11 @@
     function finishJob(jobId, job) {
       document.getElementById('progress-card').classList.add('hidden');
       document.getElementById('success-card').classList.remove('hidden');
-      document.getElementById('render-btn').disabled = false;
+      
+      const renderBtn = document.getElementById('render-btn');
+      renderBtn.disabled = false;
+      const currentVal = document.getElementById('intensity-slider').value;
+      document.getElementById('render-btn-text').textContent = `Re-Master Track with Current Settings (${currentSpatialMode.toUpperCase()} · ${currentVal}/10)`;
 
       document.getElementById('success-filename').textContent = `${job.filename} (${job.file_size || ''})`;
       
@@ -629,7 +1010,7 @@
       downloadBtn.setAttribute('download', job.filename);
 
       // Set audio preview player
-      const player = document.getElementById('audio-preview-player');
+      const player = document.getElementById('audio-final-player');
       player.src = fileUrl;
       player.load();
 
@@ -644,15 +1025,11 @@
       document.getElementById('success-card').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function resetStudio() {
-      document.getElementById('url-input').value = "";
-      document.getElementById('studio-card').classList.add('hidden');
-      document.getElementById('progress-card').classList.add('hidden');
-      document.getElementById('success-card').classList.add('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function scrollToSettings() {
+      document.getElementById('studio-card').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Check for URL query param auto-load
+    // Auto-check URL query param
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const url = params.get('url');
