@@ -19,7 +19,6 @@ from datetime import datetime, timedelta
 
 from flask import Flask, request, jsonify, render_template, send_file, Response
 import yt_dlp
-from yt_dlp.utils import download_range_func
 
 # Configure logging
 logging.basicConfig(
