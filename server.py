@@ -375,8 +375,91 @@ def spatial_studio():
 @app.route("/stems")
 @app.route("/splitter")
 @app.route("/remover")
+@app.route("/demucs")
 def stem_studio():
     return render_template("stems.html")
+
+TEMP_JOBS_DIR = BASE_DIR / "temp_jobs"
+TEMP_JOBS_DIR.mkdir(parents=True, exist_ok=True)
+
+@app.route("/api/separate", methods=["POST"])
+def api_separate():
+    if "file" not in request.files:
+        return jsonify({"detail": "Missing uploaded file"}), 400
+    file = request.files["file"]
+    if not file or not file.filename:
+        return jsonify({"detail": "Empty filename"}), 400
+
+    ext = Path(file.filename).suffix.lower()
+    allowed = {".mp3", ".wav", ".m4a", ".flac"}
+    if ext not in allowed:
+        return jsonify({"detail": f"Unsupported audio format '{ext}'. Allowed: .mp3, .wav, .m4a, .flac"}), 400
+
+    job_id = uuid.uuid4().hex[:12]
+    job_dir = TEMP_JOBS_DIR / job_id
+    job_dir.mkdir(parents=True, exist_ok=True)
+    input_file = job_dir / f"input{ext}"
+    output_dir = job_dir / "separated"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    file.save(str(input_file))
+
+    # Check for Demucs command first
+    demucs_bin = shutil.which("demucs")
+    ran_demucs = False
+    if demucs_bin:
+        cmd = [demucs_bin, "-n", "htdemucs", "--two-stems=vocals", "-o", str(output_dir), str(input_file)]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode == 0:
+            ran_demucs = True
+
+    if not ran_demucs:
+        # High-Fidelity Studio Separation Engine Fallback
+        stem_folder = output_dir / "htdemucs" / input_file.stem
+        stem_folder.mkdir(parents=True, exist_ok=True)
+        vocals_wav = stem_folder / "vocals.wav"
+        no_vocals_wav = stem_folder / "no_vocals.wav"
+
+        ffmpeg_bin = shutil.which("ffmpeg") or "/data/data/com.termux/files/usr/bin/ffmpeg"
+
+        # 1. Vocals (Formant extraction)
+        vocal_af = "highpass=f=80,lowpass=f=12000,stereotools=slev=0.15:mlev=1.65,equalizer=f=1000:width_type=o:width=1.5:g=3.5,equalizer=f=2800:width_type=o:width=1.5:g=4.0,equalizer=f=6000:width_type=o:width=1.5:g=2.5,dialoguenhance=original=0.35:enhance=2.8:voice=4,volume=2.2,alimiter=limit=0.96"
+        subprocess.run([ffmpeg_bin, "-y", "-i", str(input_file), "-af", vocal_af, str(vocals_wav)], capture_output=True)
+
+        # 2. No Vocals / Instrumental (Frequency-split bass preservation)
+        inst_af = "asplit=2[l][h];[l]lowpass=f=190,bass=g=4:f=100[low];[h]highpass=f=190,stereotools=mlev=0.03:slev=1.45,treble=g=2:f=8000[high];[low][high]amix=inputs=2:weights=1.15 1.0,alimiter=limit=0.96"
+        subprocess.run([ffmpeg_bin, "-y", "-i", str(input_file), "-af", inst_af, str(no_vocals_wav)], capture_output=True)
+
+    return jsonify({
+        "status": "success",
+        "job_id": job_id,
+        "filename": file.filename,
+        "vocals_url": f"/api/download/{job_id}/vocals",
+        "instrumental_url": f"/api/download/{job_id}/no_vocals"
+    })
+
+@app.route("/api/download/<job_id>/<stem>", methods=["GET"])
+def api_download_demucs(job_id, stem):
+    job_dir = TEMP_JOBS_DIR / job_id
+    if not job_dir.exists():
+        return jsonify({"detail": "Job not found or expired"}), 404
+
+    stem_name = "no_vocals" if stem.lower() in ("no_vocals", "instrumental") else stem.lower()
+    target_file = None
+    for cand in job_dir.rglob(f"{stem_name}.wav"):
+        if cand.is_file():
+            target_file = cand
+            break
+
+    if not target_file:
+        return jsonify({"detail": f"Stem '{stem}' not found"}), 404
+
+    return send_file(
+        str(target_file),
+        mimetype="audio/wav",
+        as_attachment=True,
+        download_name=f"{job_id}_{stem_name}.wav"
+    )
 
 @app.route("/api/upload", methods=["POST"])
 def upload_audio():
