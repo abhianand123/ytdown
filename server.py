@@ -50,6 +50,37 @@ DOWNLOAD_DIR = BASE_DIR / "web_downloads"
 DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+CACHE_DIR = BASE_DIR / "source_cache"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+MODELS_DIR = BASE_DIR / "models"
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
+
+import hashlib
+
+def get_url_cache_key(url: str) -> str:
+    cleaned = url.strip()
+    return hashlib.sha256(cleaned.encode("utf-8")).hexdigest()[:20]
+
+def find_cached_source(url: str):
+    if not url: return None
+    key = get_url_cache_key(url)
+    matches = list(CACHE_DIR.glob(f"{key}.*"))
+    for m in matches:
+        if m.is_file() and m.stat().st_size > 1024:
+            return m
+    return None
+
+def save_to_source_cache(url: str, file_path: Path):
+    try:
+        if not url or not file_path or not file_path.exists():
+            return
+        key = get_url_cache_key(url)
+        ext = file_path.suffix.lower()
+        target = CACHE_DIR / f"{key}{ext}"
+        shutil.copy2(file_path, target)
+        logger.info(f"Cached source audio for instant re-renders: {target.name}")
+    except Exception as e:
+        logger.warning(f"Could not cache source: {e}")
 
 # In-memory job tracker
 JOBS = {}
@@ -158,25 +189,46 @@ def build_spatial_audio_filter(
     """
     filters = []
 
-    # 1. Stem Filtering (Karaoke vocal cancel / Vocal isolation / Bass cut / Bass only / Drums / Instrumental)
+    # 1. Stem Filtering (Studio Karaoke / Human Voice Only / Clean Music / Bass Remover)
     if stem_filter in ("vocal_remover", "karaoke"):
-        # Center-channel vocal cancellation in stereo mix with kick recovery
-        filters.append("pan=stereo|c0=c0-c1|c1=c1-c0,bass=g=3.5:f=120")
-    elif stem_filter in ("vocal_isolate", "acapella"):
-        # Formant bandpass isolating human vocal presence
-        filters.append("highpass=f=200,lowpass=f=4200,volume=1.3")
+        # Studio Karaoke: Attenuates center vocals down to minimum while preserving punchy bass & stereo width
+        filters.append("stereotools=mlev=0.015625:slev=1.35,bass=g=5:f=110:w=0.6")
+    elif stem_filter in ("vocal_isolate", "acapella", "voice_only", "speech_only"):
+        # Human Voice Only: Center speech extraction + human formant enhancement + dynamic gating + RNNoise / FFT denoiser
+        rnnoise_model = MODELS_DIR / "sh.rnnn"
+        if not rnnoise_model.exists():
+            rnnoise_model = MODELS_DIR / "std.rnnn"
+        
+        voice_chain = [
+            "pan=mono|c0=0.5*c0+0.5*c1",
+            "highpass=f=150",
+            "lowpass=f=3800",
+            "dialoguenhance=original=0.1:enhance=2.8:voice=6",
+            "equalizer=f=1200:width_type=o:width=1.5:g=4",
+            "equalizer=f=2600:width_type=o:width=1.5:g=3.5"
+        ]
+        if rnnoise_model.exists():
+            voice_chain.append(f"arnndn=m={rnnoise_model.as_posix()}")
+        else:
+            voice_chain.append("afftdn=nf=-25")
+        
+        voice_chain.extend([
+            "alimiter=limit=0.95",
+            "aformat=sample_fmts=s16:channel_layouts=stereo:sample_rates=44100"
+        ])
+        filters.append(",".join(voice_chain))
     elif stem_filter in ("bass_remove", "no_bass"):
-        # Complete low-end bass & sub cut
-        filters.append("highpass=f=250,bass=g=-24:f=180")
+        # Clean speech & dialogue: Cut boomy sub-bass, rumble, and 808s
+        filters.append("highpass=f=260,bass=g=-24:f=180")
+    elif stem_filter in ("instrumental", "backing_track", "clean_music"):
+        # Full stereo instrumental with wide accompaniment, rich bass, and crisp air
+        filters.append("stereotools=mlev=0.015625:slev=1.35,bass=g=4:f=110,treble=g=2.5:f=7500")
     elif stem_filter in ("bass_only", "bass_isolate"):
         # Sub-bass extraction
         filters.append("lowpass=f=220,bass=g=5:f=100")
     elif stem_filter in ("drums_only", "percussion"):
         # Transient kick & snare rhythm extraction
         filters.append("highpass=f=60,equalizer=f=120:width_type=h:width=60:g=4,equalizer=f=3500:width_type=h:width=1200:g=3")
-    elif stem_filter in ("instrumental",):
-        # Full instrumental backing track with high-frequency air
-        filters.append("pan=stereo|c0=c0-c1|c1=c1-c0,bass=g=4:f=110,treble=g=2.5:f=7000")
 
     # 2. Pitch Shifting (± Semitones using rubberband)
     try:
@@ -249,6 +301,9 @@ def build_spatial_audio_filter(
             filters.append("aecho=0.8:0.85:80|1200:0.35|0.18")
         else:
             filters.append("aecho=0.8:0.85:50|80:0.25|0.15")
+
+    # 7. Safe LAME MP3 Limiter & 16-bit Float-Clean Format (Prevents libmp3lame psymodel el >= 0 assertion aborts)
+    filters.append("alimiter=limit=0.96,aformat=sample_fmts=s16:channel_layouts=stereo:sample_rates=44100")
 
     return ",".join(filters) if filters else "anull"
 
@@ -711,14 +766,31 @@ def run_download_task(job_id: str, url: str, options: dict):
             shutil.copy2(source_file, final_file)
             logger.info(f"Loaded uploaded audio: {final_file.name}")
         else:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([url])
+            # Check source cache first! If cached, loads in 0.01 seconds without downloading!
+            cached_source = find_cached_source(url)
+            if cached_source:
+                with JOBS_LOCK:
+                    JOBS[job_id]["status"] = "processing"
+                    JOBS[job_id]["progress"] = 35
+                    JOBS[job_id]["message"] = "Instant load from cached source audio..."
+                final_file = job_folder / cached_source.name
+                shutil.copy2(cached_source, final_file)
+                logger.info(f"Loaded audio from instant cache: {final_file.name}")
+            else:
+                ydl_opts["socket_timeout"] = 15
+                ydl_opts["retries"] = 3
+                ydl_opts["fragment_retries"] = 3
+                ydl_opts["nocheckcertificate"] = True
 
-            files = [f for f in job_folder.iterdir() if f.is_file() and not f.name.endswith(".part") and not f.name.endswith(".temp")]
-            if not files:
-                raise Exception("Download succeeded but no output file was generated.")
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([url])
 
-            final_file = files[0]
+                files = [f for f in job_folder.iterdir() if f.is_file() and not f.name.endswith(".part") and not f.name.endswith(".temp")]
+                if not files:
+                    raise Exception("Download succeeded but no output file was generated.")
+
+                final_file = files[0]
+                save_to_source_cache(url, final_file)
 
         # Fast post-download trimming (Instant, 0% CPU re-encoding overhead, works across all platforms)
         if is_trim and start_sec is not None and end_sec is not None and end_sec > start_sec:
@@ -778,16 +850,16 @@ def run_download_task(job_id: str, url: str, options: dict):
                 tag_parts.append(spatial_mode.upper())
             if stem_filter in ("vocal_remover", "karaoke"):
                 tag_parts.append("KARAOKE")
-            elif stem_filter in ("vocal_isolate", "acapella"):
-                tag_parts.append("ACAPELLA")
+            elif stem_filter in ("vocal_isolate", "acapella", "voice_only", "speech_only"):
+                tag_parts.append("VOICE-ONLY")
             elif stem_filter in ("bass_remove", "no_bass"):
                 tag_parts.append("NO-BASS")
             elif stem_filter in ("bass_only", "bass_isolate"):
                 tag_parts.append("BASS-ONLY")
             elif stem_filter in ("drums_only", "percussion"):
                 tag_parts.append("DRUMS")
-            elif stem_filter in ("instrumental",):
-                tag_parts.append("INSTRUMENTAL")
+            elif stem_filter in ("instrumental", "backing_track", "clean_music"):
+                tag_parts.append("CLEAN-MUSIC")
             if spatial_preset == "slowed_reverb":
                 tag_parts.append("SLOWED+REVERB")
             elif spatial_preset == "nightcore":
@@ -838,8 +910,7 @@ def run_download_task(job_id: str, url: str, options: dict):
             else:
                 err_msg = res_spatial.stderr[-400:] if res_spatial.stderr else "FFmpeg render error"
                 logger.error(f"Audio mastering failed: {err_msg}")
-                if is_preview:
-                    raise Exception(f"Audio processing error: {err_msg}")
+                raise Exception(f"Audio processing error: {err_msg}")
 
         with JOBS_LOCK:
             JOBS[job_id]["status"] = "finished"
