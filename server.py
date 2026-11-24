@@ -191,41 +191,32 @@ def build_spatial_audio_filter(
 
     # 1. Stem Filtering (Studio Karaoke / Human Voice Only / Clean Music / Bass Remover)
     if stem_filter in ("vocal_remover", "karaoke"):
-        # Studio Karaoke: Attenuates center vocals down to minimum while preserving punchy bass & stereo width
-        filters.append("stereotools=mlev=0.015625:slev=1.35,bass=g=5:f=110:w=0.6")
+        # Studio Karaoke: High-fidelity frequency-split cancellation
+        # Preserves punchy centered bass & kick drum (<190Hz), cancels centered vocal band (>190Hz), preserves airy stereo shimmer
+        filters.append("asplit=2[l][h];[l]lowpass=f=190,bass=g=4:f=100[low];[h]highpass=f=190,stereotools=mlev=0.03:slev=1.45,treble=g=2:f=8000[high];[low][high]amix=inputs=2:weights=1.15 1.0")
     elif stem_filter in ("vocal_isolate", "acapella", "voice_only", "speech_only"):
-        # Human Voice Only: Center speech extraction + human formant enhancement + dynamic gating + RNNoise / FFT denoiser
-        rnnoise_model = MODELS_DIR / "sh.rnnn"
-        if not rnnoise_model.exists():
-            rnnoise_model = MODELS_DIR / "std.rnnn"
-        
+        # Human Voice Only: Center speech extraction + full-range human vocal bandpass + vocal formant enhancement + dialogue balance + volume normalization
+        # Eliminates aggressive RNNoise gating that causes "voice cut" / choppy audio, and removes telephone-muffling lowpass
         voice_chain = [
-            "pan=mono|c0=0.5*c0+0.5*c1",
-            "highpass=f=150",
-            "lowpass=f=3800",
-            "dialoguenhance=original=0.1:enhance=2.8:voice=6",
-            "equalizer=f=1200:width_type=o:width=1.5:g=4",
-            "equalizer=f=2600:width_type=o:width=1.5:g=3.5"
+            "highpass=f=80",
+            "lowpass=f=12000",
+            "stereotools=slev=0.15:mlev=1.65",
+            "equalizer=f=1000:width_type=o:width=1.5:g=3.5",
+            "equalizer=f=2800:width_type=o:width=1.5:g=4.0",
+            "equalizer=f=6000:width_type=o:width=1.5:g=2.5",
+            "dialoguenhance=original=0.35:enhance=2.8:voice=4",
+            "volume=2.2"
         ]
-        if rnnoise_model.exists():
-            voice_chain.append(f"arnndn=m={rnnoise_model.as_posix()}")
-        else:
-            voice_chain.append("afftdn=nf=-25")
-        
-        voice_chain.extend([
-            "alimiter=limit=0.95",
-            "aformat=sample_fmts=s16:channel_layouts=stereo:sample_rates=44100"
-        ])
         filters.append(",".join(voice_chain))
     elif stem_filter in ("bass_remove", "no_bass"):
         # Clean speech & dialogue: Cut boomy sub-bass, rumble, and 808s
-        filters.append("highpass=f=260,bass=g=-24:f=180")
+        filters.append("highpass=f=180,bass=g=-22:f=150,volume=1.3")
     elif stem_filter in ("instrumental", "backing_track", "clean_music"):
         # Full stereo instrumental with wide accompaniment, rich bass, and crisp air
-        filters.append("stereotools=mlev=0.015625:slev=1.35,bass=g=4:f=110,treble=g=2.5:f=7500")
+        filters.append("stereotools=mlev=0.20:slev=1.35,bass=g=3:f=110,treble=g=2.5:f=7500")
     elif stem_filter in ("bass_only", "bass_isolate"):
         # Sub-bass extraction
-        filters.append("lowpass=f=220,bass=g=5:f=100")
+        filters.append("lowpass=f=220,bass=g=5:f=100,volume=1.3")
     elif stem_filter in ("drums_only", "percussion"):
         # Transient kick & snare rhythm extraction
         filters.append("highpass=f=60,equalizer=f=120:width_type=h:width=60:g=4,equalizer=f=3500:width_type=h:width=1200:g=3")
