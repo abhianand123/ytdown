@@ -132,6 +132,7 @@
     </div>
 
     <div class="actions" id="action-buttons" style="display: none;">
+      <a id="launch-stems-btn" href="#" style="display:inline-block; padding:12px 24px; background:linear-gradient(135deg, #f05a24, #ea580c); color:white; text-decoration:none; border-radius:12px; font-weight:700; font-size:0.9rem; transition:all 0.2s; box-shadow:0 4px 15px rgba(240, 90, 36, 0.35);">🎛️ Launch Stem Splitter & Vocal/Bass Remover Studio</a>
       <a id="launch-8d-btn" href="#" class="btn-8d">🎧 Launch 8D / 16D Spatial Audio Studio</a>
       <a id="launch-btn" href="#" class="btn-primary">🎬 Launch Universal Video Downloader</a>
       <a id="wifi-btn" href="http://192.168.1.13:5000" class="btn-secondary">On Home Wi-Fi? Open Local IP (192.168.1.13:5000)</a>
@@ -156,6 +157,7 @@
     const wifiBtn = document.getElementById('wifi-btn');
 
     const launch8dBtn = document.getElementById('launch-8d-btn');
+    const launchStemsBtn = document.getElementById('launch-stems-btn');
 
     let attemptCount = 0;
 
@@ -236,6 +238,7 @@
       statusBox.style.display = 'block';
       launchBtn.href = tunnelUrl;
       launch8dBtn.href = tunnelUrl + "/8d";
+      if (launchStemsBtn) launchStemsBtn.href = tunnelUrl + "/stems";
       actionButtons.style.display = 'flex';
 
       // Pre-flight health check
