@@ -301,89 +301,61 @@
           <p class="text-xs text-[var(--color-text-muted)]">Select which track element you want to remove or isolate</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
 
-          <!-- 1. Vocal Remover / Karaoke (Remove Lyrics) -->
-          <div id="card-vocal-remover" class="stem-card nm-card-sm p-4 border-2 border-[var(--color-accent)] selected" onclick="selectStemMode('vocal_remover')">
+          <!-- 1. Human Voice Only (Acapella / Speech Solo) -->
+          <div id="card-vocal-isolate" class="stem-card nm-card-sm p-4 border-2 border-cyan-500/50 cursor-pointer transition-all" onclick="selectStemMode('vocal_isolate')">
             <div class="flex items-center justify-between mb-1.5">
               <div class="flex items-center gap-2">
-                <span class="text-lg">🎤</span>
-                <span class="text-xs font-bold text-[var(--color-accent)]">Vocal Remover</span>
+                <span class="text-xl">🗣️</span>
+                <span class="text-xs sm:text-sm font-bold text-cyan-400">Human Voice Only</span>
               </div>
-              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-bold">Karaoke</span>
+              <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20">Voice Solo</span>
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-              Phase cancellation removes center lead vocals and lyrics while preserving beat, bass, and instrumental.
+            <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Keeps ONLY the human voice and dialogue. Completely mutes all background music, drums, and instruments. Perfect for reels, TikToks, shorts, and voiceovers.
             </p>
           </div>
 
-          <!-- 2. Acapella / Vocal Isolator (Vocals Only) -->
-          <div id="card-vocal-isolate" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('vocal_isolate')">
+          <!-- 2. Vocal Remover / Karaoke (Music Only) -->
+          <div id="card-vocal-remover" class="stem-card nm-card-sm p-4 border-2 border-[var(--color-accent)] selected cursor-pointer transition-all" onclick="selectStemMode('vocal_remover')">
             <div class="flex items-center justify-between mb-1.5">
               <div class="flex items-center gap-2">
-                <span class="text-lg">🗣️</span>
-                <span class="text-xs font-bold">Vocal Isolator</span>
+                <span class="text-xl">🎤</span>
+                <span class="text-xs sm:text-sm font-bold text-[var(--color-accent)]">Vocal Remover</span>
               </div>
-              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-bold">Acapella</span>
+              <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-bold">Karaoke</span>
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-              Formant bandpass isolates the human vocal frequencies (200Hz - 4.2kHz) for clean vocal chops & remixing.
+            <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Removes all singing, lyrics, and speech. Leaves clean background music with punchy bass and wide instruments for karaoke, covers, or video BGM.
             </p>
           </div>
 
-          <!-- 3. Bass Remover (Take Out Bass / Mute Low-End) -->
-          <div id="card-bass-remove" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('bass_remove')">
+          <!-- 3. Clean Backing Track (Full Instrumental) -->
+          <div id="card-instrumental" class="stem-card nm-card-sm p-4 border-2 border-transparent cursor-pointer transition-all" onclick="selectStemMode('instrumental')">
             <div class="flex items-center justify-between mb-1.5">
               <div class="flex items-center gap-2">
-                <span class="text-lg">🎸</span>
-                <span class="text-xs font-bold text-amber-500">Bass Remover</span>
+                <span class="text-xl">🎸</span>
+                <span class="text-xs sm:text-sm font-bold text-emerald-400">Clean Backing Track</span>
               </div>
-              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">Mute 808s</span>
+              <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">Music Only</span>
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-              240Hz high-pass filter cuts sub-bass, 808s, and bass guitar, leaving melody, guitar, piano, and chords.
+            <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Full studio-quality instrumental music with zero vocals. Enhanced stereo sound and crisp instruments for background score in video edits.
             </p>
           </div>
 
-          <!-- 4. Sub-Bass & 808 Isolator (Bass Only) -->
-          <div id="card-bass-only" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('bass_only')">
+          <!-- 4. Remove Boomy Bass (Dialogue Clarity) -->
+          <div id="card-bass-remove" class="stem-card nm-card-sm p-4 border-2 border-transparent cursor-pointer transition-all" onclick="selectStemMode('bass_remove')">
             <div class="flex items-center justify-between mb-1.5">
               <div class="flex items-center gap-2">
-                <span class="text-lg">🔊</span>
-                <span class="text-xs font-bold">Sub-Bass Isolator</span>
+                <span class="text-xl">🔇</span>
+                <span class="text-xs sm:text-sm font-bold text-amber-500">Remove Boomy Bass</span>
               </div>
-              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded nm-inset-sm text-[var(--color-text-muted)] font-bold">Sub Groove</span>
+              <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">Clear Speech</span>
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-              Low-pass filter extracts only the kick punch, 808 glide, and sub-bass frequencies below 220Hz.
-            </p>
-          </div>
-
-          <!-- 5. Drums & Percussion Focus -->
-          <div id="card-drums-only" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('drums_only')">
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="text-lg">🥁</span>
-                <span class="text-xs font-bold">Drums & Rhythm</span>
-              </div>
-              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded nm-inset-sm text-[var(--color-text-muted)] font-bold">Beats Only</span>
-            </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-              Dynamic transient enhancement focusing on kick drum punch, snare snap, and claps.
-            </p>
-          </div>
-
-          <!-- 6. Instrumental Master -->
-          <div id="card-instrumental" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('instrumental')">
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="text-lg">🎹</span>
-                <span class="text-xs font-bold text-emerald-400">Full Instrumental</span>
-              </div>
-              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">Music Only</span>
-            </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-              Full backing music with high-frequency air sheen and complete center vocal removal.
+            <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Cuts heavy bass, 808 rumbles, and low-end hums so voices and speech sound clear and don't distort phone speakers.
             </p>
           </div>
 
@@ -481,9 +453,17 @@
 
   <script>
     // State
-    let selectedStem = 'vocal_remover';
+    let selectedStem = 'vocal_isolate';
     let selectedDuration = 30;
     let currentUploadId = null;
+    let activePollInterval = null;
+
+    function clearAnyActivePoll() {
+      if (activePollInterval) {
+        clearInterval(activePollInterval);
+        activePollInterval = null;
+      }
+    }
 
     // Theme Switcher
     function initTheme() {
@@ -671,7 +651,7 @@
     // Stem Selection
     function selectStemMode(mode) {
       selectedStem = mode;
-      const modes = ['vocal_remover', 'vocal_isolate', 'bass_remove', 'bass_only', 'drums_only', 'instrumental'];
+      const modes = ['vocal_isolate', 'vocal_remover', 'instrumental', 'bass_remove'];
       modes.forEach(m => {
         const card = document.getElementById(`card-${m.replace('_', '-')}`);
         if (card) {
@@ -683,7 +663,7 @@
       const activeCard = document.getElementById(`card-${mode.replace('_', '-')}`);
       if (activeCard) {
         activeCard.classList.add('selected');
-        activeCard.style.borderColor = 'var(--color-accent)';
+        activeCard.style.borderColor = (mode === 'vocal_isolate') ? '#22d3ee' : 'var(--color-accent)';
       }
       updateLabels();
     }
@@ -704,12 +684,10 @@
 
     function getStemLabel(mode) {
       const map = {
-        'vocal_remover': 'Karaoke / Vocal Remover',
-        'vocal_isolate': 'Acapella / Vocal Isolator',
-        'bass_remove': 'Bass Remover (Mute Low-End)',
-        'bass_only': 'Sub-Bass Isolator',
-        'drums_only': 'Drums & Rhythm Only',
-        'instrumental': 'Full Instrumental'
+        'vocal_isolate': '🗣️ Human Voice Only (Dialogue / Acapella)',
+        'vocal_remover': '🎤 Vocal Remover (Karaoke)',
+        'instrumental': '🎸 Clean Backing Track (Music Only)',
+        'bass_remove': '🔇 Remove Boomy Bass (Clear Dialogue)'
       };
       return map[mode] || mode;
     }
@@ -731,6 +709,7 @@
 
     // Audition Call
     async function generateAudition() {
+      clearAnyActivePoll();
       const url = document.getElementById('url-input').value.trim();
       if (!url && !currentUploadId) {
         alert('Please load a URL or upload a track first.');
@@ -783,20 +762,33 @@
     }
 
     function pollAudition(jobId) {
+      clearAnyActivePoll();
       const btn = document.getElementById('btn-audition');
       const spinner = document.getElementById('audition-spinner');
       const pill = document.getElementById('status-pill');
 
-      const interval = setInterval(async () => {
+      let pollCount = 0;
+      activePollInterval = setInterval(async () => {
+        pollCount++;
+        if (pollCount > 90) { // ~65s timeout
+          clearAnyActivePoll();
+          btn.disabled = false;
+          spinner.classList.add('hidden');
+          updateLabels();
+          if (pill) pill.textContent = 'Timeout';
+          alert('Audition took too long to render. Please try again.');
+          return;
+        }
+
         try {
-          const res = await fetch(`/api/status/${jobId}`);
+          const res = await fetch(`/api/status/${jobId}?t=${Date.now()}`);
           if (!res.ok) return;
           const data = await res.json();
           if (!data.success) return;
 
           const job = data.job;
           if (job.status === 'finished') {
-            clearInterval(interval);
+            clearAnyActivePoll();
             btn.disabled = false;
             spinner.classList.add('hidden');
             updateLabels();
@@ -804,12 +796,12 @@
             if (pill) pill.textContent = 'Audition Ready 🎧';
 
             const player = document.getElementById('live-audition-player');
-            player.src = `/api/file/${jobId}`;
+            player.src = `/api/file/${jobId}?t=${Date.now()}`;
             player.load();
             player.play().catch(e => console.log('Autoplay prevented', e));
 
           } else if (job.status === 'error') {
-            clearInterval(interval);
+            clearAnyActivePoll();
             alert('Stem processing error: ' + (job.error || 'FFmpeg mastering error'));
             btn.disabled = false;
             spinner.classList.add('hidden');
@@ -824,6 +816,7 @@
 
     // Export Final Full Stem
     async function startStemExport() {
+      clearAnyActivePoll();
       const url = document.getElementById('url-input').value.trim();
       if (!url && !currentUploadId) {
         alert('Please load a URL or upload a track first.');
@@ -863,9 +856,19 @@
         if (!data.success) throw new Error(data.error || 'Server error');
 
         const jobId = data.job_id;
-        const interval = setInterval(async () => {
+        let pollCount = 0;
+        activePollInterval = setInterval(async () => {
+          pollCount++;
+          if (pollCount > 130) { // ~115s timeout
+            clearAnyActivePoll();
+            renderBtn.disabled = false;
+            progressCard.classList.add('hidden');
+            alert('Stem export took too long. Please try again.');
+            return;
+          }
+
           try {
-            const pollRes = await fetch(`/api/status/${jobId}`);
+            const pollRes = await fetch(`/api/status/${jobId}?t=${Date.now()}`);
             if (!pollRes.ok) return;
             const pollData = await pollRes.json();
             if (!pollData.success) return;
@@ -876,7 +879,7 @@
             progressDetail.textContent = job.message || 'Processing...';
 
             if (job.status === 'finished') {
-              clearInterval(interval);
+              clearAnyActivePoll();
               progressCard.classList.add('hidden');
               renderBtn.disabled = false;
 
@@ -886,14 +889,14 @@
               dlBtn.setAttribute('download', job.filename);
 
               const finalPlayer = document.getElementById('audio-final-player');
-              finalPlayer.src = `/api/file/${jobId}`;
+              finalPlayer.src = `/api/file/${jobId}?t=${Date.now()}`;
               finalPlayer.load();
 
               successCard.classList.remove('hidden');
               successCard.scrollIntoView({ behavior: 'smooth' });
 
             } else if (job.status === 'error') {
-              clearInterval(interval);
+              clearAnyActivePoll();
               alert('Export failed: ' + (job.error || 'Unknown mastering error'));
               progressCard.classList.add('hidden');
               renderBtn.disabled = false;
