@@ -607,7 +607,19 @@
           </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- Voice Only / Dialogue -->
+          <label class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-cyan-400 transition-all">
+            <div>
+              <div class="text-xs font-bold text-cyan-400">🗣️ Voice Only</div>
+              <div class="text-[10px] text-[var(--color-text-muted)]">Dialogue • Mutes Music</div>
+            </div>
+            <div class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="voice-only-toggle-main" onchange="handleMainStemToggle('voice')" class="sr-only peer">
+              <div class="w-10 h-5 nm-switch-track peer-focus:outline-none peer peer-checked:bg-cyan-500 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all after:shadow-md"></div>
+            </div>
+          </label>
+
           <!-- Vocal Remover / Karaoke -->
           <label class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-[var(--color-accent)] transition-all">
             <div>
@@ -633,14 +645,14 @@
           </label>
 
           <!-- 8D Audio Effect -->
-          <label class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-cyan-400 transition-all">
+          <label class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-purple-400 transition-all">
             <div>
-              <div class="text-xs font-bold text-cyan-400">🎧 8D Spatial Audio</div>
+              <div class="text-xs font-bold text-purple-400">🎧 8D Spatial Audio</div>
               <div class="text-[10px] text-[var(--color-text-muted)]">360° Binaural Orbit</div>
             </div>
             <div class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="spatial-8d-toggle-main" class="sr-only peer">
-              <div class="w-10 h-5 nm-switch-track peer-focus:outline-none peer peer-checked:bg-cyan-500 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all after:shadow-md"></div>
+              <div class="w-10 h-5 nm-switch-track peer-focus:outline-none peer peer-checked:bg-purple-500 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all after:shadow-md"></div>
             </div>
           </label>
         </div>
@@ -1066,14 +1078,19 @@
     }
 
     function handleMainStemToggle(type) {
-      if (type === 'vocal') {
-        const v = document.getElementById('vocal-remover-toggle-main');
-        const b = document.getElementById('bass-remover-toggle-main');
-        if (v && v.checked && b) b.checked = false;
-      } else if (type === 'bass') {
-        const v = document.getElementById('vocal-remover-toggle-main');
-        const b = document.getElementById('bass-remover-toggle-main');
-        if (b && b.checked && v) v.checked = false;
+      const voice = document.getElementById('voice-only-toggle-main');
+      const vocal = document.getElementById('vocal-remover-toggle-main');
+      const bass = document.getElementById('bass-remover-toggle-main');
+
+      if (type === 'voice' && voice?.checked) {
+        if (vocal) vocal.checked = false;
+        if (bass) bass.checked = false;
+      } else if (type === 'vocal' && vocal?.checked) {
+        if (voice) voice.checked = false;
+        if (bass) bass.checked = false;
+      } else if (type === 'bass' && bass?.checked) {
+        if (voice) voice.checked = false;
+        if (vocal) vocal.checked = false;
       }
     }
 
@@ -1092,7 +1109,9 @@
       }
 
       let stemFilter = 'none';
-      if (document.getElementById('vocal-remover-toggle-main')?.checked) {
+      if (document.getElementById('voice-only-toggle-main')?.checked) {
+        stemFilter = 'vocal_isolate';
+      } else if (document.getElementById('vocal-remover-toggle-main')?.checked) {
         stemFilter = 'vocal_remover';
       } else if (document.getElementById('bass-remover-toggle-main')?.checked) {
         stemFilter = 'bass_remove';
