@@ -3,1015 +3,1035 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Spatial Audio Master Console: Transform any audio into 8D/16D 360° binaural motion with industrial Neumorphic Soft UI.">
-  <title>OmniDownloader: 8D & 16D Spatial Audio Console</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>8D / 16D Spatial Audio Mastering Studio | OmniDownloader</title>
+  <meta name="description" content="Master stereo music into immersive 8D / 16D binaural spatial audio with customizable orbit rotation speed in seconds, stem isolation (vocal remover / karaoke, bass remover), pitch adjuster, and live audition preview.">
+
+  <!-- Inter & JetBrains Mono Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    /* Neumorphism Design System · Teenage Engineering & Dribbble Benchmark Standards */
-    :root, [data-theme="dark"] {
-      /* Dark Industrial Obsidian (Teenage Engineering & Apollo Studio) */
+    /* ── DUAL NEUMORPHIC COLOR PALETTE ENGINE ── */
+    :root {
+      /* Dark Industrial Obsidian & Signal Orange (Teenage Engineering Hardware) */
       --nm-bg: #151517;
       --nm-surface: #1e1e22;
-      --nm-surface-light: #26262b;
-      --nm-surface-dark: #171719;
+      --nm-surface-light: #242429;
+      --nm-surface-dark: #18181b;
+      --nm-border: rgba(255, 255, 255, 0.05);
 
-      /* Dual Light Source Shadows */
-      --nm-shadow-light: rgba(255, 255, 255, 0.06);
+      --nm-shadow-light: rgba(255, 255, 255, 0.05);
       --nm-shadow-dark: rgba(0, 0, 0, 0.65);
 
-      /* Raised Surfaces (Extrusion) */
+      --color-accent: #f05a24;
+      --color-accent-hover: #ff6b35;
+      --color-accent-glow: rgba(240, 90, 36, 0.28);
+      --color-accent-subtle: rgba(240, 90, 36, 0.12);
+
+      --color-text: #f5f5f4;
+      --color-text-muted: #8e8e93;
+      --color-text-dim: #5c5c62;
+
       --nm-raised: -6px -6px 14px var(--nm-shadow-light), 6px 6px 14px var(--nm-shadow-dark);
       --nm-raised-sm: -3px -3px 8px var(--nm-shadow-light), 3px 3px 8px var(--nm-shadow-dark);
       --nm-raised-btn: -4px -4px 10px var(--nm-shadow-light), 4px 4px 10px var(--nm-shadow-dark);
-
-      /* Inset Surfaces (Debossed / Sunken Wells) */
-      --nm-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.7), inset -4px -4px 8px rgba(255, 255, 255, 0.05);
-      --nm-inset-sm: inset 2px 2px 5px rgba(0, 0, 0, 0.65), inset -2px -2px 5px rgba(255, 255, 255, 0.05);
-      --nm-inset-deep: inset 6px 6px 14px rgba(0, 0, 0, 0.75), inset -6px -6px 14px rgba(255, 255, 255, 0.05);
-
-      /* Tactile Borders for boundary definition */
-      --nm-border: 1px solid rgba(255, 255, 255, 0.06);
-      --nm-border-inset: 1px solid rgba(0, 0, 0, 0.35);
-
-      /* High-Contrast Accessible Text */
-      --color-text-primary: #f5f5f4;
-      --color-text-muted: #a8a29e;
-      --color-text-dim: #78716c;
-
-      /* Industrial Signal Orange (Teenage Engineering signature) */
-      --color-accent: #f05a24;
-      --color-accent-hover: #ff6a38;
-      --color-accent-glow: rgba(240, 90, 36, 0.35);
-      --color-focus: #f05a24;
-      --color-accent-ink: #ffffff;
-      --btn-primary-gradient: linear-gradient(145deg, #f05a24, #d14713);
-      --btn-primary-hover: linear-gradient(145deg, #ff6a38, #f05a24);
-      --color-header-border: rgba(255, 255, 255, 0.05);
-      --radar-bg: radial-gradient(circle at center, #1b1b1f 0%, #111113 80%);
+      --nm-inset: inset 4px 4px 8px var(--nm-shadow-dark), inset -4px -4px 8px var(--nm-shadow-light);
+      --nm-inset-sm: inset 2px 2px 5px var(--nm-shadow-dark), inset -2px -2px 5px var(--nm-shadow-light);
+      --radar-bg: radial-gradient(circle at center, #1e1e24 0%, #111113 85%);
+      --radar-grid: rgba(255, 255, 255, 0.07);
     }
 
     [data-theme="light"] {
-      /* Classic Dribbble Soft Clay Neumorphism */
+      /* Classic Dribbble Soft Clay & Terracotta */
       --nm-bg: #e0e5ec;
       --nm-surface: #e0e5ec;
-      --nm-surface-light: #eff3f8;
-      --nm-surface-dark: #d1d9e6;
+      --nm-surface-light: #eaeff6;
+      --nm-surface-dark: #d5dae2;
+      --nm-border: rgba(255, 255, 255, 0.6);
 
       --nm-shadow-light: #ffffff;
       --nm-shadow-dark: #a3b1c6;
 
+      --color-accent: #ea580c;
+      --color-accent-hover: #c2410c;
+      --color-accent-glow: rgba(234, 88, 12, 0.25);
+      --color-accent-subtle: rgba(234, 88, 12, 0.12);
+
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-text-dim: #94a3b8;
+
       --nm-raised: -6px -6px 14px var(--nm-shadow-light), 6px 6px 14px var(--nm-shadow-dark);
       --nm-raised-sm: -3px -3px 8px var(--nm-shadow-light), 3px 3px 8px var(--nm-shadow-dark);
       --nm-raised-btn: -4px -4px 10px var(--nm-shadow-light), 4px 4px 10px var(--nm-shadow-dark);
-
-      --nm-inset: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
-      --nm-inset-sm: inset 2px 2px 5px #a3b1c6, inset -2px -2px 5px #ffffff;
-      --nm-inset-deep: inset 6px 6px 14px #a3b1c6, inset -6px -6px 14px #ffffff;
-
-      --nm-border: 1px solid rgba(255, 255, 255, 0.7);
-      --nm-border-inset: 1px solid rgba(163, 177, 198, 0.35);
-
-      --color-text-primary: #1e293b;
-      --color-text-muted: #475569;
-      --color-text-dim: #64748b;
-
-      /* Terracotta Industrial Signal */
-      --color-accent: #ea580c;
-      --color-accent-hover: #f97316;
-      --color-accent-glow: rgba(234, 88, 12, 0.25);
-      --color-focus: #ea580c;
-      --color-accent-ink: #ffffff;
-      --btn-primary-gradient: linear-gradient(145deg, #ea580c, #c2410c);
-      --btn-primary-hover: linear-gradient(145deg, #f97316, #ea580c);
-      --color-header-border: rgba(163, 177, 198, 0.4);
-      --radar-bg: radial-gradient(circle at center, #d8e0eb 0%, #cbd4e2 80%);
+      --nm-inset: inset 4px 4px 8px var(--nm-shadow-dark), inset -4px -4px 8px var(--nm-shadow-light);
+      --nm-inset-sm: inset 2px 2px 5px var(--nm-shadow-dark), inset -2px -2px 5px var(--nm-shadow-light);
+      --radar-bg: radial-gradient(circle at center, #eaeff6 0%, #cbd4e2 85%);
+      --radar-grid: rgba(0, 0, 0, 0.08);
     }
 
-    html, body {
+    * { box-sizing: border-box; }
+    body {
       background-color: var(--nm-bg);
-      color: var(--color-text-primary);
-      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      overflow-x: clip;
-      max-width: 100%;
-      caret-color: var(--color-accent);
-      scrollbar-color: var(--nm-surface-light) var(--nm-bg);
-      transition: background-color 200ms ease, color 200ms ease;
+      color: var(--color-text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    ::selection {
-      background-color: var(--color-accent);
-      color: #ffffff;
-    }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-    /* Neumorphic Components */
+    /* Tactile Neumorphic Utilities */
     .nm-card {
-      background: linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark));
+      background: var(--nm-surface);
       box-shadow: var(--nm-raised);
-      border: var(--nm-border);
-      border-radius: 16px;
+      border-radius: 24px;
+      border: 1px solid var(--nm-border);
     }
-
-    .nm-card-subtle {
+    .nm-card-sm {
       background: var(--nm-surface);
       box-shadow: var(--nm-raised-sm);
-      border: var(--nm-border);
-      border-radius: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--nm-border);
     }
-
-    .nm-well {
+    .nm-inset-box {
       background: var(--nm-surface-dark);
       box-shadow: var(--nm-inset);
-      border: var(--nm-border-inset);
-      border-radius: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--nm-border);
     }
-
-    .nm-well-sm {
+    .nm-inset-sm {
       background: var(--nm-surface-dark);
       box-shadow: var(--nm-inset-sm);
-      border: var(--nm-border-inset);
-      border-radius: 8px;
+      border-radius: 12px;
     }
 
     .nm-btn {
       background: linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark));
       box-shadow: var(--nm-raised-btn);
-      border: var(--nm-border);
-      border-radius: 12px;
-      color: var(--color-text-primary);
+      border-radius: 14px;
+      border: 1px solid var(--nm-border);
+      color: var(--color-text);
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
-      font-weight: 500;
+      user-select: none;
       white-space: nowrap;
-      transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
     }
     .nm-btn:hover {
-      box-shadow: -5px -5px 12px var(--nm-shadow-light), 5px 5px 12px var(--nm-shadow-dark);
-      color: var(--color-accent);
+      box-shadow: -2px -2px 6px var(--nm-shadow-light), 2px 2px 6px var(--nm-shadow-dark);
     }
-    .nm-btn:active {
+    .nm-btn:active, .nm-btn.active {
       box-shadow: var(--nm-inset-sm);
-      transform: scale(0.985);
-    }
-    .nm-btn:focus-visible {
-      outline: 2px solid var(--color-focus);
-      outline-offset: 2px;
+      background: var(--nm-surface-dark);
+      color: var(--color-accent);
     }
 
     .nm-btn-primary {
-      background: var(--btn-primary-gradient);
-      box-shadow: -4px -4px 10px rgba(255, 255, 255, 0.1), 4px 4px 12px rgba(0, 0, 0, 0.4), 0 0 12px var(--color-accent-glow);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 12px;
+      background: var(--color-accent);
       color: #ffffff;
+      box-shadow: 0 4px 14px var(--color-accent-glow), var(--nm-raised-btn);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-weight: 700;
+      transition: all 0.15s ease;
       cursor: pointer;
-      font-weight: 600;
       white-space: nowrap;
-      transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
     }
     .nm-btn-primary:hover {
-      background: var(--btn-primary-hover);
-      box-shadow: -5px -5px 14px rgba(255, 255, 255, 0.14), 5px 5px 14px rgba(0, 0, 0, 0.5), 0 0 16px var(--color-accent-glow);
+      background: var(--color-accent-hover);
+      box-shadow: 0 6px 20px var(--color-accent-glow);
     }
     .nm-btn-primary:active {
-      box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.45);
-      transform: scale(0.985);
-    }
-    .nm-btn-primary:focus-visible {
-      outline: 2px solid var(--color-accent);
-      outline-offset: 2px;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+      transform: translateY(1px);
     }
 
-    .nm-btn-subtle {
-      background: var(--nm-surface);
-      box-shadow: var(--nm-raised-sm);
-      border: var(--nm-border);
-      border-radius: 8px;
-      color: var(--color-text-muted);
-      cursor: pointer;
-      transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    /* Range Sliders */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+      width: 100%;
     }
-    .nm-btn-subtle:hover {
-      color: var(--color-text-primary);
-      box-shadow: -4px -4px 8px var(--nm-shadow-light), 4px 4px 8px var(--nm-shadow-dark);
-    }
-    .nm-btn-subtle:active {
-      box-shadow: var(--nm-inset-sm);
-      transform: scale(0.98);
-    }
-    .nm-btn-subtle:focus-visible {
-      outline: 2px solid var(--color-focus);
-      outline-offset: 2px;
-    }
-
-    .nm-input {
+    input[type=range]:focus { outline: none; }
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 8px;
       background: var(--nm-surface-dark);
-      box-shadow: var(--nm-inset);
-      border: var(--nm-border-inset);
-      border-radius: 12px;
-      color: var(--color-text-primary);
-      transition: box-shadow 150ms ease, border-color 150ms ease;
+      box-shadow: var(--nm-inset-sm);
+      border-radius: 9999px;
+      border: 1px solid var(--nm-border);
     }
-    .nm-input:focus {
-      outline: none;
-      box-shadow: var(--nm-inset), 0 0 0 2px var(--color-accent);
-      border-color: var(--color-accent);
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 22px;
+      width: 22px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark));
+      border: 2px solid var(--color-accent);
+      box-shadow: var(--nm-raised-sm), 0 0 10px var(--color-accent-glow);
+      cursor: pointer;
+      margin-top: -7px;
+      transition: transform 0.1s ease;
     }
-    .nm-input:focus-visible {
-      outline: 2px solid var(--color-focus);
-      outline-offset: 2px;
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+    input[type=range]::-webkit-slider-thumb:active {
+      background: var(--color-accent);
+      border-color: #ffffff;
     }
 
-    /* Milled Neumorphic Azimuth Radar Scope */
+    /* Tactile Number Inputs */
+    input[type=number], input[type=text] {
+      background: var(--nm-surface-dark);
+      box-shadow: var(--nm-inset-sm);
+      color: var(--color-text);
+      border: 1px solid var(--nm-border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    input[type=number]:focus, input[type=text]:focus {
+      border-color: var(--color-accent);
+      box-shadow: var(--nm-inset-sm), 0 0 0 2px var(--color-accent-subtle);
+    }
+
+    /* Milled Azimuth Radar Scope */
     .nm-azimuth-scope {
-      position: relative;
-      width: 220px;
-      height: 220px;
-      margin: 0 auto;
+      width: 240px;
+      height: 240px;
       border-radius: 50%;
       background: var(--radar-bg);
-      box-shadow: var(--nm-inset-deep);
-      border: var(--nm-border-inset);
+      box-shadow: var(--nm-inset), 0 0 0 4px var(--nm-surface), var(--nm-raised-sm);
+      position: relative;
+      margin: 0 auto;
+      border: 1px solid var(--nm-border);
+      overflow: hidden;
     }
-
-    .azimuth-crosshair-x {
+    .radar-ring {
       position: absolute;
-      top: 50%;
-      left: 12px;
-      right: 12px;
-      height: 1px;
-      background: rgba(240, 90, 36, 0.15);
-    }
-
-    .azimuth-crosshair-y {
-      position: absolute;
-      left: 50%;
-      top: 12px;
-      bottom: 12px;
-      width: 1px;
-      background: rgba(240, 90, 36, 0.15);
-    }
-
-    .azimuth-ring-inner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 128px;
-      height: 128px;
-      margin-top: -64px;
-      margin-left: -64px;
-      border: 1px dashed rgba(240, 90, 36, 0.3);
       border-radius: 50%;
+      border: 1px dashed var(--radar-grid);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .radar-crosshair-h {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: var(--radar-grid);
+      pointer-events: none;
+    }
+    .radar-crosshair-v {
+      position: absolute;
+      left: 50%;
+      top: 10%;
+      bottom: 10%;
+      width: 1px;
+      background: var(--radar-grid);
+      pointer-events: none;
     }
 
     .azimuth-beacon {
       position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      box-shadow: 0 0 16px var(--color-accent), 0 0 28px var(--color-accent);
       top: 50%;
       left: 50%;
-      width: 16px;
-      height: 16px;
-      margin-top: -8px;
-      margin-left: -8px;
-      background-color: var(--color-accent);
-      border-radius: 50%;
-      box-shadow: 0 0 14px var(--color-accent), 0 0 4px #ffffff;
+      margin: -7px 0 0 -7px;
+      transform-origin: 0 0;
       animation: orbit-azimuth 8s linear infinite;
     }
-
     .azimuth-beacon-alt {
       position: absolute;
-      top: 50%;
-      left: 50%;
       width: 10px;
       height: 10px;
-      margin-top: -5px;
-      margin-left: -5px;
-      background-color: #f59e0b;
       border-radius: 50%;
-      box-shadow: 0 0 10px #f59e0b;
-      animation: orbit-azimuth-alt 5s linear infinite;
+      background: #06b6d4;
+      box-shadow: 0 0 12px #06b6d4, 0 0 22px #06b6d4;
+      top: 50%;
+      left: 50%;
+      margin: -5px 0 0 -5px;
+      transform-origin: 0 0;
+      animation: orbit-azimuth-alt 5.3s linear infinite;
     }
 
     @keyframes orbit-azimuth {
-      0% { transform: rotate(0deg) translateX(84px) rotate(0deg); }
-      100% { transform: rotate(360deg) translateX(84px) rotate(-360deg); }
+      from { transform: rotate(0deg) translateX(85px) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(85px) rotate(-360deg); }
     }
-
     @keyframes orbit-azimuth-alt {
-      0% { transform: rotate(180deg) translateX(64px) rotate(-180deg); }
-      100% { transform: rotate(-180deg) translateX(64px) rotate(180deg); }
+      from { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+      to { transform: rotate(-360deg) translateX(60px) rotate(360deg); }
     }
 
-    /* Range slider custom styling */
-    input[type=range].nm-slider {
-      -webkit-appearance: none;
+    /* Tactile Toggle Switch */
+    .nm-toggle-track {
+      width: 44px;
+      height: 24px;
+      border-radius: 9999px;
       background: var(--nm-surface-dark);
       box-shadow: var(--nm-inset-sm);
-      border-radius: 9999px;
-      height: 8px;
-      outline: none;
-    }
-    input[type=range].nm-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--btn-primary-gradient);
-      box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.2), 2px 2px 6px rgba(0, 0, 0, 0.6), 0 0 8px var(--color-accent-glow);
+      border: 1px solid var(--nm-border);
+      position: relative;
       cursor: pointer;
-      border: 1.5px solid #ffffff;
-      transition: transform 150ms ease;
+      transition: all 0.2s ease;
     }
-    input[type=range].nm-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
+    .nm-toggle-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark));
+      box-shadow: var(--nm-raised-sm);
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+    }
+    input[type=checkbox]:checked + .nm-toggle-track {
+      background: var(--color-accent);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    input[type=checkbox]:checked + .nm-toggle-track .nm-toggle-thumb {
+      transform: translateX(20px);
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     }
 
-    button:disabled, input:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
+    /* Accessibility focus ring */
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
     }
 
     @media (prefers-reduced-motion: reduce) {
       .azimuth-beacon, .azimuth-beacon-alt, .animate-spin {
         animation: none !important;
-        transition: none !important;
       }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between antialiased">
+<body class="p-3 sm:p-6 lg:p-10 flex flex-col items-center">
 
-  <!-- Neumorphic Header Bar -->
-  <header class="w-full bg-[var(--nm-surface)] border-b border-[var(--color-header-border)] sticky top-0 z-50" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-      
-      <!-- Brand & Mode -->
-      <div class="flex items-center space-x-3.5">
-        <a href="/" class="flex items-center space-x-3.5 group text-[var(--color-text-primary)]">
-          <div class="w-10 h-10 nm-card flex items-center justify-center text-[var(--color-accent)] font-bold">
-            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-          </div>
-          <div>
-            <span class="text-sm sm:text-base font-semibold tracking-tight text-[var(--color-text-primary)]">OmniDownloader</span>
-            <span class="block text-[11px] text-[var(--color-text-muted)]">360° Spatial Audio DSP</span>
-          </div>
+  <div class="w-full max-w-4xl mx-auto space-y-6">
+
+    <!-- Top Navigation & Hardware Theme Toggle -->
+    <header class="flex items-center justify-between nm-card p-4 sm:p-5">
+      <div class="flex items-center gap-3">
+        <a href="/" class="nm-btn p-2.5 sm:px-3.5 sm:py-2 flex items-center gap-2 text-xs font-semibold" title="Return to Universal Video Downloader">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span class="hidden sm:inline">Universal Downloader</span>
         </a>
+        <div class="h-6 w-px bg-[var(--nm-border)]"></div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight flex items-center gap-2">
+            <span>Spatial Audio Studio</span>
+            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border border-[var(--color-accent)] font-semibold">Pro DSP</span>
+          </h1>
+          <p class="text-[11px] text-[var(--color-text-muted)] hidden sm:block">8D/16D Binaural Orbit • Stem Extraction • Acoustic Rack</p>
+        </div>
       </div>
 
-      <!-- Center & Right Controls -->
-      <div class="flex items-center space-x-2.5">
-        <!-- Mode Switcher -->
-        <nav aria-label="Console Modes" class="flex items-center gap-1.5 p-1 nm-well rounded-xl text-xs font-medium">
-          <a href="/" class="px-3.5 py-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition flex items-center gap-1.5 whitespace-nowrap">
-            <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-            <span>Downloader</span>
-          </a>
-          <a href="/8d" class="px-3.5 py-1.5 rounded-lg text-[var(--color-accent)] font-medium flex items-center gap-1.5 whitespace-nowrap" style="box-shadow: var(--nm-inset-sm); background: var(--nm-surface-dark);">
-            <svg aria-hidden="true" class="w-3.5 h-3.5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-            <span>8D / 16D Studio</span>
-          </a>
-        </nav>
-
-        <!-- Theme Switcher Button -->
-        <button
-          type="button"
-          onclick="toggleTheme()"
-          id="theme-toggle-btn"
-          class="nm-btn-subtle p-2 text-xs flex items-center justify-center rounded-xl"
-          title="Toggle Industrial Dark / Classic Soft Clay Palette"
-        >
-          <svg id="theme-icon-sun" class="w-4 h-4 text-amber-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-          <svg id="theme-icon-moon" class="w-4 h-4 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-grow max-w-3xl w-full mx-auto px-4 py-8 space-y-8">
-
-    <!-- Azimuth Radar & Hero Posture -->
-    <section class="text-center space-y-4">
-      <div class="nm-azimuth-scope my-3" id="radar-scope">
-        <div class="azimuth-crosshair-x"></div>
-        <div class="azimuth-crosshair-y"></div>
-        <div class="azimuth-ring-inner"></div>
-        
-        <!-- Cardinal Markers -->
-        <span class="absolute top-2 left-1/2 -translate-x-1/2 text-[10px] text-[var(--color-text-muted)] font-mono">0° FRONT</span>
-        <span class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-[var(--color-text-muted)] font-mono">180° REAR</span>
-        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text-muted)] font-mono">L</span>
-        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text-muted)] font-mono">R</span>
-
-        <!-- Center Audition Head -->
-        <div class="absolute inset-0 flex items-center justify-center">
-          <div class="w-10 h-10 rounded-full nm-card flex items-center justify-center text-[var(--color-accent)]" style="box-shadow: var(--nm-raised-sm);">
-            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 11V9a9 9 0 0118 0v2"/></svg>
-          </div>
+      <div class="flex items-center gap-3">
+        <!-- Live Status Pill -->
+        <div id="preview-status-pill" class="text-[11px] font-mono px-3 py-1.5 rounded-full nm-inset-sm text-[var(--color-text-muted)] border border-[var(--nm-border)] hidden sm:block">
+          DSP Ready
         </div>
 
-        <!-- Rotating Spatial Beacons -->
-        <div class="azimuth-beacon" id="beacon-1"></div>
-        <div class="azimuth-beacon-alt hidden" id="beacon-2"></div>
-      </div>
-
-      <div class="space-y-1">
-        <h1 class="text-3xl sm:text-4xl font-semibold text-[var(--color-text-primary)] tracking-tight">
-          Spatial Audio Master Console
-        </h1>
-        <p class="text-xs sm:text-sm text-[var(--color-text-muted)] max-w-lg mx-auto leading-relaxed">
-          Convert any audio track into 360° binaural motion with live headphone preview.
-        </p>
-      </div>
-    </section>
-
-    <!-- Source Selection Deck -->
-    <section class="nm-card p-5 sm:p-6 space-y-4">
-      <div class="flex p-1 nm-well rounded-xl gap-1.5">
-        <button
-          id="tab-url-btn"
-          type="button"
-          onclick="switchInputTab('url')"
-          class="flex-1 py-2 text-xs font-medium rounded-lg text-[var(--color-accent)] transition"
-          style="box-shadow: var(--nm-inset-sm); background: var(--nm-surface-dark);"
-        >
-          Paste Web URL
-        </button>
-        <button
-          id="tab-upload-btn"
-          type="button"
-          onclick="switchInputTab('upload')"
-          class="flex-1 py-2 text-xs font-medium rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition"
-          style="box-shadow: none; background: transparent;"
-        >
-          Upload Audio Track
+        <!-- Tactile Light / Dark Theme Switcher -->
+        <button id="theme-toggle-btn" class="nm-btn p-2.5 rounded-xl flex items-center justify-center text-[var(--color-text)]" aria-label="Toggle visual theme" title="Toggle Obsidian / Soft Clay theme">
+          <svg id="theme-icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
       </div>
+    </header>
 
-      <!-- Tab 1: Web URL Input -->
-      <form id="url-input-section" onsubmit="event.preventDefault(); fetchTrackInfo();" class="flex flex-col sm:flex-row gap-2.5">
-        <div class="relative flex-grow">
-          <input
-            id="url-input"
-            type="text"
-            placeholder="Paste YouTube, SoundCloud, or media link… Press Enter ↵"
-            class="nm-input w-full pl-3.5 pr-20 py-3 text-xs sm:text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dim)]"
-          >
-          <button
-            type="button"
-            onclick="pasteClipboard()"
-            class="nm-btn-subtle absolute right-2 top-2 px-3 py-1 text-xs font-medium"
-          >
-            Paste
+    <!-- Track Source Input Deck: Tabs for URL vs Upload -->
+    <section class="nm-card p-5 sm:p-7 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold tracking-tight">Select Audio Source</h2>
+          <p class="text-xs text-[var(--color-text-muted)]">Download from YouTube/SoundCloud/Web, or upload your own audio file</p>
+        </div>
+        <div class="flex items-center gap-2 nm-inset-sm p-1.5 self-start sm:self-auto">
+          <button id="tab-url-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold active" onclick="switchSourceTab('url')">Web URL</button>
+          <button id="tab-upload-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold" onclick="switchSourceTab('upload')">Upload File</button>
+        </div>
+      </div>
+
+      <!-- URL Input -->
+      <div id="url-input-section" class="space-y-3">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <input type="text" id="url-input" placeholder="Paste YouTube, SoundCloud, or music link..." class="w-full text-xs sm:text-sm pl-4 pr-10 py-3.5" autocomplete="off" spellcheck="false">
+          </div>
+          <button id="inspect-btn" onclick="inspectUrl()" class="nm-btn-primary px-6 py-3.5 text-xs sm:text-sm flex items-center justify-center gap-2">
+            <span id="inspect-btn-text">Load Track</span>
+            <svg id="inspect-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
           </button>
         </div>
+      </div>
 
-        <button
-          id="inspect-btn"
-          type="submit"
-          class="nm-btn-primary py-3 px-6 text-xs sm:text-sm sm:w-36 flex-shrink-0 flex items-center justify-center gap-2"
-        >
-          <span id="inspect-btn-text">Load Track</span>
-          <svg id="inspect-spinner" aria-hidden="true" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-        </button>
-      </form>
-
-      <!-- Tab 2: Upload Own Audio File -->
-      <div id="upload-input-section" class="hidden space-y-3">
-        <div
-          id="drop-zone"
-          onclick="document.getElementById('file-input').click()"
-          class="p-7 border border-dashed border-[var(--color-text-dim)] hover:border-[var(--color-accent)] rounded-xl nm-well text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2 group"
-        >
-          <input
-            id="file-input"
-            type="file"
-            accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.opus"
-            class="hidden"
-            onchange="handleFileUpload(this.files)"
-          >
-          <div class="w-10 h-10 rounded-xl nm-card flex items-center justify-center text-[var(--color-accent)]">
-            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+      <!-- Upload Input -->
+      <div id="upload-input-section" class="space-y-3 hidden">
+        <div id="drop-zone" class="nm-inset-box p-8 text-center cursor-pointer hover:border-[var(--color-accent)] transition-all border-2 border-dashed border-[var(--nm-border)]">
+          <input type="file" id="file-input" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg,.aac,.opus,.webm" class="hidden">
+          <div class="space-y-2">
+            <svg class="w-10 h-10 mx-auto text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <p class="text-xs sm:text-sm font-semibold">Drop your MP3, WAV, FLAC, M4A, or AAC file here</p>
+            <p class="text-[11px] text-[var(--color-text-muted)]">Supports high-res studio audio up to 250MB</p>
           </div>
-          <span class="text-xs font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)]">Select or drop audio file here</span>
-          <p class="text-[11px] text-[var(--color-text-muted)]">Supports FLAC, WAV, MP3, AAC, OGG up to 200MB</p>
         </div>
 
-        <div id="upload-progress-box" class="hidden p-4 rounded-xl nm-well space-y-2">
-          <div class="flex justify-between text-xs">
-            <span id="upload-status-text" class="text-[var(--color-text-muted)]">Uploading file…</span>
-            <span id="upload-percent-text" class="text-[var(--color-accent)] font-mono">0%</span>
+        <div id="upload-progress-box" class="hidden nm-card-sm p-4 space-y-2">
+          <div class="flex justify-between text-xs font-mono">
+            <span id="upload-status-text">Uploading audio...</span>
+            <span id="upload-percent-text">0%</span>
           </div>
-          <div class="w-full nm-well rounded-full h-2 overflow-hidden">
-            <div id="upload-bar-fill" class="bg-[var(--color-accent)] h-full rounded-full transition-all duration-200" style="width: 0%"></div>
+          <div class="w-full bg-[var(--nm-surface-dark)] h-2 rounded-full overflow-hidden nm-inset-sm">
+            <div id="upload-bar-fill" class="bg-[var(--color-accent)] h-full transition-all duration-200" style="width: 0%"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Studio Deck & Controls -->
-    <section id="studio-card" class="nm-card p-5 sm:p-6 space-y-6 hidden">
+    <!-- DSP Mastering Console (Revealed once track is loaded) -->
+    <section id="studio-card" class="nm-card p-5 sm:p-7 space-y-8 hidden">
 
-      <!-- Track Identification -->
-      <div class="flex items-center gap-3.5 p-3.5 nm-well rounded-xl">
-        <img id="track-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f05a24'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E" alt="Thumbnail" class="w-14 h-14 object-cover flex-shrink-0 rounded-lg border border-[var(--color-text-dim)]">
-        <div class="flex-grow space-y-1 overflow-hidden text-left">
-          <div class="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[var(--color-accent)] text-white">
-            <span id="track-badge">Stream Ready</span>
+      <!-- Active Track Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[var(--nm-border)]">
+        <div class="flex items-center gap-4">
+          <img id="track-thumb" src="" alt="Album Artwork" class="w-16 h-16 rounded-xl object-cover nm-inset-sm border border-[var(--nm-border)]">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="track-badge" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-bold">STEREO</span>
+              <span id="track-meta" class="text-[11px] font-mono text-[var(--color-text-muted)]">--:--</span>
+            </div>
+            <h3 id="track-title" class="text-sm sm:text-base font-bold truncate max-w-md mt-1">Ready for Mastering</h3>
           </div>
-          <h2 id="track-title" class="text-sm font-semibold text-[var(--color-text-primary)] truncate">--</h2>
-          <p id="track-meta" class="text-xs text-[var(--color-text-muted)] font-mono">--</p>
+        </div>
+
+        <!-- Milled Azimuth Visualizer Radar -->
+        <div class="nm-azimuth-scope" id="radar-scope" title="360° Binaural Azimuth Radar">
+          <div class="radar-ring" style="width: 190px; height: 190px;"></div>
+          <div class="radar-ring" style="width: 130px; height: 130px;"></div>
+          <div class="radar-ring" style="width: 70px; height: 70px;"></div>
+          <div class="radar-crosshair-h"></div>
+          <div class="radar-crosshair-v"></div>
+          <div class="azimuth-beacon" id="beacon-1"></div>
+          <div class="azimuth-beacon-alt hidden" id="beacon-2"></div>
         </div>
       </div>
 
-      <!-- 1. Spatial Engine Selector -->
-      <div class="space-y-2.5 text-left">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">1. Spatial audio engine</span>
+      <!-- 1. Orbit Rotation Speed Controller (User Option to Type in Seconds) -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <label for="speed-input-sec" class="text-xs sm:text-sm font-bold tracking-tight flex items-center gap-2">
+              <span>Orbit Rotation Speed</span>
+              <span class="text-[11px] text-[var(--color-text-muted)] font-normal">(Type duration in seconds)</span>
+            </label>
+            <p class="text-[11px] text-[var(--color-text-muted)]">Time taken for sound to complete one full 360° physical orbit around your head</p>
+          </div>
+          <div class="flex items-center gap-2 self-start sm:self-auto">
+            <span class="text-xs text-[var(--color-text-muted)] font-mono">Period:</span>
+            <input type="number" id="speed-input-sec" min="1" max="60" step="0.5" value="8.0" class="w-20 text-center text-xs font-bold font-mono">
+            <span class="text-xs font-mono text-[var(--color-accent)]">sec</span>
+            <span id="orbit-hz-badge" class="text-[10px] font-mono px-2 py-0.5 rounded nm-inset-sm text-[var(--color-text-muted)]">0.125 Hz</span>
+          </div>
+        </div>
+
+        <!-- Synchronized tactile slider -->
+        <div class="space-y-2">
+          <input type="range" id="speed-slider-sec" min="1" max="30" step="0.5" value="8.0">
+          <div class="flex justify-between text-[10px] font-mono text-[var(--color-text-dim)]">
+            <span>1s (Hyper Spin)</span>
+            <span>8s (Dynamic Standard)</span>
+            <span>15s (Slow Chill)</span>
+            <span>30s (Hypnotic)</span>
+          </div>
+        </div>
+
+        <!-- Quick Speed Preset Chips -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button id="speed-fast" class="nm-btn px-3 py-2 text-xs font-medium" onclick="setSpeedSeconds(4.0, 'fast')">4s Hyper Spin</button>
+          <button id="speed-normal" class="nm-btn px-3 py-2 text-xs font-medium active" onclick="setSpeedSeconds(8.0, 'normal')">8s Dynamic Orbit</button>
+          <button id="speed-slow" class="nm-btn px-3 py-2 text-xs font-medium" onclick="setSpeedSeconds(14.0, 'slow')">14s Deep Spatial</button>
+          <button id="speed-hypnotic" class="nm-btn px-3 py-2 text-xs font-medium" onclick="setSpeedSeconds(20.0, 'hypnotic')">20s Hypnotic Flow</button>
+        </div>
+      </div>
+
+      <!-- 2. Stem Extraction & Track Isolation Deck ("Take out bass or lyrics") -->
+      <div class="space-y-3 pt-4 border-t border-[var(--nm-border)]">
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold tracking-tight">Stem Extraction & Isolation Deck</h4>
+          <p class="text-[11px] text-[var(--color-text-muted)]">Isolate or eliminate specific music stems (vocals, basslines, or backing track)</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+          <button id="stem-full" class="nm-btn p-3 text-left active" onclick="setStemFilter('none')">
+            <div class="text-xs font-bold">Full Mix</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Original all stems</div>
+          </button>
+          <button id="stem-vocal-remover" class="nm-btn p-3 text-left" onclick="setStemFilter('vocal_remover')">
+            <div class="text-xs font-bold text-[var(--color-accent)]">🎤 Vocal Remover</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Karaoke • Lyrics Out</div>
+          </button>
+          <button id="stem-vocal-isolate" class="nm-btn p-3 text-left" onclick="setStemFilter('vocal_isolate')">
+            <div class="text-xs font-bold">🗣️ Vocal Isolator</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Acapella • Voice Only</div>
+          </button>
+          <button id="stem-bass-remove" class="nm-btn p-3 text-left" onclick="setStemFilter('bass_remove')">
+            <div class="text-xs font-bold text-amber-500">🎸 Bass Remover</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Mute Bass & Sub-End</div>
+          </button>
+          <button id="stem-bass-only" class="nm-btn p-3 text-left" onclick="setStemFilter('bass_only')">
+            <div class="text-xs font-bold">🔊 Sub-Bass Only</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Bassline Groove Focus</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Spatial Dimension Mode (8D vs 16D) -->
+      <div class="space-y-3 pt-4 border-t border-[var(--nm-border)]">
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold tracking-tight">Spatial Orbit Architecture</h4>
+          <p class="text-[11px] text-[var(--color-text-muted)]">Select single-axis circular orbit (8D) or dual-harmonic multi-axis elevation (16D)</p>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            type="button"
-            id="mode-card-8d"
-            onclick="setSpatialMode('8d')"
-            class="p-4 nm-card rounded-xl text-left transition cursor-pointer border border-[var(--color-accent)]"
-            style="background: var(--nm-surface-dark); box-shadow: var(--nm-inset-sm);"
-          >
+          <div id="mode-card-8d" class="nm-card-sm p-4 cursor-pointer border-2 border-[var(--color-accent)] transition-all" onclick="setSpatialMode('8d')">
             <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-semibold text-[var(--color-text-primary)] whitespace-nowrap">8D Spatial Audio</span>
-              <span class="text-[10px] text-[var(--color-accent)] font-medium">360° Circular</span>
+              <span class="text-xs font-bold tracking-tight">8D Circular Orbit</span>
+              <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-semibold">Standard</span>
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">Smooth circular binaural panning orbiting the stereo field.</p>
-          </button>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">Smooth 360° horizontal ear-to-ear rotation with subtle room reflection matrix.</p>
+          </div>
 
-          <button
-            type="button"
-            id="mode-card-16d"
-            onclick="setSpatialMode('16d')"
-            class="p-4 nm-card rounded-xl text-left transition cursor-pointer"
-          >
+          <div id="mode-card-16d" class="nm-card-sm p-4 cursor-pointer border-2 border-transparent transition-all" onclick="setSpatialMode('16d')">
             <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-semibold text-[var(--color-text-primary)] whitespace-nowrap">16D Ultra Spatial</span>
-              <span class="text-[10px] text-[var(--color-text-muted)] font-medium">Spherical Orbit</span>
+              <span class="text-xs font-bold tracking-tight">16D Multi-Axis Trajectory</span>
+              <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-semibold">Dual Harmonic</span>
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">Spherical dual-delay reflections with acoustic crossfeed widening.</p>
-          </button>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">Dual-frequency Lissajous rotation with elevation crossfeed and cathedral space.</p>
+          </div>
         </div>
       </div>
 
-      <!-- 2. Intensity Slider & Presets -->
-      <div class="p-4 nm-well rounded-xl space-y-3.5 text-left">
+      <!-- 4. Panning Intensity Slider & Presets -->
+      <div class="space-y-3 pt-4 border-t border-[var(--nm-border)]">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-[var(--color-text-muted)]">2. Effect intensity</span>
-          <span id="intensity-value-badge" class="text-xs text-[var(--color-accent)] font-semibold font-mono">
-            Level 7 / 10
-          </span>
+          <label for="intensity-slider" class="text-xs sm:text-sm font-bold tracking-tight">Binaural Panning Depth</label>
+          <span id="intensity-value-badge" class="text-xs font-mono font-bold text-[var(--color-accent)]">Level 7 / 10</span>
         </div>
-
-        <input
-          id="intensity-slider"
-          type="range"
-          min="1"
-          max="10"
-          value="7"
-          step="1"
-          oninput="updateIntensity(this.value)"
-          onchange="updateIntensity(this.value)"
-          class="nm-slider w-full cursor-pointer"
-        >
-
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-[var(--color-text-muted)] pt-1">
-          <span id="intensity-desc" class="text-[11px]">Balanced (Concert Immersion · 85% Pan Width)</span>
-          <div class="flex gap-2 self-end sm:self-auto">
-            <button id="preset-mild" type="button" onclick="setIntensityPreset(4)" class="nm-btn-subtle px-2.5 py-1 text-[11px]">Mild</button>
-            <button id="preset-balanced" type="button" onclick="setIntensityPreset(7)" class="nm-btn-subtle px-2.5 py-1 text-[11px] text-[var(--color-accent)] font-medium" style="box-shadow: var(--nm-inset-sm); background: var(--nm-surface-dark);">Balanced</button>
-            <button id="preset-extreme" type="button" onclick="setIntensityPreset(10)" class="nm-btn-subtle px-2.5 py-1 text-[11px]">Extreme (10/10)</button>
+        <input type="range" id="intensity-slider" min="1" max="10" value="7" oninput="updateIntensity(this.value)">
+        <div class="flex items-center justify-between text-[11px] text-[var(--color-text-muted)]">
+          <span id="intensity-desc">Balanced (Concert Immersion · 85% Pan Width)</span>
+          <div class="flex gap-1.5">
+            <button id="preset-mild" class="nm-btn px-2.5 py-1 text-[10px]" onclick="setIntensityPreset(4)">Mild (4)</button>
+            <button id="preset-balanced" class="nm-btn px-2.5 py-1 text-[10px] active" onclick="setIntensityPreset(7)">Concert (7)</button>
+            <button id="preset-extreme" class="nm-btn px-2.5 py-1 text-[10px]" onclick="setIntensityPreset(10)">Arena (10)</button>
           </div>
         </div>
       </div>
 
-      <!-- 3. Speed & Acoustic Options -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-        <div class="p-4 nm-card rounded-xl space-y-2.5">
-          <span class="text-xs font-medium text-[var(--color-text-muted)]">Orbit rotation speed</span>
-          <div class="grid grid-cols-3 gap-2 text-xs">
-            <button type="button" onclick="setSpeed('slow')" id="speed-slow" class="nm-btn py-2 text-[11px]">Slow (12s)</button>
-            <button type="button" onclick="setSpeed('normal')" id="speed-normal" class="nm-btn py-2 text-[11px] text-[var(--color-accent)] font-medium" style="box-shadow: var(--nm-inset-sm); background: var(--nm-surface-dark);">Normal (8s)</button>
-            <button type="button" onclick="setSpeed('fast')" id="speed-fast" class="nm-btn py-2 text-[11px]">Fast (5s)</button>
+      <!-- 5. Acoustic Enhancements & Studio Master Rack -->
+      <div class="space-y-4 pt-4 border-t border-[var(--nm-border)]">
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold tracking-tight">Acoustic Master Rack & Sound Signatures</h4>
+          <p class="text-[11px] text-[var(--color-text-muted)]">Hardware equalizers, spatial reverb, pitch shifter, and viral mix signatures</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Deep Bass Preservation -->
+          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer">
+            <div>
+              <div class="text-xs font-bold">Deep Bass Warmth</div>
+              <div class="text-[10px] text-[var(--color-text-muted)]">+4.5dB warm analog sub-shelf</div>
+            </div>
+            <div class="relative">
+              <input type="checkbox" id="bass-boost" checked class="sr-only">
+              <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
+            </div>
+          </label>
+
+          <!-- Concert Hall 3D Reverb -->
+          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer">
+            <div>
+              <div class="text-xs font-bold">Concert Hall Reverb</div>
+              <div class="text-[10px] text-[var(--color-text-muted)]">3D spatial room reflections</div>
+            </div>
+            <div class="relative">
+              <input type="checkbox" id="hall-reverb" checked class="sr-only">
+              <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
+            </div>
+          </label>
+
+          <!-- Air & Crystal Clarity Boost -->
+          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer">
+            <div>
+              <div class="text-xs font-bold">Air & Crystal Clarity</div>
+              <div class="text-[10px] text-[var(--color-text-muted)]">+3.5dB harmonic presence sheen</div>
+            </div>
+            <div class="relative">
+              <input type="checkbox" id="clarity-boost" class="sr-only">
+              <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Special Sound Signatures -->
+        <div class="space-y-2">
+          <label class="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Special Mix Presets</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button id="preset-none" class="nm-btn px-3 py-2 text-xs font-medium active" onclick="setSpecialPreset('none')">Standard Master</button>
+            <button id="preset-slowed" class="nm-btn px-3 py-2 text-xs font-medium" onclick="setSpecialPreset('slowed_reverb')">Slowed + Reverb</button>
+            <button id="preset-nightcore" class="nm-btn px-3 py-2 text-xs font-medium" onclick="setSpecialPreset('nightcore')">Nightcore (1.25x)</button>
+            <button id="preset-432hz" class="nm-btn px-3 py-2 text-xs font-medium" onclick="setSpecialPreset('432hz')">432 Hz Sacred</button>
           </div>
         </div>
 
-        <div class="p-4 nm-card rounded-xl space-y-2.5">
-          <span class="text-xs font-medium text-[var(--color-text-muted)]">Acoustic enhancements</span>
-          <div class="space-y-2 text-xs">
-            <label class="flex items-center gap-2.5 cursor-pointer text-[var(--color-text-primary)]">
-              <input type="checkbox" id="bass-boost" checked class="w-4 h-4 rounded text-orange-600 bg-slate-800 border-slate-600 focus:ring-0">
-              <span class="text-[11px]">Deep Bass Preservation (+3.5dB warm shelf)</span>
-            </label>
-            <label class="flex items-center gap-2.5 cursor-pointer text-[var(--color-text-primary)]">
-              <input type="checkbox" id="hall-reverb" checked class="w-4 h-4 rounded text-orange-600 bg-slate-800 border-slate-600 focus:ring-0">
-              <span class="text-[11px]">Concert Hall Reverb (3D room reflections)</span>
-            </label>
+        <!-- Pitch Adjuster (± Semitones) -->
+        <div class="nm-card-sm p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold">Pitch Shifter (Semitones)</div>
+              <div class="text-[10px] text-[var(--color-text-muted)]">Shift track key without changing tempo</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="pitch-badge" class="text-xs font-mono font-bold text-[var(--color-accent)]">Original Key (0 ST)</span>
+              <button id="pitch-reset-btn" class="nm-btn px-2 py-1 text-[10px]" onclick="setPitch(0)">Reset</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono text-[var(--color-text-dim)]">-6</span>
+            <input type="range" id="pitch-slider" min="-6" max="6" step="1" value="0" oninput="setPitch(this.value)">
+            <span class="text-xs font-mono text-[var(--color-text-dim)]">+6</span>
           </div>
         </div>
       </div>
 
-      <!-- 4. Optional Clip Trimming -->
-      <div class="p-4 nm-card rounded-xl space-y-2.5 text-left">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-[var(--color-text-muted)]">Trim segment (optional)</span>
-          <input type="checkbox" id="trim-toggle" onchange="toggleTrimSection()" class="w-4 h-4 rounded text-orange-600 bg-slate-800 border-slate-600 focus:ring-0">
-        </div>
-
-        <div id="trim-controls" class="grid grid-cols-2 gap-3 pt-1 hidden">
+      <!-- 6. Extended Audition & Preview Controller -->
+      <div class="nm-inset-box p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <label class="text-[11px] text-[var(--color-text-muted)] font-mono">Start (MM:SS)</label>
-            <input type="text" id="trim-start" value="00:00" class="nm-input w-full mt-1 px-3 py-1.5 text-xs font-mono">
+            <h4 class="text-xs sm:text-sm font-bold tracking-tight flex items-center gap-2">
+              <span>Live Headphone Audition</span>
+              <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Instant DSP</span>
+            </h4>
+            <p class="text-[11px] text-[var(--color-text-muted)]">Preview your selected combo in high-fidelity before final download</p>
+          </div>
+
+          <!-- Preview Duration Selector Chips -->
+          <div class="flex items-center gap-1.5 nm-inset-sm p-1 self-start sm:self-auto">
+            <button id="preview-dur-15" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setPreviewDuration(15)">15s</button>
+            <button id="preview-dur-30" class="nm-btn px-2.5 py-1 text-[11px] active" onclick="setPreviewDuration(30)">30s</button>
+            <button id="preview-dur-60" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setPreviewDuration(60)">60s</button>
+            <button id="preview-dur-full" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setPreviewDuration('full')">Full Track</button>
+          </div>
+        </div>
+
+        <!-- Start Time Offset -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-[var(--color-text-muted)] font-mono text-[11px]">Start Audition At:</span>
+          <input type="text" id="preview-start-time" value="00:00" placeholder="00:00" class="w-16 text-center text-xs py-1">
+          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setPreviewStart('00:00')">0:00 Intro</button>
+          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setPreviewStart('00:30')">0:30 Drop/Chorus</button>
+          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setPreviewStart('01:00')">1:00</button>
+        </div>
+
+        <!-- Audition Audio Player -->
+        <div class="nm-card-sm p-3">
+          <audio id="live-audio-preview" controls class="w-full h-9"></audio>
+        </div>
+
+        <!-- Audition Action Button -->
+        <button id="btn-quick-preview" onclick="generateQuickPreview()" class="nm-btn w-full py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border border-[var(--color-accent)]">
+          <svg class="w-4 h-4 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span id="preview-btn-text">Audition 30s Preview</span>
+          <svg id="preview-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+        </button>
+      </div>
+
+      <!-- 7. Clip Trimming Section -->
+      <div class="space-y-3 pt-4 border-t border-[var(--nm-border)]">
+        <label class="flex items-center gap-3 cursor-pointer select-none">
+          <input type="checkbox" id="trim-toggle" onchange="toggleTrimSection()" class="sr-only">
+          <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
+          <div>
+            <span class="text-xs font-bold">Cut / Trim Final Export</span>
+            <span class="text-[11px] text-[var(--color-text-muted)] block">Export only a specific section or drop</span>
+          </div>
+        </label>
+
+        <div id="trim-controls" class="hidden grid grid-cols-2 gap-3 pt-2">
+          <div>
+            <label for="trim-start" class="text-[11px] text-[var(--color-text-muted)] font-mono block mb-1">Start Time (MM:SS)</label>
+            <input type="text" id="trim-start" value="00:00" placeholder="00:00" class="w-full text-xs">
           </div>
           <div>
-            <label class="text-[11px] text-[var(--color-text-muted)] font-mono">End (MM:SS)</label>
-            <input type="text" id="trim-end" value="00:30" class="nm-input w-full mt-1 px-3 py-1.5 text-xs font-mono">
+            <label for="trim-end" class="text-[11px] text-[var(--color-text-muted)] font-mono block mb-1">End Time (MM:SS)</label>
+            <input type="text" id="trim-end" value="" placeholder="03:30" class="w-full text-xs">
           </div>
         </div>
       </div>
 
-      <!-- 5. Headphone Audition Bar -->
-      <div class="p-4 sm:p-5 nm-well rounded-xl space-y-3.5 text-left">
-        <div class="flex items-center justify-between">
-          <div class="space-y-0.5">
-            <h3 class="text-xs sm:text-sm font-semibold text-[var(--color-text-primary)]">Live Headphone Audition</h3>
-            <p class="text-[11px] text-[var(--color-text-muted)]">Experience spatial combinations instantly before downloading.</p>
-          </div>
-          <span id="preview-status-pill" class="text-[11px] text-[var(--color-accent)] font-medium px-2 py-0.5 nm-card rounded-md">Ready</span>
-        </div>
-
-        <audio id="live-audio-preview" controls class="w-full h-8"></audio>
-
-        <div class="pt-1 flex items-center justify-between">
-          <button
-            type="button"
-            id="btn-quick-preview"
-            onclick="generateQuickPreview()"
-            class="nm-btn px-4 py-2 text-xs flex items-center gap-2"
-          >
-            <svg aria-hidden="true" class="w-3.5 h-3.5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
-            <span id="preview-btn-text">Render 15s Quick Preview</span>
-            <svg id="preview-spinner" aria-hidden="true" class="animate-spin h-3.5 w-3.5 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          </button>
-          <span class="text-[11px] text-[var(--color-text-dim)]">Wear headphones</span>
-        </div>
+      <!-- 8. Master & Export Final High-Res Track -->
+      <div class="pt-4 border-t border-[var(--nm-border)] space-y-4">
+        <button id="render-btn" onclick="startSpatialRender()" class="nm-btn-primary w-full py-4 text-sm sm:text-base flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span id="render-btn-text">Master & Export High-Res MP3</span>
+        </button>
+        <p class="text-[11px] text-center text-[var(--color-text-muted)]">Renders 320kbps High-Fidelity MP3 with ID3 album artwork embedded directly on your device</p>
       </div>
-
-      <!-- Action Button -->
-      <button
-        id="render-btn"
-        type="button"
-        onclick="startSpatialRender()"
-        class="nm-btn-primary w-full py-4 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 whitespace-nowrap"
-      >
-        <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        <span id="render-btn-text">Master & Export Full Track (320kbps MP3)</span>
-      </button>
-
     </section>
 
     <!-- Progress Card -->
-    <section id="progress-card" class="nm-card p-5 sm:p-6 space-y-3.5 hidden text-left">
-      <div class="flex items-center justify-between text-xs sm:text-sm">
-        <div class="flex items-center gap-2.5">
-          <svg aria-hidden="true" class="animate-spin h-4 w-4 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          <span id="progress-title" class="font-semibold text-[var(--color-text-primary)]">Mastering Spatial Audio…</span>
-        </div>
-        <span id="progress-percent" class="font-mono text-sm font-bold text-[var(--color-accent)]">0%</span>
+    <section id="progress-card" class="nm-card p-6 space-y-4 hidden">
+      <div class="flex items-center justify-between text-xs font-mono">
+        <span id="progress-title" class="font-bold flex items-center gap-2">
+          <svg class="animate-spin h-4 w-4 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          Processing Audio...
+        </span>
+        <span id="progress-percent" class="font-bold text-[var(--color-accent)]">0%</span>
       </div>
-
-      <div class="w-full nm-well rounded-full h-2.5 overflow-hidden p-0.5">
-        <div id="progress-bar-fill" class="bg-[var(--color-accent)] h-full rounded-full transition-all duration-300" style="width: 0%; box-shadow: 0 0 8px var(--color-accent-glow);"></div>
+      <div class="w-full bg-[var(--nm-surface-dark)] h-2.5 rounded-full overflow-hidden nm-inset-sm">
+        <div id="progress-bar-fill" class="bg-[var(--color-accent)] h-full transition-all duration-300" style="width: 0%"></div>
       </div>
-
-      <p id="progress-detail" class="text-[11px] text-[var(--color-text-muted)] font-mono">Applying psychoacoustic 360° binaural pan…</p>
+      <div id="progress-detail" class="text-[11px] font-mono text-[var(--color-text-muted)] text-center">Applying psychoacoustic filters...</div>
     </section>
 
-    <!-- Success Delivery Card -->
-    <section id="success-card" class="nm-card p-6 space-y-4 hidden text-left">
-      <div class="flex items-center gap-2 text-xs text-[var(--color-accent)] font-semibold">
-        <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-        <span>Spatial Master Ready for Playback</span>
+    <!-- Success / Download Card -->
+    <section id="success-card" class="nm-card p-6 space-y-4 hidden text-center">
+      <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/20">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
       </div>
-
       <div>
-        <h3 class="text-sm sm:text-base font-semibold text-[var(--color-text-primary)]">Export Complete</h3>
-        <p id="success-filename" class="text-xs text-[var(--color-text-muted)] font-mono mt-0.5">--</p>
+        <h3 class="text-base font-bold">Mastering Complete!</h3>
+        <p id="success-filename" class="text-xs font-mono text-[var(--color-text-muted)] truncate max-w-md mx-auto mt-1">track.mp3</p>
       </div>
-
-      <div class="p-3.5 nm-well rounded-xl space-y-2">
-        <span class="text-[11px] text-[var(--color-text-muted)]">Listen to master:</span>
-        <audio id="audio-final-player" controls class="w-full h-8"></audio>
+      <div class="nm-inset-sm p-3 max-w-lg mx-auto">
+        <audio id="audio-final-player" controls class="w-full h-9"></audio>
       </div>
-
-      <div class="flex flex-col sm:flex-row gap-3 pt-2">
-        <a id="download-trigger-btn" href="#" class="nm-btn-primary py-3 px-5 text-xs font-semibold flex items-center justify-center gap-2 flex-1">
-          <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span>Download MP3 to Device</span>
+      <div class="pt-2">
+        <a id="download-trigger-btn" href="#" class="nm-btn-primary inline-flex items-center gap-2 px-8 py-3.5 text-xs sm:text-sm font-bold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download Mastered Audio (320kbps)
         </a>
-        <button type="button" onclick="scrollToSettings()" class="nm-btn py-3 px-5 text-xs font-medium">
-          Adjust Parameters
-        </button>
       </div>
     </section>
 
-  </main>
+  </div>
 
-  <footer class="border-t border-[var(--color-header-border)] py-5 text-center text-xs text-[var(--color-text-dim)] bg-[var(--nm-surface)]">
-    OmniDownloader Spatial Audio Console · Neumorphic Hardware Soft UI
-  </footer>
-
+  <!-- JavaScript DSP Client Engine -->
   <script>
-    let activeInputTab = 'url';
+    // State Management
     let currentSpatialMode = '8d';
     let currentIntensity = 7;
-    let currentSpeed = 'normal';
+    let currentSpeedSec = 8.0;
+    let currentStemFilter = 'none';
+    let currentSpecialPreset = 'none';
+    let currentPitch = 0;
+    let currentPreviewDuration = 30;
     let currentUploadId = null;
-    let loadedTrackData = null;
-    let pollInterval = null;
+    let activeJobId = null;
+    let activeSourceTab = 'url';
 
-    // Theme Switcher Logic
+    // ── THEME SWITCHER ──
     function initTheme() {
-      const savedTheme = localStorage.getItem('omni-theme') || 'dark';
-      setTheme(savedTheme);
+      const saved = localStorage.getItem('nm_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcons(saved);
     }
 
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      setTheme(next);
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('nm_theme', target);
+      updateThemeIcons(target);
     }
 
-    function setTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('omni-theme', theme);
+    function updateThemeIcons(theme) {
       const sun = document.getElementById('theme-icon-sun');
       const moon = document.getElementById('theme-icon-moon');
-      if (sun && moon) {
-        if (theme === 'light') {
-          sun.classList.remove('hidden');
-          moon.classList.add('hidden');
-        } else {
-          sun.classList.add('hidden');
-          moon.classList.remove('hidden');
-        }
+      if (theme === 'light') {
+        sun.classList.remove('hidden');
+        moon.classList.add('hidden');
+      } else {
+        sun.classList.add('hidden');
+        moon.classList.remove('hidden');
       }
     }
+
+    document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
     initTheme();
 
-    function switchInputTab(tab) {
-      activeInputTab = tab;
+    // ── SOURCE TAB SWITCHING ──
+    function switchSourceTab(tab) {
+      activeSourceTab = tab;
       const urlBtn = document.getElementById('tab-url-btn');
       const uploadBtn = document.getElementById('tab-upload-btn');
-      const urlSection = document.getElementById('url-input-section');
-      const uploadSection = document.getElementById('upload-input-section');
+      const urlSec = document.getElementById('url-input-section');
+      const uploadSec = document.getElementById('upload-input-section');
 
       if (tab === 'url') {
-        urlBtn.style.boxShadow = "var(--nm-inset-sm)";
-        urlBtn.style.background = "var(--nm-surface-dark)";
-        urlBtn.classList.add('text-[var(--color-accent)]');
-        urlBtn.classList.remove('text-[var(--color-text-muted)]');
-
-        uploadBtn.style.boxShadow = "none";
-        uploadBtn.style.background = "transparent";
-        uploadBtn.classList.remove('text-[var(--color-accent)]');
-        uploadBtn.classList.add('text-[var(--color-text-muted)]');
-
-        urlSection.classList.remove('hidden');
-        uploadSection.classList.add('hidden');
+        urlBtn.classList.add('active');
+        uploadBtn.classList.remove('active');
+        urlSec.classList.remove('hidden');
+        uploadSec.classList.add('hidden');
       } else {
-        uploadBtn.style.boxShadow = "var(--nm-inset-sm)";
-        uploadBtn.style.background = "var(--nm-surface-dark)";
-        uploadBtn.classList.add('text-[var(--color-accent)]');
-        uploadBtn.classList.remove('text-[var(--color-text-muted)]');
-
-        urlBtn.style.boxShadow = "none";
-        urlBtn.style.background = "transparent";
-        urlBtn.classList.remove('text-[var(--color-accent)]');
-        urlBtn.classList.add('text-[var(--color-text-muted)]');
-
-        uploadSection.classList.remove('hidden');
-        urlSection.classList.add('hidden');
+        uploadBtn.classList.add('active');
+        urlBtn.classList.remove('active');
+        uploadSec.classList.remove('hidden');
+        urlSec.classList.add('hidden');
       }
     }
 
-    async function handleFileUpload(files) {
-      if (!files || files.length === 0) return;
-      const file = files[0];
+    // ── FILE UPLOAD HANDLING ──
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
 
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-[var(--color-accent)]'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-[var(--color-accent)]'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-[var(--color-accent)]');
+      if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) handleFileUpload(fileInput.files[0]);
+    });
+
+    async function handleFileUpload(file) {
       const progressBox = document.getElementById('upload-progress-box');
-      const progressBar = document.getElementById('upload-bar-fill');
-      const percentText = document.getElementById('upload-percent-text');
       const statusText = document.getElementById('upload-status-text');
+      const percentText = document.getElementById('upload-percent-text');
+      const barFill = document.getElementById('upload-bar-fill');
 
       progressBox.classList.remove('hidden');
-      progressBar.style.width = '20%';
-      percentText.textContent = '20%';
-      statusText.textContent = `Uploading ${file.name}…`;
+      statusText.textContent = `Uploading ${file.name}...`;
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('audio_file', file);
 
-      try {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload');
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload', true);
 
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            const p = Math.round((e.loaded / e.total) * 100);
-            progressBar.style.width = `${p}%`;
-            percentText.textContent = `${p}%`;
-          }
-        };
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          percentText.textContent = `${pct}%`;
+          barFill.style.width = `${pct}%`;
+        }
+      };
 
-        xhr.onload = () => {
-          if (xhr.status === 200) {
-            const data = JSON.parse(xhr.responseText);
-            if (data.success) {
-              currentUploadId = data.upload_id;
-              loadedTrackData = data;
-              displayTrackInfo(data, true);
-              progressBox.classList.add('hidden');
-            } else {
-              alert("Upload failed: " + (data.error || "Unknown error"));
-              progressBox.classList.add('hidden');
-            }
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          if (res.success) {
+            currentUploadId = res.upload_id;
+            loadTrackIntoStudio({
+              title: res.filename,
+              duration: res.duration || 0,
+              thumbnail: res.thumbnail || '',
+              badge: res.format ? res.format.toUpperCase() : 'UPLOAD'
+            });
+            progressBox.classList.add('hidden');
+            const previewPill = document.getElementById('preview-status-pill');
+            if (previewPill) previewPill.textContent = "Audio Uploaded";
           } else {
-            alert("Upload failed with server status " + xhr.status);
+            alert('Upload error: ' + (res.error || 'Server rejected file'));
             progressBox.classList.add('hidden');
           }
-        };
-
-        xhr.onerror = () => {
-          alert("Network error while uploading audio file.");
+        } else {
+          alert('Upload failed (HTTP ' + xhr.status + ')');
           progressBox.classList.add('hidden');
-        };
-
-        xhr.send(formData);
-
-      } catch (err) {
-        alert("Upload error: " + err.message);
-        progressBox.classList.add('hidden');
-      }
-    }
-
-    // Drag and Drop
-    const dropZone = document.getElementById('drop-zone');
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.classList.add('border-[var(--color-accent)]');
-      }, false);
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.classList.remove('border-[var(--color-accent)]');
-      }, false);
-    });
-    dropZone.addEventListener('drop', (e) => {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      handleFileUpload(files);
-    }, false);
-
-    // Enter Key
-    document.addEventListener('DOMContentLoaded', () => {
-      const urlInput = document.getElementById('url-input');
-      if (urlInput) {
-        urlInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            fetchTrackInfo();
-          }
-        });
-      }
-
-      const slider = document.getElementById('intensity-slider');
-      if (slider) {
-        const handleSliderChange = () => {
-          updateIntensity(slider.value);
-        };
-        slider.addEventListener('input', handleSliderChange);
-        slider.addEventListener('change', handleSliderChange);
-      }
-    });
-
-    async function pasteClipboard() {
-      try {
-        const text = await navigator.clipboard.readText();
-        if (text) {
-          document.getElementById('url-input').value = text.trim();
-          fetchTrackInfo();
         }
-      } catch (e) {
-        alert("Clipboard permission not granted. Please paste manually into the input.");
-      }
+      };
+
+      xhr.onerror = () => {
+        alert('Network error during upload');
+        progressBox.classList.add('hidden');
+      };
+
+      xhr.send(formData);
     }
 
-    async function fetchTrackInfo() {
+    // ── URL INSPECTION ──
+    async function inspectUrl() {
       const url = document.getElementById('url-input').value.trim();
       if (!url) {
-        alert("Please paste a valid music URL first.");
+        alert('Please paste a video or music link first.');
         return;
       }
 
-      const inspectBtn = document.getElementById('inspect-btn');
-      const inspectText = document.getElementById('inspect-btn-text');
-      const inspectSpinner = document.getElementById('inspect-spinner');
+      const btn = document.getElementById('inspect-btn');
+      const btnText = document.getElementById('inspect-btn-text');
+      const spinner = document.getElementById('inspect-spinner');
 
-      inspectBtn.disabled = true;
-      inspectText.textContent = "Loading…";
-      inspectSpinner.classList.remove('hidden');
-      currentUploadId = null;
+      btn.disabled = true;
+      btnText.textContent = 'Analyzing…';
+      spinner.classList.remove('hidden');
 
       try {
         const res = await fetch('/api/info', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ url: url })
+          body: JSON.stringify({url})
         });
 
-        if (!res.ok) throw new Error("Could not fetch media info");
+        if (!res.ok) throw new Error('Status ' + res.status);
         const data = await res.json();
-        if (!data.success) throw new Error(data.error || "Failed");
+        if (!data.success) throw new Error(data.error || 'Failed to inspect link');
 
-        loadedTrackData = data;
-        displayTrackInfo(data, false);
+        currentUploadId = null;
+        loadTrackIntoStudio({
+          title: data.title,
+          duration: data.duration || 0,
+          thumbnail: data.thumbnail || '',
+          badge: data.platform || 'STREAM'
+        });
+
       } catch (err) {
-        alert("Could not load track: " + err.message);
+        alert('Could not load track: ' + err.message);
       } finally {
-        inspectBtn.disabled = false;
-        inspectText.textContent = "Load Track";
-        inspectSpinner.classList.add('hidden');
+        btn.disabled = false;
+        btnText.textContent = 'Load Track';
+        spinner.classList.add('hidden');
       }
     }
 
-    function displayTrackInfo(data, isUpload) {
-      document.getElementById('track-title').textContent = data.title || "Unknown Title";
-      document.getElementById('track-meta').textContent = `${data.author || 'Artist'} · ${data.duration_formatted || '--:--'} · ${data.platform || 'Audio'}`;
-      
-      const thumb = document.getElementById('track-thumb');
-      if (data.thumbnail) {
-        thumb.src = data.thumbnail;
+    // Load Metadata into Studio Console
+    function loadTrackIntoStudio(info) {
+      document.getElementById('track-title').textContent = info.title;
+      document.getElementById('track-badge').textContent = info.badge;
+      if (info.thumbnail) {
+        document.getElementById('track-thumb').src = info.thumbnail;
+      } else {
+        document.getElementById('track-thumb').src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="%238e8e93" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
       }
 
-      document.getElementById('track-badge').textContent = isUpload ? "Uploaded Audio Ready" : "Stream Ready";
-      
-      if (isUpload && data.stream_url) {
-        const player = document.getElementById('live-audio-preview');
-        player.src = data.stream_url;
-        player.load();
-        document.getElementById('preview-status-pill').textContent = "Audio loaded for audition";
+      if (info.duration > 0) {
+        const mins = Math.floor(info.duration / 60);
+        const secs = Math.floor(info.duration % 60);
+        document.getElementById('track-meta').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        document.getElementById('trim-end').value = `${mins}:${secs.toString().padStart(2, '0')}`;
       }
 
       document.getElementById('studio-card').classList.remove('hidden');
       document.getElementById('studio-card').scrollIntoView({ behavior: 'smooth' });
+      updateButtonLabels();
     }
 
+    // ── ROTATION SPEED CONTROL (Direct Seconds Input & Radar Sync) ──
+    const speedInput = document.getElementById('speed-input-sec');
+    const speedSlider = document.getElementById('speed-slider-sec');
+    const orbitHzBadge = document.getElementById('orbit-hz-badge');
+    const beacon1 = document.getElementById('beacon-1');
+    const beacon2 = document.getElementById('beacon-2');
+
+    function updateOrbitSpeed(sec) {
+      let val = parseFloat(sec);
+      if (isNaN(val) || val <= 0.5) val = 8.0;
+      val = Math.max(1.0, Math.min(60.0, val));
+      currentSpeedSec = val;
+
+      if (speedInput.value != val) speedInput.value = val;
+      if (speedSlider.value != Math.min(30.0, val)) speedSlider.value = Math.min(30.0, val);
+
+      const hz = (1.0 / val).toFixed(3);
+      orbitHzBadge.textContent = `${hz} Hz`;
+
+      // Update physical radar animation duration in real time!
+      beacon1.style.animationDuration = `${val}s`;
+      beacon2.style.animationDuration = `${Math.max(1, (val / 1.5).toFixed(1))}s`;
+
+      // Update quick chips
+      ['speed-fast', 'speed-normal', 'speed-slow', 'speed-hypnotic'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+      });
+
+      if (val === 4.0) document.getElementById('speed-fast')?.classList.add('active');
+      else if (val === 8.0) document.getElementById('speed-normal')?.classList.add('active');
+      else if (val === 14.0) document.getElementById('speed-slow')?.classList.add('active');
+      else if (val === 20.0) document.getElementById('speed-hypnotic')?.classList.add('active');
+
+      updateButtonLabels();
+    }
+
+    speedInput.addEventListener('input', (e) => updateOrbitSpeed(e.target.value));
+    speedSlider.addEventListener('input', (e) => updateOrbitSpeed(e.target.value));
+
+    function setSpeedSeconds(sec, btnKey) {
+      updateOrbitSpeed(sec);
+    }
+
+    // ── STEM FILTER SELECTION ("Take out bass or lyrics") ──
+    function setStemFilter(filter) {
+      currentStemFilter = filter;
+      const stems = ['stem-full', 'stem-vocal-remover', 'stem-vocal-isolate', 'stem-bass-remove', 'stem-bass-only'];
+      stems.forEach(s => document.getElementById(s)?.classList.remove('active'));
+
+      const activeMap = {
+        'none': 'stem-full',
+        'vocal_remover': 'stem-vocal-remover',
+        'vocal_isolate': 'stem-vocal-isolate',
+        'bass_remove': 'stem-bass-remove',
+        'bass_only': 'stem-bass-only'
+      };
+
+      const activeId = activeMap[filter] || 'stem-full';
+      document.getElementById(activeId)?.classList.add('active');
+
+      // Auto-adjust bass-boost toggle for consistency
+      const bassBoostEl = document.getElementById('bass-boost');
+      if (filter === 'bass_remove' && bassBoostEl) {
+        bassBoostEl.checked = false;
+      }
+
+      updateButtonLabels();
+    }
+
+    // ── SPATIAL MODE SELECTION ──
     function setSpatialMode(mode) {
       currentSpatialMode = mode;
       const card8d = document.getElementById('mode-card-8d');
       const card16d = document.getElementById('mode-card-16d');
-      const beacon2 = document.getElementById('beacon-2');
 
       if (mode === '8d') {
-        card8d.style.boxShadow = "var(--nm-inset-sm)";
-        card8d.style.background = "var(--nm-surface-dark)";
         card8d.classList.add('border-[var(--color-accent)]');
-
-        card16d.style.boxShadow = "var(--nm-raised)";
-        card16d.style.background = "linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark))";
+        card8d.classList.remove('border-transparent');
         card16d.classList.remove('border-[var(--color-accent)]');
-
+        card16d.classList.add('border-transparent');
         beacon2.classList.add('hidden');
       } else {
-        card16d.style.boxShadow = "var(--nm-inset-sm)";
-        card16d.style.background = "var(--nm-surface-dark)";
         card16d.classList.add('border-[var(--color-accent)]');
-
-        card8d.style.boxShadow = "var(--nm-raised)";
-        card8d.style.background = "linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark))";
+        card16d.classList.remove('border-transparent');
         card8d.classList.remove('border-[var(--color-accent)]');
-
+        card8d.classList.add('border-transparent');
         beacon2.classList.remove('hidden');
       }
       updateButtonLabels();
     }
 
+    // ── INTENSITY SLIDER & PRESETS ──
     function updateIntensity(val) {
       currentIntensity = parseInt(val) || 7;
-      const slider = document.getElementById('intensity-slider');
-      if (slider && slider.value != currentIntensity) {
-        slider.value = currentIntensity;
-      }
       document.getElementById('intensity-value-badge').textContent = `Level ${currentIntensity} / 10`;
-      
+
       const desc = document.getElementById('intensity-desc');
       if (currentIntensity <= 3) {
         desc.textContent = `Mild (Subtle Spatial Panning · ${Math.round(50 + currentIntensity * 5)}% Pan Width)`;
@@ -1021,52 +1041,72 @@
         desc.textContent = `Extreme (Full Arena Orbit · 100% Pan Width + Deep Room)`;
       }
 
-      const pMild = document.getElementById('preset-mild');
-      const pBal = document.getElementById('preset-balanced');
-      const pExt = document.getElementById('preset-extreme');
-      if (pMild && pBal && pExt) {
-        [pMild, pBal, pExt].forEach(p => {
-          p.style.boxShadow = "var(--nm-raised-sm)";
-          p.style.background = "var(--nm-surface)";
-          p.classList.remove('text-[var(--color-accent)]', 'font-semibold');
-        });
-
-        const activePreset = (currentIntensity === 4) ? pMild : (currentIntensity === 7) ? pBal : (currentIntensity === 10) ? pExt : null;
-        if (activePreset) {
-          activePreset.style.boxShadow = "var(--nm-inset-sm)";
-          activePreset.style.background = "var(--nm-surface-dark)";
-          activePreset.classList.add('text-[var(--color-accent)]', 'font-semibold');
-        }
-      }
+      ['preset-mild', 'preset-balanced', 'preset-extreme'].forEach(p => {
+        document.getElementById(p)?.classList.remove('active');
+      });
+      if (currentIntensity === 4) document.getElementById('preset-mild')?.classList.add('active');
+      else if (currentIntensity === 7) document.getElementById('preset-balanced')?.classList.add('active');
+      else if (currentIntensity === 10) document.getElementById('preset-extreme')?.classList.add('active');
 
       updateButtonLabels();
     }
 
     function setIntensityPreset(val) {
+      document.getElementById('intensity-slider').value = val;
       updateIntensity(val);
     }
 
-    function setSpeed(speed) {
-      currentSpeed = speed;
-      ['slow', 'normal', 'fast'].forEach(s => {
-        const btn = document.getElementById(`speed-${s}`);
-        if (s === speed) {
-          btn.style.boxShadow = "var(--nm-inset-sm)";
-          btn.style.background = "var(--nm-surface-dark)";
-          btn.classList.add('text-[var(--color-accent)]', 'font-medium');
-        } else {
-          btn.style.boxShadow = "var(--nm-raised-btn)";
-          btn.style.background = "linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark))";
-          btn.classList.remove('text-[var(--color-accent)]', 'font-medium');
-        }
+    // ── SPECIAL SOUND SIGNATURES ──
+    function setSpecialPreset(preset) {
+      currentSpecialPreset = preset;
+      ['preset-none', 'preset-slowed', 'preset-nightcore', 'preset-432hz'].forEach(id => {
+        document.getElementById(id)?.classList.remove('active');
       });
 
-      const beacon1 = document.getElementById('beacon-1');
-      if (speed === 'slow') beacon1.style.animationDuration = '12s';
-      else if (speed === 'normal') beacon1.style.animationDuration = '8s';
-      else if (speed === 'fast') beacon1.style.animationDuration = '5s';
-
+      const map = {
+        'none': 'preset-none',
+        'slowed_reverb': 'preset-slowed',
+        'nightcore': 'preset-nightcore',
+        '432hz': 'preset-432hz'
+      };
+      document.getElementById(map[preset] || 'preset-none')?.classList.add('active');
       updateButtonLabels();
+    }
+
+    // ── PITCH SHIFTER ──
+    function setPitch(st) {
+      currentPitch = parseInt(st) || 0;
+      const slider = document.getElementById('pitch-slider');
+      if (slider && slider.value != currentPitch) slider.value = currentPitch;
+
+      const badge = document.getElementById('pitch-badge');
+      if (currentPitch === 0) {
+        badge.textContent = 'Original Key (0 ST)';
+        badge.className = 'text-xs font-mono font-bold text-[var(--color-accent)]';
+      } else if (currentPitch > 0) {
+        badge.textContent = `+${currentPitch} Semitones (Sharp)`;
+        badge.className = 'text-xs font-mono font-bold text-cyan-400';
+      } else {
+        badge.textContent = `${currentPitch} Semitones (Flat)`;
+        badge.className = 'text-xs font-mono font-bold text-amber-400';
+      }
+      updateButtonLabels();
+    }
+
+    // ── PREVIEW DURATION & START ──
+    function setPreviewDuration(dur) {
+      currentPreviewDuration = dur;
+      ['preview-dur-15', 'preview-dur-30', 'preview-dur-60', 'preview-dur-full'].forEach(id => {
+        document.getElementById(id)?.classList.remove('active');
+      });
+
+      const map = {15: 'preview-dur-15', 30: 'preview-dur-30', 60: 'preview-dur-60', 'full': 'preview-dur-full'};
+      document.getElementById(map[dur] || 'preview-dur-30')?.classList.add('active');
+      updateButtonLabels();
+    }
+
+    function setPreviewStart(timestamp) {
+      document.getElementById('preview-start-time').value = timestamp;
     }
 
     function toggleTrimSection() {
@@ -1076,23 +1116,40 @@
       else controls.classList.add('hidden');
     }
 
+    // Dynamic Button Labels
     function updateButtonLabels() {
       const modeUpper = currentSpatialMode.toUpperCase();
       const sliderVal = document.getElementById('intensity-slider') ? document.getElementById('intensity-slider').value : currentIntensity;
-      const renderBtnText = document.getElementById('render-btn-text');
-      if (renderBtnText) {
-        renderBtnText.textContent = `Master & Export ${modeUpper} Track (Level: ${sliderVal}/10)`;
-      }
+
+      let tag = modeUpper;
+      if (currentStemFilter === 'vocal_remover') tag += ' • Karaoke';
+      else if (currentStemFilter === 'vocal_isolate') tag += ' • Acapella';
+      else if (currentStemFilter === 'bass_remove') tag += ' • No-Bass';
+      else if (currentStemFilter === 'bass_only') tag += ' • Bass-Only';
+
+      if (currentSpecialPreset === 'slowed_reverb') tag += ' • Slowed';
+      else if (currentSpecialPreset === 'nightcore') tag += ' • Nightcore';
+      else if (currentSpecialPreset === '432hz') tag += ' • 432Hz';
+
+      if (currentPitch !== 0) tag += ` • ${currentPitch > 0 ? '+' : ''}${currentPitch}ST`;
+
+      const durLabel = currentPreviewDuration === 'full' ? 'Full Track' : `${currentPreviewDuration}s`;
       const previewText = document.getElementById('preview-btn-text');
-      if (previewText && !previewText.textContent.includes("…")) {
-        previewText.textContent = `Render 15s Quick Preview (${modeUpper} · ${sliderVal}/10)`;
+      if (previewText && !previewText.textContent.includes('…')) {
+        previewText.textContent = `Audition ${durLabel} Preview (${tag})`;
+      }
+
+      const renderText = document.getElementById('render-btn-text');
+      if (renderText) {
+        renderText.textContent = `Master & Export Track (${tag})`;
       }
     }
 
+    // ── AUDITION / QUICK PREVIEW CALL ──
     async function generateQuickPreview() {
       const url = document.getElementById('url-input').value.trim();
       if (!url && !currentUploadId) {
-        alert("Please load a URL or upload a track first.");
+        alert('Please load a URL or upload a track first.');
         return;
       }
 
@@ -1102,28 +1159,33 @@
       const previewPill = document.getElementById('preview-status-pill');
 
       previewBtn.disabled = true;
-      previewText.textContent = "Rendering 15s preview…";
+      previewText.textContent = 'Rendering audition preview…';
       previewSpinner.classList.remove('hidden');
-      previewPill.textContent = "Processing…";
+      if (previewPill) previewPill.textContent = 'DSP Rendering…';
 
       const sliderIntensity = parseInt(document.getElementById('intensity-slider').value) || currentIntensity;
       const bassBoost = document.getElementById('bass-boost').checked;
       const reverb = document.getElementById('hall-reverb').checked;
+      const clarity = document.getElementById('clarity-boost').checked;
+      const startTime = document.getElementById('preview-start-time').value.trim() || '00:00';
 
       const payload = {
         url: url,
         upload_id: currentUploadId,
-        mode: "audio",
-        audio_codec: "mp3",
+        mode: 'audio',
+        audio_codec: 'mp3',
         spatial_audio: currentSpatialMode,
         spatial_intensity: sliderIntensity,
-        spatial_speed: currentSpeed,
+        spatial_speed_sec: currentSpeedSec,
         spatial_bass: bassBoost,
         spatial_reverb: reverb,
+        spatial_clarity: clarity,
+        spatial_pitch: currentPitch,
+        spatial_preset: currentSpecialPreset,
+        stem_filter: currentStemFilter,
         is_preview: true,
-        trim: true,
-        start_time: "00:00",
-        end_time: "00:15"
+        preview_duration: currentPreviewDuration,
+        start_time: startTime
       };
 
       try {
@@ -1133,24 +1195,23 @@
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error("Status " + res.status);
+        if (!res.ok) throw new Error('Status ' + res.status);
         const data = await res.json();
-        if (!data.success) throw new Error(data.error || "Failed");
+        if (!data.success) throw new Error(data.error || 'Failed to start audition');
 
         pollPreviewJob(data.job_id);
 
       } catch (err) {
-        alert("Preview failed: " + err.message);
+        alert('Audition failed: ' + err.message);
         previewBtn.disabled = false;
-        previewText.textContent = "Render 15s Quick Preview";
+        updateButtonLabels();
         previewSpinner.classList.add('hidden');
-        previewPill.textContent = "Audition error";
+        if (previewPill) previewPill.textContent = 'Audition Error';
       }
     }
 
     function pollPreviewJob(jobId) {
       const previewBtn = document.getElementById('btn-quick-preview');
-      const previewText = document.getElementById('preview-btn-text');
       const previewSpinner = document.getElementById('preview-spinner');
       const previewPill = document.getElementById('preview-status-pill');
 
@@ -1165,31 +1226,35 @@
           if (job.status === 'finished') {
             clearInterval(interval);
             previewBtn.disabled = false;
-            previewText.textContent = "Re-Audition 15s Preview";
             previewSpinner.classList.add('hidden');
-            previewPill.textContent = `${currentSpatialMode.toUpperCase()} at Level ${document.getElementById('intensity-slider').value}/10`;
+            updateButtonLabels();
+
+            if (previewPill) previewPill.textContent = 'Audition Ready 🎧';
 
             const player = document.getElementById('live-audio-preview');
             player.src = `/api/file/${jobId}`;
             player.load();
-            player.play().catch(e => console.log("Autoplay prevented", e));
+            player.play().catch(e => console.log('Autoplay prevented', e));
+
           } else if (job.status === 'error') {
             clearInterval(interval);
-            alert("Preview render error: " + (job.error || "Unknown"));
+            alert('Preview render error: ' + (job.error || 'FFmpeg mastering error'));
             previewBtn.disabled = false;
-            previewText.textContent = "Render 15s Quick Preview";
             previewSpinner.classList.add('hidden');
+            updateButtonLabels();
+            if (previewPill) previewPill.textContent = 'Error';
           }
         } catch (e) {
-          console.error("Preview poll", e);
+          console.error('Preview poll', e);
         }
-      }, 800);
+      }, 700);
     }
 
+    // ── MASTER & EXPORT FINAL HIGH-RES TRACK ──
     async function startSpatialRender() {
       const url = document.getElementById('url-input').value.trim();
       if (!url && !currentUploadId) {
-        alert("Please load a URL or upload a file first.");
+        alert('Please load a URL or upload a file first.');
         return;
       }
 
@@ -1198,19 +1263,23 @@
       const endTime = document.getElementById('trim-end').value;
       const bassBoost = document.getElementById('bass-boost').checked;
       const reverb = document.getElementById('hall-reverb').checked;
-
+      const clarity = document.getElementById('clarity-boost').checked;
       const sliderIntensity = parseInt(document.getElementById('intensity-slider').value) || currentIntensity;
 
       const payload = {
         url: url,
         upload_id: currentUploadId,
-        mode: "audio",
-        audio_codec: "mp3",
+        mode: 'audio',
+        audio_codec: 'mp3',
         spatial_audio: currentSpatialMode,
         spatial_intensity: sliderIntensity,
-        spatial_speed: currentSpeed,
+        spatial_speed_sec: currentSpeedSec,
         spatial_bass: bassBoost,
         spatial_reverb: reverb,
+        spatial_clarity: clarity,
+        spatial_pitch: currentPitch,
+        spatial_preset: currentSpecialPreset,
+        stem_filter: currentStemFilter,
         trim: isTrim,
         start_time: startTime,
         end_time: endTime
@@ -1218,9 +1287,16 @@
 
       const renderBtn = document.getElementById('render-btn');
       renderBtn.disabled = true;
-      document.getElementById('progress-card').classList.remove('hidden');
+
+      const progressCard = document.getElementById('progress-card');
+      const progressTitle = document.getElementById('progress-title');
+      const progressBar = document.getElementById('progress-bar-fill');
+      const progressPercent = document.getElementById('progress-percent');
+      const progressDetail = document.getElementById('progress-detail');
+
+      progressCard.classList.remove('hidden');
+      progressCard.scrollIntoView({ behavior: 'smooth' });
       document.getElementById('success-card').classList.add('hidden');
-      document.getElementById('progress-card').scrollIntoView({ behavior: 'smooth' });
 
       try {
         const res = await fetch('/api/download', {
@@ -1229,22 +1305,29 @@
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error("Server responded with error " + res.status);
+        if (!res.ok) throw new Error('Status ' + res.status);
         const data = await res.json();
-        if (!data.success) throw new Error(data.error || "Failed");
+        if (!data.success) throw new Error(data.error || 'Server error');
 
-        trackProgress(data.job_id);
+        activeJobId = data.job_id;
+        pollRenderJob(activeJobId);
+
       } catch (err) {
-        alert("Render error: " + err.message);
+        alert('Export failed: ' + err.message);
         renderBtn.disabled = false;
-        document.getElementById('progress-card').classList.add('hidden');
+        progressCard.classList.add('hidden');
       }
     }
 
-    function trackProgress(jobId) {
-      if (pollInterval) clearInterval(pollInterval);
+    function pollRenderJob(jobId) {
+      const renderBtn = document.getElementById('render-btn');
+      const progressCard = document.getElementById('progress-card');
+      const progressBar = document.getElementById('progress-bar-fill');
+      const progressPercent = document.getElementById('progress-percent');
+      const progressDetail = document.getElementById('progress-detail');
+      const successCard = document.getElementById('success-card');
 
-      pollInterval = setInterval(async () => {
+      const interval = setInterval(async () => {
         try {
           const res = await fetch(`/api/status/${jobId}`);
           if (!res.ok) return;
@@ -1252,74 +1335,42 @@
           if (!data.success) return;
 
           const job = data.job;
-          const status = job.status;
-          const percent = job.progress || 0;
+          progressBar.style.width = `${job.progress || 0}%`;
+          progressPercent.textContent = `${job.progress || 0}%`;
+          progressDetail.textContent = job.message || 'Processing...';
 
-          document.getElementById('progress-percent').textContent = `${Math.round(percent)}%`;
-          document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+          if (job.status === 'finished') {
+            clearInterval(interval);
+            progressCard.classList.add('hidden');
+            renderBtn.disabled = false;
 
-          if (status === 'downloading') {
-            document.getElementById('progress-title').textContent = "Downloading audio stream…";
-            document.getElementById('progress-detail').textContent = `Speed: ${job.speed || '--'} · ETA: ${job.eta || '--'}`;
-          } else if (status === 'processing') {
-            document.getElementById('progress-title').textContent = job.message || "Mastering Spatial DSP…";
-            document.getElementById('progress-detail').textContent = `Applying 360° pan (Level: ${document.getElementById('intensity-slider').value}/10) & room reflections…`;
-          } else if (status === 'finished') {
-            clearInterval(pollInterval);
-            finishJob(jobId, job);
-          } else if (status === 'error') {
-            clearInterval(pollInterval);
-            alert("Spatial audio processing failed: " + (job.error || "Unknown error"));
-            document.getElementById('render-btn').disabled = false;
-            document.getElementById('progress-card').classList.add('hidden');
+            document.getElementById('success-filename').textContent = `${job.filename} (${job.file_size})`;
+            const dlBtn = document.getElementById('download-trigger-btn');
+            dlBtn.href = `/api/file/${jobId}`;
+            dlBtn.setAttribute('download', job.filename);
+
+            const finalPlayer = document.getElementById('audio-final-player');
+            finalPlayer.src = `/api/file/${jobId}`;
+            finalPlayer.load();
+
+            successCard.classList.remove('hidden');
+            successCard.scrollIntoView({ behavior: 'smooth' });
+
+          } else if (job.status === 'error') {
+            clearInterval(interval);
+            alert('Export failed: ' + (job.error || 'Unknown mastering error'));
+            progressCard.classList.add('hidden');
+            renderBtn.disabled = false;
           }
         } catch (e) {
-          console.error("Poll error", e);
+          console.error('Job polling error', e);
         }
-      }, 1000);
+      }, 900);
     }
 
-    function finishJob(jobId, job) {
-      document.getElementById('progress-card').classList.add('hidden');
-      document.getElementById('success-card').classList.remove('hidden');
-      
-      const renderBtn = document.getElementById('render-btn');
-      renderBtn.disabled = false;
-      const currentVal = document.getElementById('intensity-slider').value;
-      document.getElementById('render-btn-text').textContent = `Re-Master Track with Current Settings (${currentSpatialMode.toUpperCase()} · Level ${currentVal}/10)`;
-
-      document.getElementById('success-filename').textContent = `${job.filename} (${job.file_size || ''})`;
-      
-      const fileUrl = `/api/file/${jobId}`;
-      const downloadBtn = document.getElementById('download-trigger-btn');
-      downloadBtn.href = fileUrl;
-      downloadBtn.setAttribute('download', job.filename);
-
-      const player = document.getElementById('audio-final-player');
-      player.src = fileUrl;
-      player.load();
-
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.setAttribute('download', job.filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      document.getElementById('success-card').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function scrollToSettings() {
-      document.getElementById('studio-card').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(window.location.search);
-      const url = params.get('url');
-      if (url) {
-        document.getElementById('url-input').value = url;
-        fetchTrackInfo();
-      }
+    // Keyboard Shortcuts: Enter key triggers loading or preview
+    document.getElementById('url-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') inspectUrl();
     });
   </script>
 </body>
