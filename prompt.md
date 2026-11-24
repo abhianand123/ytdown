@@ -140,3 +140,21 @@ Alongside the Neumorphic visual redesign, the audio processing backend was rebui
 * **Permanent Gateway**: [https://abhianand123.github.io/ytdown/](https://abhianand123.github.io/ytdown/)
 * **Live Studio Direct**: [https://uni-winds-driving-stream.trycloudflare.com/8d](https://uni-winds-driving-stream.trycloudflare.com/8d)
 * **Main Downloader**: [https://uni-winds-driving-stream.trycloudflare.com/](https://uni-winds-driving-stream.trycloudflare.com/)
+
+
+---
+
+## 6. Three Dedicated Studios Overview
+
+1. **Universal Media Downloader & Clipper** (/):
+   - Fast stream extraction, container conversion, clip trimming bounds, and quick stem removal toggles.
+2. **8D / 16D Spatial Audio Studio** (/8d):
+   - 360° binaural circular & multi-axis elevation orbit, typed rotation speed in seconds, azimuth visualizer radar, acoustic EQ shelf, and spatial reverb.
+3. **Stem Splitter & Track Isolator Studio** (/stems):
+   - Dedicated third section for musical stem extraction:
+     - 🎤 **Vocal Remover / Karaoke**: Center phase cancellation removing lead voice and lyrics.
+     - 🗣️ **Acapella / Vocal Isolator**: Formant bandpass isolating speech & vocal presence.
+     - 🎸 **Bass Remover**: 240Hz high-pass cutting sub-bass, 808s, and basslines.
+     - 🔊 **Sub-Bass Isolator**: 220Hz low-pass groove extraction.
+     - 🥁 **Drums & Rhythm Only**: Transient rhythm & beat focus.
+     - 🎹 **Complete Instrumental**: Full backing music with vocal cancellation and harmonic sheen.
