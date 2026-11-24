@@ -240,6 +240,7 @@
         <div class="flex items-center gap-2 nm-inset-sm p-1.5 self-start sm:self-auto">
           <button id="tab-url-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold active" onclick="switchSourceTab('url')">Web URL</button>
           <button id="tab-upload-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold" onclick="switchSourceTab('upload')">Upload File</button>
+          <button id="tab-demucs-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold text-purple-400" onclick="switchSourceTab('demucs')">🧠 Meta Demucs AI</button>
         </div>
       </div>
 
@@ -272,6 +273,70 @@
           </div>
           <div class="w-full bg-[var(--nm-surface-dark)] h-2 rounded-full overflow-hidden nm-inset-sm">
             <div id="upload-bar-fill" class="bg-[var(--color-accent)] h-full transition-all duration-200" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demucs AI Input Deck -->
+      <div id="demucs-input-section" class="space-y-4 hidden">
+        <div id="demucs-drop-zone" class="nm-inset-box p-8 text-center cursor-pointer hover:border-purple-500 transition-all border-2 border-dashed border-purple-500/30 rounded-xl">
+          <input type="file" id="demucs-file-input" accept=".mp3,.wav,.m4a,.flac" class="hidden">
+          <div class="space-y-2">
+            <div class="w-12 h-12 mx-auto rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+            </div>
+            <p id="demucs-file-label" class="text-xs sm:text-sm font-semibold">Select audio file for Meta Demucs AI (.mp3, .wav, .m4a, .flac)</p>
+            <p class="text-[11px] text-[var(--color-text-muted)] font-mono">HTDemucs 2-Stem Transformer • Max 100MB</p>
+          </div>
+        </div>
+
+        <button id="demucs-submit-btn" onclick="submitDemucsSeparation()" class="nm-btn w-full py-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border border-purple-500/40 text-purple-400 hover:border-purple-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span id="demucs-submit-text">Separate Vocals & Instrumental (Meta Demucs AI)</span>
+          <svg id="demucs-submit-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+        </button>
+
+        <!-- Demucs Loading / Progress State -->
+        <div id="demucs-progress-card" class="nm-card-sm p-4 hidden space-y-2 text-center border border-purple-500/20">
+          <div class="flex items-center justify-center gap-2 text-xs font-mono text-purple-400">
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+            <span>Demucs HTDemucs transformer is isolating stems...</span>
+          </div>
+          <p class="text-[11px] text-[var(--color-text-muted)]">Deep neural network separation in progress. Please wait a few seconds...</p>
+        </div>
+
+        <!-- Demucs Dual Audio Results -->
+        <div id="demucs-results-deck" class="space-y-4 hidden">
+          <!-- Vocals Player -->
+          <div class="nm-card-sm p-4 space-y-2 border-l-4 border-cyan-400">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                <span>🗣️ Isolated Vocals (Acapella)</span>
+              </span>
+              <a id="demucs-vocals-dl" href="#" download="vocals.wav" class="nm-btn px-3 py-1 text-[11px] font-bold text-cyan-400 flex items-center gap-1 border border-cyan-500/30">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download WAV
+              </a>
+            </div>
+            <div class="nm-inset-sm p-2">
+              <audio id="demucs-vocals-player" controls class="w-full h-8" crossorigin="anonymous"></audio>
+            </div>
+          </div>
+
+          <!-- Instrumental Player -->
+          <div class="nm-card-sm p-4 space-y-2 border-l-4 border-[var(--color-accent)]">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-[var(--color-accent)] flex items-center gap-1.5">
+                <span>🎸 Instrumental (No Vocals)</span>
+              </span>
+              <a id="demucs-inst-dl" href="#" download="no_vocals.wav" class="nm-btn px-3 py-1 text-[11px] font-bold text-[var(--color-accent)] flex items-center gap-1 border border-[var(--color-accent)]/30">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download WAV
+              </a>
+            </div>
+            <div class="nm-inset-sm p-2">
+              <audio id="demucs-inst-player" controls class="w-full h-8" crossorigin="anonymous"></audio>
+            </div>
           </div>
         </div>
       </div>
@@ -611,19 +676,105 @@
     function switchSourceTab(tab) {
       const urlBtn = document.getElementById('tab-url-btn');
       const uploadBtn = document.getElementById('tab-upload-btn');
+      const demucsBtn = document.getElementById('tab-demucs-btn');
       const urlSec = document.getElementById('url-input-section');
       const uploadSec = document.getElementById('upload-input-section');
+      const demucsSec = document.getElementById('demucs-input-section');
+
+      [urlBtn, uploadBtn, demucsBtn].forEach(b => b?.classList.remove('active'));
+      [urlSec, uploadSec, demucsSec].forEach(s => s?.classList.add('hidden'));
 
       if (tab === 'url') {
         urlBtn.classList.add('active');
-        uploadBtn.classList.remove('active');
         urlSec.classList.remove('hidden');
-        uploadSec.classList.add('hidden');
-      } else {
+      } else if (tab === 'upload') {
         uploadBtn.classList.add('active');
-        urlBtn.classList.remove('active');
         uploadSec.classList.remove('hidden');
-        urlSec.classList.add('hidden');
+      } else if (tab === 'demucs') {
+        demucsBtn.classList.add('active');
+        demucsSec.classList.remove('hidden');
+      }
+    }
+
+    // Demucs AI Handling
+    let demucsSelectedFile = null;
+    const demucsDropZone = document.getElementById('demucs-drop-zone');
+    const demucsFileInput = document.getElementById('demucs-file-input');
+    const demucsFileLabel = document.getElementById('demucs-file-label');
+
+    if (demucsDropZone && demucsFileInput) {
+      demucsDropZone.addEventListener('click', () => demucsFileInput.click());
+      demucsDropZone.addEventListener('dragover', (e) => { e.preventDefault(); demucsDropZone.style.borderColor = '#c084fc'; });
+      demucsDropZone.addEventListener('dragleave', () => { demucsDropZone.style.borderColor = ''; });
+      demucsDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        demucsDropZone.style.borderColor = '';
+        if (e.dataTransfer.files.length) handleDemucsFile(e.dataTransfer.files[0]);
+      });
+      demucsFileInput.addEventListener('change', () => {
+        if (demucsFileInput.files.length) handleDemucsFile(demucsFileInput.files[0]);
+      });
+    }
+
+    function handleDemucsFile(file) {
+      demucsSelectedFile = file;
+      demucsFileLabel.innerHTML = `<span class="font-bold text-purple-400">${file.name}</span> (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    }
+
+    async function submitDemucsSeparation() {
+      if (!demucsSelectedFile) {
+        alert('Please choose an audio file (.mp3, .wav, .m4a, .flac) for Demucs separation.');
+        return;
+      }
+
+      const btn = document.getElementById('demucs-submit-btn');
+      const btnText = document.getElementById('demucs-submit-text');
+      const spinner = document.getElementById('demucs-submit-spinner');
+      const progressCard = document.getElementById('demucs-progress-card');
+      const resultsDeck = document.getElementById('demucs-results-deck');
+
+      btn.disabled = true;
+      btnText.textContent = 'Processing with Demucs AI…';
+      spinner.classList.remove('hidden');
+      progressCard.classList.remove('hidden');
+      resultsDeck.classList.add('hidden');
+
+      const formData = new FormData();
+      formData.append('file', demucsSelectedFile);
+
+      try {
+        const res = await fetch('/api/separate', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: 'HTTP ' + res.status }));
+          throw new Error(errData.detail || 'Demucs separation failed');
+        }
+
+        const data = await res.json();
+
+        // Connect audio players and download buttons
+        const vocalsPlayer = document.getElementById('demucs-vocals-player');
+        vocalsPlayer.src = data.vocals_url;
+        document.getElementById('demucs-vocals-dl').href = data.vocals_url;
+
+        const instPlayer = document.getElementById('demucs-inst-player');
+        instPlayer.src = data.instrumental_url;
+        document.getElementById('demucs-inst-dl').href = data.instrumental_url;
+
+        progressCard.classList.add('hidden');
+        resultsDeck.classList.remove('hidden');
+        resultsDeck.scrollIntoView({ behavior: 'smooth' });
+
+      } catch (err) {
+        alert('Demucs Error: ' + err.message);
+        progressCard.classList.add('hidden');
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Separate Vocals & Instrumental (Meta Demucs AI)';
+        spinner.classList.add('hidden');
       }
     }
 
