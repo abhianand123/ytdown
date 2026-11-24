@@ -158,19 +158,25 @@ def build_spatial_audio_filter(
     """
     filters = []
 
-    # 1. Stem Filtering (Karaoke vocal cancel / Vocal isolation / Bass cut / Bass only)
-    if stem_filter == "vocal_remover":
+    # 1. Stem Filtering (Karaoke vocal cancel / Vocal isolation / Bass cut / Bass only / Drums / Instrumental)
+    if stem_filter in ("vocal_remover", "karaoke"):
         # Center-channel vocal cancellation in stereo mix with kick recovery
         filters.append("pan=stereo|c0=c0-c1|c1=c1-c0,bass=g=3.5:f=120")
-    elif stem_filter == "vocal_isolate":
+    elif stem_filter in ("vocal_isolate", "acapella"):
         # Formant bandpass isolating human vocal presence
-        filters.append("highpass=f=200,lowpass=f=4200")
-    elif stem_filter == "bass_remove":
+        filters.append("highpass=f=200,lowpass=f=4200,volume=1.3")
+    elif stem_filter in ("bass_remove", "no_bass"):
         # Complete low-end bass & sub cut
         filters.append("highpass=f=250,bass=g=-24:f=180")
-    elif stem_filter == "bass_only":
+    elif stem_filter in ("bass_only", "bass_isolate"):
         # Sub-bass extraction
         filters.append("lowpass=f=220,bass=g=5:f=100")
+    elif stem_filter in ("drums_only", "percussion"):
+        # Transient kick & snare rhythm extraction
+        filters.append("highpass=f=60,equalizer=f=120:width_type=h:width=60:g=4,equalizer=f=3500:width_type=h:width=1200:g=3")
+    elif stem_filter in ("instrumental",):
+        # Full instrumental backing track with high-frequency air
+        filters.append("pan=stereo|c0=c0-c1|c1=c1-c0,bass=g=4:f=110,treble=g=2.5:f=7000")
 
     # 2. Pitch Shifting (± Semitones using rubberband)
     try:
@@ -319,6 +325,12 @@ def index():
 @app.route("/8d")
 def spatial_studio():
     return render_template("8d.html")
+
+@app.route("/stems")
+@app.route("/splitter")
+@app.route("/remover")
+def stem_studio():
+    return render_template("stems.html")
 
 @app.route("/api/upload", methods=["POST"])
 def upload_audio():
@@ -764,14 +776,18 @@ def run_download_task(job_id: str, url: str, options: dict):
             tag_parts = []
             if spatial_mode:
                 tag_parts.append(spatial_mode.upper())
-            if stem_filter == "vocal_remover":
+            if stem_filter in ("vocal_remover", "karaoke"):
                 tag_parts.append("KARAOKE")
-            elif stem_filter == "vocal_isolate":
+            elif stem_filter in ("vocal_isolate", "acapella"):
                 tag_parts.append("ACAPELLA")
-            elif stem_filter == "bass_remove":
+            elif stem_filter in ("bass_remove", "no_bass"):
                 tag_parts.append("NO-BASS")
-            elif stem_filter == "bass_only":
+            elif stem_filter in ("bass_only", "bass_isolate"):
                 tag_parts.append("BASS-ONLY")
+            elif stem_filter in ("drums_only", "percussion"):
+                tag_parts.append("DRUMS")
+            elif stem_filter in ("instrumental",):
+                tag_parts.append("INSTRUMENTAL")
             if spatial_preset == "slowed_reverb":
                 tag_parts.append("SLOWED+REVERB")
             elif spatial_preset == "nightcore":
