@@ -552,24 +552,55 @@
           <p class="text-[11px] text-[var(--color-text-muted)]">Hardware equalizers, spatial reverb, pitch shifter, and viral mix signatures</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <!-- Deep Bass Preservation -->
-          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer">
+        <!-- Separate Dedicated Toggle Cards for Vocals & Bass (Direct Quick Toggles) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- 1. Vocal Remover / Karaoke (Remove Lyrics) -->
+          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer border border-[var(--color-accent-subtle)] hover:border-[var(--color-accent)] transition-all">
             <div>
-              <div class="text-xs font-bold">Deep Bass Warmth</div>
-              <div class="text-[10px] text-[var(--color-text-muted)]">+4.5dB warm analog sub-shelf</div>
+              <div class="text-xs font-bold flex items-center gap-1.5 text-[var(--color-accent)]">
+                <span>🎤 Vocal Remover (Karaoke)</span>
+                <span class="text-[9px] uppercase px-1.5 py-0.2 rounded bg-[var(--color-accent-subtle)] font-mono font-bold">Lyrics Out</span>
+              </div>
+              <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Phase cancel center lyrics & lead vocals</div>
             </div>
             <div class="relative">
-              <input type="checkbox" id="bass-boost" checked class="sr-only">
+              <input type="checkbox" id="vocal-remover-toggle" onchange="toggleVocalRemover(this.checked)" class="sr-only">
               <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
             </div>
           </label>
 
-          <!-- Concert Hall 3D Reverb -->
-          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer">
+          <!-- 2. Bass Remover (Take Out Bass) -->
+          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer border border-[var(--nm-border)] hover:border-amber-500 transition-all">
+            <div>
+              <div class="text-xs font-bold flex items-center gap-1.5 text-amber-500">
+                <span>🎸 Bass Remover (Cut Bass)</span>
+                <span class="text-[9px] uppercase px-1.5 py-0.2 rounded bg-amber-500/10 font-mono font-bold">Low-End Out</span>
+              </div>
+              <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">240Hz high-pass cuts basslines & 808s</div>
+            </div>
+            <div class="relative">
+              <input type="checkbox" id="bass-remover-toggle" onchange="toggleBassRemover(this.checked)" class="sr-only">
+              <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
+            </div>
+          </label>
+
+          <!-- 3. Deep Bass Warmth -->
+          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer border border-[var(--nm-border)]">
+            <div>
+              <div class="text-xs font-bold">Deep Bass Warmth</div>
+              <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">+4.5dB warm analog sub-shelf</div>
+            </div>
+            <div class="relative">
+              <input type="checkbox" id="bass-boost" checked onchange="toggleBassBoost(this.checked)" class="sr-only">
+              <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
+            </div>
+          </label>
+
+          <!-- 4. Concert Hall 3D Reverb -->
+          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer border border-[var(--nm-border)]">
             <div>
               <div class="text-xs font-bold">Concert Hall Reverb</div>
-              <div class="text-[10px] text-[var(--color-text-muted)]">3D spatial room reflections</div>
+              <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">3D spatial room reflections</div>
             </div>
             <div class="relative">
               <input type="checkbox" id="hall-reverb" checked class="sr-only">
@@ -577,11 +608,11 @@
             </div>
           </label>
 
-          <!-- Air & Crystal Clarity Boost -->
-          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer">
+          <!-- 5. Air & Crystal Clarity Boost -->
+          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer border border-[var(--nm-border)]">
             <div>
               <div class="text-xs font-bold">Air & Crystal Clarity</div>
-              <div class="text-[10px] text-[var(--color-text-muted)]">+3.5dB harmonic presence sheen</div>
+              <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">+3.5dB harmonic presence sheen</div>
             </div>
             <div class="relative">
               <input type="checkbox" id="clarity-boost" class="sr-only">
@@ -996,6 +1027,13 @@
       const activeId = activeMap[filter] || 'stem-full';
       document.getElementById(activeId)?.classList.add('active');
 
+      // Keep dedicated toggle switches in exact sync
+      const vToggle = document.getElementById('vocal-remover-toggle');
+      if (vToggle) vToggle.checked = (filter === 'vocal_remover');
+
+      const bToggle = document.getElementById('bass-remover-toggle');
+      if (bToggle) bToggle.checked = (filter === 'bass_remove');
+
       // Auto-adjust bass-boost toggle for consistency
       const bassBoostEl = document.getElementById('bass-boost');
       if (filter === 'bass_remove' && bassBoostEl) {
@@ -1003,6 +1041,28 @@
       }
 
       updateButtonLabels();
+    }
+
+    function toggleVocalRemover(checked) {
+      if (checked) {
+        setStemFilter('vocal_remover');
+      } else {
+        if (currentStemFilter === 'vocal_remover') setStemFilter('none');
+      }
+    }
+
+    function toggleBassRemover(checked) {
+      if (checked) {
+        setStemFilter('bass_remove');
+      } else {
+        if (currentStemFilter === 'bass_remove') setStemFilter('none');
+      }
+    }
+
+    function toggleBassBoost(checked) {
+      if (checked && currentStemFilter === 'bass_remove') {
+        setStemFilter('none');
+      }
     }
 
     // ── SPATIAL MODE SELECTION ──
