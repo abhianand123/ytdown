@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-OmniDownloader - Cloudflare Tunnel & GitHub Pages Bridge Manager
+OmniDownloader - Cloudflare Tunnel & GitHub Pages Bridge Manager (Self-Healing Edition)
 - 100% Free, NO credit card needed
 - Launches Cloudflare Tunnel (trycloudflare.com)
-- Automatically captures the new URL
-- Updates 'url.txt' in your GitHub Pages repo via GitHub API
+- Active Watchdog: Pings public tunnel every 30s to detect drops/disconnects
+- If tunnel ever drops or phone changes Wi-Fi, automatically restarts & pushes new URL to GitHub
 - Rotates before 24-hr limit (every 20 hours) or on phone reboot
 """
 
@@ -17,8 +17,14 @@ import shutil
 import base64
 import logging
 import subprocess
+import threading
 from pathlib import Path
 from datetime import datetime
+
+# Ensure Termux bin directories are in PATH when executed via root / su / subshells
+termux_bin = "/data/data/com.termux/files/usr/bin"
+if os.path.isdir(termux_bin) and termux_bin not in os.environ.get("PATH", ""):
+    os.environ["PATH"] = f"{termux_bin}:{os.environ.get('PATH', '')}"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,9 +39,9 @@ URL_FILE = BASE_DIR / "current_url.txt"
 
 def load_config():
     defaults = {
-        "github_repo": "",          # e.g. "abhianand/ytdown"
-        "github_token": "",         # GitHub Personal Access Token (starts with ghp_ or github_pat_)
-        "rotation_hours": 20,       # Auto-refresh tunnel before 24h limit
+        "github_repo": "abhianand123/ytdown",
+        "github_token": os.environ.get("GITHUB_TOKEN", ""),
+        "rotation_hours": 20,
         "port": 5000
     }
     if CONFIG_FILE.exists():
@@ -69,7 +75,7 @@ def update_github_pages(repo, token, active_url):
         # Step 2: Push new URL
         content_b64 = base64.b64encode(active_url.strip().encode("utf-8")).decode("utf-8")
         payload = {
-            "message": f"Update tunnel URL to {active_url}",
+            "message": f"Auto-update tunnel URL to {active_url}",
             "content": content_b64
         }
         if sha:
@@ -78,7 +84,7 @@ def update_github_pages(repo, token, active_url):
         put_res = requests.put(api_url, headers=headers, json=payload, timeout=15)
         if put_res.status_code in (200, 201):
             logger.info("=" * 60)
-            logger.info(f"✔ GITHUB PAGES UPDATED SUCCESSFULLY!")
+            logger.info("✔ GITHUB PAGES UPDATED SUCCESSFULLY!")
             logger.info(f"   Permanent Link: https://{repo.split('/')[0]}.github.io/{repo.split('/')[1]}/")
             logger.info(f"   Now points to: {active_url}")
             logger.info("=" * 60)
@@ -90,10 +96,27 @@ def update_github_pages(repo, token, active_url):
         logger.warning(f"Failed to update GitHub Pages: {e}")
         return False
 
+def check_tunnel_health(active_url):
+    """Pings the public Cloudflare tunnel to verify it is reachable from the outside world."""
+    if not active_url:
+        return False
+    try:
+        import requests
+        r = requests.get(f"{active_url}/api/health", timeout=8)
+        return r.status_code == 200
+    except Exception as e:
+        logger.warning(f"Tunnel health ping check failed: {e}")
+        return False
+
 def run_tunnel_process(port):
     """Starts cloudflared with termux-chroot on Android or directly on PC."""
     is_android = "android" in sys.platform or os.path.exists("/data/data/com.termux")
     has_chroot = shutil.which("termux-chroot") is not None
+
+    # Kill any zombie instances first
+    if is_android:
+        os.system("killall -9 proot cloudflared 2>/dev/null")
+        time.sleep(1)
 
     if is_android and has_chroot:
         cmd = ["termux-chroot", "cloudflared", "tunnel", "--url", f"http://localhost:{port}"]
@@ -129,6 +152,13 @@ def watch_and_capture_url(proc, config):
             URL_FILE.write_text(active_url)
             # Update GitHub Pages
             update_github_pages(config.get("github_repo"), config.get("github_token"), active_url)
+
+            # Drain remaining output in background so pipe buffer never fills
+            def _drain():
+                try:
+                    for _ in iter(proc.stdout.readline, ''): pass
+                except: pass
+            threading.Thread(target=_drain, daemon=True).start()
             break
 
     return active_url
@@ -138,11 +168,8 @@ def main():
     port = config.get("port", 5000)
     rotation_seconds = int(config.get("rotation_hours", 20)) * 3600
 
-    logger.info("OmniDownloader Bridge Manager started.")
-    if config.get("github_repo"):
-        logger.info(f"Target GitHub Pages: {config['github_repo']}")
-    else:
-        logger.info("Tip: Set 'github_repo' and 'github_token' in tunnel_config.json for automatic redirect!")
+    logger.info("OmniDownloader Self-Healing Bridge Manager started.")
+    logger.info(f"Target GitHub Pages: {config.get('github_repo')}")
 
     while True:
         try:
@@ -153,32 +180,58 @@ def main():
                 continue
 
             active_url = watch_and_capture_url(proc, config)
+            if not active_url:
+                logger.error("Failed to capture tunnel URL. Retrying in 5s...")
+                proc.kill()
+                os.system("killall -9 proot cloudflared 2>/dev/null")
+                time.sleep(5)
+                continue
 
-            # Monitor process until rotation time or crash
+            # Give Cloudflare edge DNS 10 seconds to propagate globally
+            time.sleep(10)
+
+            fail_count = 0
+
+            # Active Watchdog Loop: Checks health every 30 seconds
             while True:
+                time.sleep(30)
                 elapsed = time.time() - start_time
                 if elapsed >= rotation_seconds:
                     logger.info("Rotation threshold reached (20 hours). Refreshing tunnel...")
-                    proc.terminate()
-                    try: proc.wait(timeout=5)
-                    except: proc.kill()
                     break
 
                 ret = proc.poll()
                 if ret is not None:
-                    logger.warning(f"Tunnel disconnected (exit {ret}). Re-spawning in 5s...")
-                    time.sleep(5)
+                    logger.warning(f"Tunnel process died (exit {ret}). Re-spawning...")
                     break
 
-                time.sleep(5)
+                # Self-healing check: Verify the tunnel is reachable from the internet
+                if not check_tunnel_health(active_url):
+                    fail_count += 1
+                    logger.warning(f"Public tunnel ping failed ({fail_count}/2)...")
+                    if fail_count >= 2:
+                        logger.error("Tunnel is down or de-registered! Forcing auto-restart...")
+                        break
+                else:
+                    fail_count = 0
+
+            # Cleanup before spawning new tunnel
+            try:
+                proc.kill()
+            except:
+                pass
+            os.system("killall -9 proot cloudflared 2>/dev/null")
+            time.sleep(2)
 
         except KeyboardInterrupt:
             logger.info("Stopping Bridge Manager...")
-            if 'proc' in locals() and proc and proc.poll() is None:
-                proc.terminate()
+            try: proc.kill()
+            except: pass
+            os.system("killall -9 proot cloudflared 2>/dev/null")
             break
         except Exception as e:
             logger.error(f"Error in tunnel loop: {e}")
+            os.system("killall -9 proot cloudflared 2>/dev/null")
             time.sleep(5)
 
 if __name__ == "__main__":
