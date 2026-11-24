@@ -17,6 +17,11 @@ import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta
 
+# Ensure Termux bin directories are in PATH when executed via root / su
+termux_bin = "/data/data/com.termux/files/usr/bin"
+if os.path.isdir(termux_bin) and termux_bin not in os.environ.get("PATH", ""):
+    os.environ["PATH"] = f"{termux_bin}:{os.environ.get('PATH', '')}"
+
 from flask import Flask, request, jsonify, render_template, send_file, Response
 import yt_dlp
 
@@ -131,52 +136,112 @@ def dr_priority(f) -> int:
 
 
 # ── Spatial 8D / 16D Audio Engine ───────────────────────────────
-def build_spatial_audio_filter(mode="8d", intensity=7, speed="normal", bass_boost=True, reverb=True):
+def build_spatial_audio_filter(
+    mode="8d",
+    intensity=7,
+    speed_sec=8.0,
+    bass_boost=True,
+    reverb=True,
+    clarity_boost=False,
+    pitch_semitones=0,
+    tempo=1.0,
+    preset="none",
+    stem_filter="none"
+):
     """
-    Constructs an FFmpeg audio filtergraph for 8D or 16D binaural spatial audio.
-    Simulates sound rotating 360 degrees around the listener's head with psychoacoustic reverb.
+    Constructs a comprehensive, hardware-grade FFmpeg audio filtergraph.
+    Supports 8D / 16D spatial panning, stem filters (vocal remover / karaoke, vocal isolate, bass remover, sub-bass focus),
+    pitch & tempo adjustment, acoustic enhancements (deep bass shelf, air clarity), and viral presets (slowed+reverb, nightcore, 432Hz).
     """
-    speed_map = {
-        "slow": 0.08,      # ~12.5 seconds per 360 rotation
-        "normal": 0.125,   # ~8 seconds per 360 rotation
-        "fast": 0.20       # ~5 seconds per 360 rotation
-    }
-    hz = speed_map.get(str(speed).lower(), 0.125)
-    if mode == "16d":
-        hz *= 1.6  # 16D orbits faster in multi-axis trajectory
-
-    # Intensity (1-10 or string mild/medium/intense)
-    try:
-        val = float(intensity)
-        val = max(1.0, min(10.0, val))
-        width = 0.5 + (val / 10.0) * 0.5   # Maps 1..10 -> 0.55 .. 1.0
-    except (ValueError, TypeError):
-        intensity_map = {"mild": 0.65, "medium": 0.85, "intense": 1.0}
-        width = intensity_map.get(str(intensity).lower(), 0.85)
-
     filters = []
 
-    # 1. 360-degree Binaural Pan Rotation via apulsator (Left-Right 180° phase offset)
-    filters.append(f"apulsator=mode=sine:hz={hz:.3f}:width={width:.2f}:offset_l=0:offset_r=0.5")
+    # 1. Stem Filtering (Karaoke vocal cancel / Vocal isolation / Bass cut / Bass only)
+    if stem_filter == "vocal_remover":
+        # Center-channel vocal cancellation in stereo mix with kick recovery
+        filters.append("pan=stereo|c0=c0-c1|c1=c1-c0,bass=g=3.5:f=120")
+    elif stem_filter == "vocal_isolate":
+        # Formant bandpass isolating human vocal presence
+        filters.append("highpass=f=200,lowpass=f=4200")
+    elif stem_filter == "bass_remove":
+        # Complete low-end bass & sub cut
+        filters.append("highpass=f=250,bass=g=-24:f=180")
+    elif stem_filter == "bass_only":
+        # Sub-bass extraction
+        filters.append("lowpass=f=220,bass=g=5:f=100")
 
-    # 2. Stereo Field Enhancement
-    if mode == "16d":
-        filters.append("stereowiden=delay=25:feedback=0.4:crossfeed=0.3:drymix=0.7")
-    else:
-        filters.append("extrastereo=m=1.25")
+    # 2. Pitch Shifting (± Semitones using rubberband)
+    try:
+        pitch = float(pitch_semitones)
+    except (ValueError, TypeError):
+        pitch = 0.0
 
-    # 3. Acoustic Hall / Spatial Reverb
-    if reverb:
-        if mode == "16d":
-            filters.append("aecho=0.8:0.85:35|55:0.25|0.2")
+    if abs(pitch) >= 0.1:
+        pitch_factor = 2.0 ** (pitch / 12.0)
+        filters.append(f"rubberband=pitch={pitch_factor:.5f}")
+
+    # 3. Special Sound Signatures / Presets
+    if preset == "slowed_reverb":
+        filters.append("atempo=0.88,asetrate=44100*0.92,aresample=44100")
+    elif preset == "nightcore":
+        filters.append("asetrate=44100*1.25,aresample=44100")
+    elif preset == "432hz":
+        ratio = 432.0 / 440.0
+        filters.append(f"asetrate=44100*{ratio:.6f},atempo={1.0/ratio:.6f},aresample=44100")
+    elif tempo != 1.0:
+        try:
+            t_val = float(tempo)
+            if 0.5 <= t_val <= 2.0 and abs(t_val - 1.0) > 0.02:
+                filters.append(f"atempo={t_val:.2f}")
+        except (ValueError, TypeError):
+            pass
+
+    # 4. Acoustic Enhancements: Bass Warmth & Air Clarity
+    if bass_boost and stem_filter != "bass_remove":
+        filters.append("bass=g=4.5:f=110:w=0.6")
+
+    if clarity_boost and stem_filter != "bass_only":
+        filters.append("treble=g=3.5:f=8000,crystalizer=i=1.5")
+
+    # 5. Spatial Orbit: 8D or 16D Binaural Panning
+    mode_lower = str(mode).lower() if mode else "none"
+    if mode_lower in ("8d", "16d"):
+        try:
+            if isinstance(speed_sec, str):
+                s_map = {"fast": 5.0, "normal": 8.0, "slow": 14.0}
+                sec = s_map.get(speed_sec.lower(), 8.0)
+            else:
+                sec = float(speed_sec)
+            sec = max(1.0, min(60.0, sec))
+        except (ValueError, TypeError):
+            sec = 8.0
+
+        hz = 1.0 / sec
+
+        try:
+            val = float(intensity)
+            val = max(1.0, min(10.0, val))
+            amount = 0.5 + (val / 10.0) * 0.5
+        except (ValueError, TypeError):
+            amount = 0.85
+
+        if mode_lower == "16d":
+            hz_16d = hz * 1.5
+            filters.append("stereowiden=delay=25:feedback=0.38:crossfeed=0.32:drymix=0.75")
+            filters.append(f"apulsator=mode=sine:hz={hz_16d:.4f}:amount={amount:.2f}:offset_l=0:offset_r=0.5")
         else:
-            filters.append("aecho=0.8:0.8:40|55:0.2|0.15")
+            filters.append("stereowiden=delay=18:feedback=0.25:crossfeed=0.25:drymix=0.8")
+            filters.append(f"apulsator=mode=sine:hz={hz:.4f}:amount={amount:.2f}:offset_l=0:offset_r=0.5")
 
-    # 4. Bass Preservation & Warmth
-    if bass_boost:
-        filters.append("bass=g=3.5:f=110")
+    # 6. Psychoacoustic Reverb
+    if reverb and stem_filter not in ("bass_only", "vocal_isolate"):
+        if mode_lower == "16d":
+            filters.append("aecho=0.8:0.88:45|90:0.3|0.2")
+        elif preset == "slowed_reverb":
+            filters.append("aecho=0.8:0.85:80|1200:0.35|0.18")
+        else:
+            filters.append("aecho=0.8:0.85:50|80:0.25|0.15")
 
-    return ",".join(filters)
+    return ",".join(filters) if filters else "anull"
 
 def embed_artwork_into_mp3(mp3_path: Path, thumb_path: Path):
     """Embeds thumbnail artwork into an MP3 file using mutagen."""
@@ -466,9 +531,14 @@ def run_download_task(job_id: str, url: str, options: dict):
         audio_codec = "mp3"
 
     spatial_intensity = options.get("spatial_intensity", 7)
-    spatial_speed = options.get("spatial_speed", "normal")
+    spatial_speed_sec = options.get("spatial_speed_sec") or options.get("spatial_speed", 8.0)
     spatial_bass = options.get("spatial_bass", True)
     spatial_reverb = options.get("spatial_reverb", True)
+    spatial_clarity = options.get("spatial_clarity", False)
+    spatial_pitch = options.get("spatial_pitch", 0)
+    spatial_tempo = options.get("spatial_tempo", 1.0)
+    spatial_preset = options.get("spatial_preset", "none")
+    stem_filter = options.get("stem_filter", "none")
 
     format_id = options.get("format_id")
     has_audio = options.get("has_audio", False)
@@ -598,9 +668,18 @@ def run_download_task(job_id: str, url: str, options: dict):
         upload_id = options.get("upload_id")
         is_preview = bool(options.get("is_preview", False))
         if is_preview:
-            is_trim = True
-            start_sec = 0.0
-            end_sec = 15.0
+            preview_dur = options.get("preview_duration", 30)
+            if str(preview_dur).lower() in ("full", "0", "all", "none"):
+                is_trim = False
+            else:
+                try:
+                    dur = max(5, int(preview_dur))
+                except (ValueError, TypeError):
+                    dur = 30
+                is_trim = True
+                if start_sec is None:
+                    start_sec = 0.0
+                end_sec = start_sec + dur
 
         if upload_id:
             with JOBS_LOCK:
@@ -666,22 +745,59 @@ def run_download_task(job_id: str, url: str, options: dict):
                     final_file.unlink(missing_ok=True)
                     final_file = trimmed_file
 
-        # Fast 8D / 16D Spatial Audio Rendering (Binaural 360 Pan, Hall Reverb, Bass Boost)
+        # Comprehensive Audio Effects & Spatial Mastering
         spatial_mode = "16d" if (spatial_audio == "16d") else ("8d" if (spatial_audio == "8d") else None)
-        if spatial_mode and ffmpeg_available:
+        has_effects = (
+            bool(spatial_mode)
+            or (stem_filter not in (None, "", "none"))
+            or (spatial_preset not in (None, "", "none"))
+            or (abs(float(spatial_pitch or 0)) >= 0.1)
+            or bool(spatial_clarity)
+            or bool(spatial_bass)
+            or bool(spatial_reverb)
+        )
+
+        if has_effects and ffmpeg_available:
+            tag_parts = []
+            if spatial_mode:
+                tag_parts.append(spatial_mode.upper())
+            if stem_filter == "vocal_remover":
+                tag_parts.append("KARAOKE")
+            elif stem_filter == "vocal_isolate":
+                tag_parts.append("ACAPELLA")
+            elif stem_filter == "bass_remove":
+                tag_parts.append("NO-BASS")
+            elif stem_filter == "bass_only":
+                tag_parts.append("BASS-ONLY")
+            if spatial_preset == "slowed_reverb":
+                tag_parts.append("SLOWED+REVERB")
+            elif spatial_preset == "nightcore":
+                tag_parts.append("NIGHTCORE")
+            elif spatial_preset == "432hz":
+                tag_parts.append("432Hz")
+            if abs(float(spatial_pitch or 0)) >= 0.1:
+                tag_parts.append(f"PITCH_{int(spatial_pitch):+d}")
+
+            tag_str = f"[{'+'.join(tag_parts)}]" if tag_parts else "[MASTERED]"
+
             with JOBS_LOCK:
                 JOBS[job_id]["status"] = "processing"
-                JOBS[job_id]["message"] = f"Mastering {spatial_mode.upper()} Spatial Audio (Intensity: {spatial_intensity}/10)..."
+                JOBS[job_id]["message"] = f"Mastering {tag_str} Audio (Speed: {spatial_speed_sec}s, Intensity: {spatial_intensity}/10)..."
 
             spatial_filter = build_spatial_audio_filter(
-                mode=spatial_mode,
+                mode=spatial_mode or "none",
                 intensity=spatial_intensity,
-                speed=spatial_speed,
+                speed_sec=spatial_speed_sec,
                 bass_boost=spatial_bass,
-                reverb=spatial_reverb
+                reverb=spatial_reverb,
+                clarity_boost=spatial_clarity,
+                pitch_semitones=spatial_pitch,
+                tempo=spatial_tempo,
+                preset=spatial_preset,
+                stem_filter=stem_filter
             )
             clean_stem = safe_filename(final_file.stem, 70)
-            spatial_out = job_folder / f"[{spatial_mode.upper()}] {clean_stem}.mp3"
+            spatial_out = job_folder / f"{tag_str} {clean_stem}.mp3"
             spatial_cmd = [
                 "ffmpeg", "-y",
                 "-i", str(final_file),
@@ -691,18 +807,20 @@ def run_download_task(job_id: str, url: str, options: dict):
                 "-movflags", "+faststart",
                 str(spatial_out)
             ]
-            logger.info(f"Rendering {spatial_mode.upper()} audio: {' '.join(spatial_cmd)}")
+            logger.info(f"Rendering {tag_str} audio: {' '.join(spatial_cmd)}")
             res_spatial = subprocess.run(spatial_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if res_spatial.returncode == 0 and spatial_out.exists() and spatial_out.stat().st_size > 0:
-                # Find any thumbnail in job folder to re-embed
                 thumbs = [f for f in job_folder.iterdir() if f.is_file() and f.suffix.lower() in ('.jpg', '.jpeg', '.png', '.webp') and f != final_file and f != spatial_out]
                 if thumbs:
                     embed_artwork_into_mp3(spatial_out, thumbs[0])
                 final_file.unlink(missing_ok=True)
                 final_file = spatial_out
-                logger.info(f"{spatial_mode.upper()} spatial render complete: {final_file.name} ({format_bytes(final_file.stat().st_size)})")
+                logger.info(f"{tag_str} audio render complete: {final_file.name} ({format_bytes(final_file.stat().st_size)})")
             else:
-                logger.warning(f"Spatial audio render failed ({res_spatial.stderr}). Keeping standard audio.")
+                err_msg = res_spatial.stderr[-400:] if res_spatial.stderr else "FFmpeg render error"
+                logger.error(f"Audio mastering failed: {err_msg}")
+                if is_preview:
+                    raise Exception(f"Audio processing error: {err_msg}")
 
         with JOBS_LOCK:
             JOBS[job_id]["status"] = "finished"
@@ -763,9 +881,23 @@ def generate_preview():
 
     job_id = "prev_" + uuid.uuid4().hex[:8]
     data["is_preview"] = True
-    data["trim"] = True
-    data["start_time"] = "00:00"
-    data["end_time"] = "00:15"
+
+    preview_dur = data.get("preview_duration", 30)
+    start_raw = data.get("start_time", "00:00")
+    start_sec = parse_time_seconds(start_raw) or 0
+
+    if str(preview_dur).lower() in ("full", "0", "all", "none"):
+        data["trim"] = False
+        duration_label = "Full track"
+    else:
+        try:
+            dur = max(5, int(preview_dur))
+        except (ValueError, TypeError):
+            dur = 30
+        data["trim"] = True
+        data["start_time"] = format_seconds(start_sec)
+        data["end_time"] = format_seconds(start_sec + dur)
+        duration_label = f"{dur}s"
 
     with JOBS_LOCK:
         JOBS[job_id] = {
@@ -774,7 +906,7 @@ def generate_preview():
             "progress": 0,
             "speed": "",
             "eta": "",
-            "message": "Generating fast 15s 8D preview...",
+            "message": f"Rendering {duration_label} audio audition preview...",
             "filename": None,
             "file_path": None,
             "file_size": None,
