@@ -481,26 +481,26 @@
           <p class="text-[11px] text-[var(--color-text-muted)]">Isolate or eliminate specific music stems (vocals, basslines, or backing track)</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
           <button id="stem-full" class="nm-btn p-3 text-left active" onclick="setStemFilter('none')">
-            <div class="text-xs font-bold">Full Mix</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Original all stems</div>
+            <div class="text-xs font-bold">🎼 Full Mix</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Original instruments & vocals</div>
+          </button>
+          <button id="stem-vocal-isolate" class="nm-btn p-3 text-left border border-cyan-500/40" onclick="setStemFilter('vocal_isolate')">
+            <div class="text-xs font-bold text-cyan-400">🗣️ Human Voice Only</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Voice alone • Mutes music</div>
           </button>
           <button id="stem-vocal-remover" class="nm-btn p-3 text-left" onclick="setStemFilter('vocal_remover')">
             <div class="text-xs font-bold text-[var(--color-accent)]">🎤 Vocal Remover</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Karaoke • Lyrics Out</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Karaoke • Keeps music & bass</div>
           </button>
-          <button id="stem-vocal-isolate" class="nm-btn p-3 text-left" onclick="setStemFilter('vocal_isolate')">
-            <div class="text-xs font-bold">🗣️ Vocal Isolator</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Acapella • Voice Only</div>
+          <button id="stem-instrumental" class="nm-btn p-3 text-left" onclick="setStemFilter('instrumental')">
+            <div class="text-xs font-bold text-emerald-400">🎸 Clean Backing Track</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Pure music • Zero lyrics</div>
           </button>
           <button id="stem-bass-remove" class="nm-btn p-3 text-left" onclick="setStemFilter('bass_remove')">
-            <div class="text-xs font-bold text-amber-500">🎸 Bass Remover</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Mute Bass & Sub-End</div>
-          </button>
-          <button id="stem-bass-only" class="nm-btn p-3 text-left" onclick="setStemFilter('bass_only')">
-            <div class="text-xs font-bold">🔊 Sub-Bass Only</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Bassline Groove Focus</div>
+            <div class="text-xs font-bold text-amber-500">🔇 Remove Boomy Bass</div>
+            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Cuts 808s • Clear dialogue</div>
           </button>
         </div>
       </div>
@@ -779,7 +779,15 @@
     let currentPreviewDuration = 30;
     let currentUploadId = null;
     let activeJobId = null;
+    let activePollInterval = null;
     let activeSourceTab = 'url';
+
+    function clearAnyActivePoll() {
+      if (activePollInterval) {
+        clearInterval(activePollInterval);
+        activePollInterval = null;
+      }
+    }
 
     // ── THEME SWITCHER ──
     function initTheme() {
@@ -1016,15 +1024,15 @@
     // ── STEM FILTER SELECTION ("Take out bass or lyrics") ──
     function setStemFilter(filter) {
       currentStemFilter = filter;
-      const stems = ['stem-full', 'stem-vocal-remover', 'stem-vocal-isolate', 'stem-bass-remove', 'stem-bass-only'];
+      const stems = ['stem-full', 'stem-vocal-remover', 'stem-vocal-isolate', 'stem-instrumental', 'stem-bass-remove'];
       stems.forEach(s => document.getElementById(s)?.classList.remove('active'));
 
       const activeMap = {
         'none': 'stem-full',
         'vocal_remover': 'stem-vocal-remover',
         'vocal_isolate': 'stem-vocal-isolate',
-        'bass_remove': 'stem-bass-remove',
-        'bass_only': 'stem-bass-only'
+        'instrumental': 'stem-instrumental',
+        'bass_remove': 'stem-bass-remove'
       };
 
       const activeId = activeMap[filter] || 'stem-full';
@@ -1185,10 +1193,10 @@
       const sliderVal = document.getElementById('intensity-slider') ? document.getElementById('intensity-slider').value : currentIntensity;
 
       let tag = modeUpper;
-      if (currentStemFilter === 'vocal_remover') tag += ' • Karaoke';
-      else if (currentStemFilter === 'vocal_isolate') tag += ' • Acapella';
+      if (currentStemFilter === 'vocal_isolate') tag += ' • Voice Only';
+      else if (currentStemFilter === 'vocal_remover') tag += ' • Karaoke';
+      else if (currentStemFilter === 'instrumental') tag += ' • Clean Music';
       else if (currentStemFilter === 'bass_remove') tag += ' • No-Bass';
-      else if (currentStemFilter === 'bass_only') tag += ' • Bass-Only';
 
       if (currentSpecialPreset === 'slowed_reverb') tag += ' • Slowed';
       else if (currentSpecialPreset === 'nightcore') tag += ' • Nightcore';
@@ -1210,6 +1218,7 @@
 
     // ── AUDITION / QUICK PREVIEW CALL ──
     async function generateQuickPreview() {
+      clearAnyActivePoll();
       const url = document.getElementById('url-input').value.trim();
       if (!url && !currentUploadId) {
         alert('Please load a URL or upload a track first.');
@@ -1274,20 +1283,33 @@
     }
 
     function pollPreviewJob(jobId) {
+      clearAnyActivePoll();
       const previewBtn = document.getElementById('btn-quick-preview');
       const previewSpinner = document.getElementById('preview-spinner');
       const previewPill = document.getElementById('preview-status-pill');
 
-      const interval = setInterval(async () => {
+      let pollCount = 0;
+      activePollInterval = setInterval(async () => {
+        pollCount++;
+        if (pollCount > 90) { // ~65s safety timeout
+          clearAnyActivePoll();
+          previewBtn.disabled = false;
+          previewSpinner.classList.add('hidden');
+          updateButtonLabels();
+          if (previewPill) previewPill.textContent = 'Timeout';
+          alert('Audition took too long to render. Please try again.');
+          return;
+        }
+
         try {
-          const res = await fetch(`/api/status/${jobId}`);
+          const res = await fetch(`/api/status/${jobId}?t=${Date.now()}`);
           if (!res.ok) return;
           const data = await res.json();
           if (!data.success) return;
 
           const job = data.job;
           if (job.status === 'finished') {
-            clearInterval(interval);
+            clearAnyActivePoll();
             previewBtn.disabled = false;
             previewSpinner.classList.add('hidden');
             updateButtonLabels();
@@ -1295,12 +1317,12 @@
             if (previewPill) previewPill.textContent = 'Audition Ready 🎧';
 
             const player = document.getElementById('live-audio-preview');
-            player.src = `/api/file/${jobId}`;
+            player.src = `/api/file/${jobId}?t=${Date.now()}`;
             player.load();
             player.play().catch(e => console.log('Autoplay prevented', e));
 
           } else if (job.status === 'error') {
-            clearInterval(interval);
+            clearAnyActivePoll();
             alert('Preview render error: ' + (job.error || 'FFmpeg mastering error'));
             previewBtn.disabled = false;
             previewSpinner.classList.add('hidden');
@@ -1315,6 +1337,7 @@
 
     // ── MASTER & EXPORT FINAL HIGH-RES TRACK ──
     async function startSpatialRender() {
+      clearAnyActivePoll();
       const url = document.getElementById('url-input').value.trim();
       if (!url && !currentUploadId) {
         alert('Please load a URL or upload a file first.');
@@ -1352,7 +1375,6 @@
       renderBtn.disabled = true;
 
       const progressCard = document.getElementById('progress-card');
-      const progressTitle = document.getElementById('progress-title');
       const progressBar = document.getElementById('progress-bar-fill');
       const progressPercent = document.getElementById('progress-percent');
       const progressDetail = document.getElementById('progress-detail');
@@ -1383,6 +1405,7 @@
     }
 
     function pollRenderJob(jobId) {
+      clearAnyActivePoll();
       const renderBtn = document.getElementById('render-btn');
       const progressCard = document.getElementById('progress-card');
       const progressBar = document.getElementById('progress-bar-fill');
@@ -1390,9 +1413,19 @@
       const progressDetail = document.getElementById('progress-detail');
       const successCard = document.getElementById('success-card');
 
-      const interval = setInterval(async () => {
+      let pollCount = 0;
+      activePollInterval = setInterval(async () => {
+        pollCount++;
+        if (pollCount > 130) { // ~115s safety timeout
+          clearAnyActivePoll();
+          renderBtn.disabled = false;
+          progressCard.classList.add('hidden');
+          alert('Render took too long. Please try again.');
+          return;
+        }
+
         try {
-          const res = await fetch(`/api/status/${jobId}`);
+          const res = await fetch(`/api/status/${jobId}?t=${Date.now()}`);
           if (!res.ok) return;
           const data = await res.json();
           if (!data.success) return;
@@ -1403,7 +1436,7 @@
           progressDetail.textContent = job.message || 'Processing...';
 
           if (job.status === 'finished') {
-            clearInterval(interval);
+            clearAnyActivePoll();
             progressCard.classList.add('hidden');
             renderBtn.disabled = false;
 
@@ -1413,18 +1446,23 @@
             dlBtn.setAttribute('download', job.filename);
 
             const finalPlayer = document.getElementById('audio-final-player');
-            finalPlayer.src = `/api/file/${jobId}`;
+            finalPlayer.src = `/api/file/${jobId}?t=${Date.now()}`;
             finalPlayer.load();
 
             successCard.classList.remove('hidden');
             successCard.scrollIntoView({ behavior: 'smooth' });
 
           } else if (job.status === 'error') {
-            clearInterval(interval);
+            clearAnyActivePoll();
             alert('Export failed: ' + (job.error || 'Unknown mastering error'));
             progressCard.classList.add('hidden');
             renderBtn.disabled = false;
           }
+        } catch (e) {
+          console.error('Job polling error', e);
+        }
+      }, 900);
+    }
         } catch (e) {
           console.error('Job polling error', e);
         }
