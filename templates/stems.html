@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stem Splitter & Track Isolator Studio | OmniDownloader Pro</title>
+  <meta name="description" content="Isolate or remove musical stems: Vocal Remover (Karaoke), Acapella (Vocals Only), Bass Remover, Sub-Bass Isolator, Drums & Instrumental with live headphone audition.">
+
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ── DUAL NEUMORPHIC COLOR PALETTE ENGINE ── */
+    :root {
+      /* Dark Industrial Obsidian & Signal Orange (Teenage Engineering Hardware) */
+      --nm-bg: #151517;
+      --nm-surface: #1e1e22;
+      --nm-surface-light: #242429;
+      --nm-surface-dark: #18181b;
+      --nm-border: rgba(255, 255, 255, 0.05);
+
+      --nm-shadow-light: rgba(255, 255, 255, 0.05);
+      --nm-shadow-dark: rgba(0, 0, 0, 0.65);
+
+      --color-accent: #f05a24;
+      --color-accent-hover: #ff6b35;
+      --color-accent-glow: rgba(240, 90, 36, 0.28);
+      --color-accent-subtle: rgba(240, 90, 36, 0.12);
+
+      --color-text: #f5f5f4;
+      --color-text-muted: #8e8e93;
+      --color-text-dim: #5c5c62;
+
+      --nm-raised: -6px -6px 14px var(--nm-shadow-light), 6px 6px 14px var(--nm-shadow-dark);
+      --nm-raised-sm: -3px -3px 8px var(--nm-shadow-light), 3px 3px 8px var(--nm-shadow-dark);
+      --nm-raised-btn: -4px -4px 10px var(--nm-shadow-light), 4px 4px 10px var(--nm-shadow-dark);
+      --nm-inset: inset 4px 4px 8px var(--nm-shadow-dark), inset -4px -4px 8px var(--nm-shadow-light);
+      --nm-inset-sm: inset 2px 2px 5px var(--nm-shadow-dark), inset -2px -2px 5px var(--nm-shadow-light);
+    }
+
+    [data-theme="light"] {
+      /* Classic Dribbble Soft Clay & Terracotta */
+      --nm-bg: #e0e5ec;
+      --nm-surface: #e0e5ec;
+      --nm-surface-light: #eaeff6;
+      --nm-surface-dark: #d5dae2;
+      --nm-border: rgba(255, 255, 255, 0.6);
+
+      --nm-shadow-light: #ffffff;
+      --nm-shadow-dark: #a3b1c6;
+
+      --color-accent: #ea580c;
+      --color-accent-hover: #c2410c;
+      --color-accent-glow: rgba(234, 88, 12, 0.25);
+      --color-accent-subtle: rgba(234, 88, 12, 0.12);
+
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-text-dim: #94a3b8;
+
+      --nm-raised: -6px -6px 14px var(--nm-shadow-light), 6px 6px 14px var(--nm-shadow-dark);
+      --nm-raised-sm: -3px -3px 8px var(--nm-shadow-light), 3px 3px 8px var(--nm-shadow-dark);
+      --nm-raised-btn: -4px -4px 10px var(--nm-shadow-light), 4px 4px 10px var(--nm-shadow-dark);
+      --nm-inset: inset 4px 4px 8px var(--nm-shadow-dark), inset -4px -4px 8px var(--nm-shadow-light);
+      --nm-inset-sm: inset 2px 2px 5px var(--nm-shadow-dark), inset -2px -2px 5px var(--nm-shadow-light);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      background-color: var(--nm-bg);
+      color: var(--color-text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Tactile Neumorphic Classes */
+    .nm-card {
+      background: var(--nm-surface);
+      box-shadow: var(--nm-raised);
+      border-radius: 24px;
+      border: 1px solid var(--nm-border);
+    }
+    .nm-card-sm {
+      background: var(--nm-surface);
+      box-shadow: var(--nm-raised-sm);
+      border-radius: 16px;
+      border: 1px solid var(--nm-border);
+    }
+    .nm-inset-box {
+      background: var(--nm-surface-dark);
+      box-shadow: var(--nm-inset);
+      border-radius: 16px;
+      border: 1px solid var(--nm-border);
+    }
+    .nm-inset-sm {
+      background: var(--nm-surface-dark);
+      box-shadow: var(--nm-inset-sm);
+      border-radius: 12px;
+    }
+
+    .nm-btn {
+      background: linear-gradient(145deg, var(--nm-surface-light), var(--nm-surface-dark));
+      box-shadow: var(--nm-raised-btn);
+      border-radius: 14px;
+      border: 1px solid var(--nm-border);
+      color: var(--color-text);
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .nm-btn:hover {
+      box-shadow: -2px -2px 6px var(--nm-shadow-light), 2px 2px 6px var(--nm-shadow-dark);
+    }
+    .nm-btn:active, .nm-btn.active {
+      box-shadow: var(--nm-inset-sm);
+      background: var(--nm-surface-dark);
+      color: var(--color-accent);
+    }
+
+    .nm-btn-primary {
+      background: var(--color-accent);
+      color: #ffffff;
+      box-shadow: 0 4px 14px var(--color-accent-glow), var(--nm-raised-btn);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-weight: 700;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nm-btn-primary:hover {
+      background: var(--color-accent-hover);
+      box-shadow: 0 6px 20px var(--color-accent-glow);
+    }
+    .nm-btn-primary:active {
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+      transform: translateY(1px);
+    }
+
+    /* Inputs */
+    input[type=text], input[type=number] {
+      background: var(--nm-surface-dark);
+      box-shadow: var(--nm-inset-sm);
+      color: var(--color-text);
+      border: 1px solid var(--nm-border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    input[type=text]:focus, input[type=number]:focus {
+      border-color: var(--color-accent);
+      box-shadow: var(--nm-inset-sm), 0 0 0 2px var(--color-accent-subtle);
+    }
+
+    /* Stem Card Active State */
+    .stem-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .stem-card.selected {
+      border-color: var(--color-accent) !important;
+      background: var(--nm-surface-dark) !important;
+      box-shadow: var(--nm-inset-sm) !important;
+    }
+
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-6 lg:p-10 flex flex-col items-center">
+
+  <div class="w-full max-w-4xl mx-auto space-y-6">
+
+    <!-- Global Top Navigation Bar Across All 3 Studios -->
+    <header class="flex flex-col sm:flex-row items-center justify-between nm-card p-4 sm:p-5 gap-3">
+      <div class="flex items-center gap-3">
+        <a href="/" class="nm-btn p-2 sm:px-3 sm:py-2 flex items-center gap-1.5 text-xs font-semibold" title="Universal Downloader">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Downloader</span>
+        </a>
+        <a href="/8d" class="nm-btn p-2 sm:px-3 sm:py-2 flex items-center gap-1.5 text-xs font-semibold" title="8D / 16D Spatial Studio">
+          <span>🎧 8D Studio</span>
+        </a>
+        <span class="text-xs font-bold text-[var(--color-accent)] px-3 py-1.5 rounded-lg nm-inset-sm flex items-center gap-1.5 border border-[var(--color-accent-subtle)]">
+          <span>🎛️ Stem Studio</span>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3 self-end sm:self-auto">
+        <div id="status-pill" class="text-[11px] font-mono px-3 py-1.5 rounded-full nm-inset-sm text-[var(--color-text-muted)] border border-[var(--nm-border)]">
+          DSP Ready
+        </div>
+
+        <!-- Light / Dark Theme Switcher -->
+        <button id="theme-toggle-btn" class="nm-btn p-2.5 rounded-xl flex items-center justify-center text-[var(--color-text)]" aria-label="Toggle visual theme">
+          <svg id="theme-icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Studio Hero Banner -->
+    <div class="nm-card p-5 sm:p-7 space-y-2 text-center sm:text-left">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div>
+          <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight flex items-center justify-center sm:justify-start gap-2.5">
+            <span>Stem Splitter & Track Isolator</span>
+            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border border-[var(--color-accent)] font-bold">Section 3</span>
+          </h1>
+          <p class="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
+            Dedicated studio to remove or isolate vocals, lyrics, basslines, 808s, and instruments from any song.
+          </p>
+        </div>
+        <div class="hidden sm:flex items-center gap-2 font-mono text-[11px] text-[var(--color-text-muted)] nm-inset-sm px-3 py-2">
+          <span>Phase-Cancellation</span>
+          <span>•</span>
+          <span>Formant Filters</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 1: Audio Source Selection (URL or Upload) -->
+    <section class="nm-card p-5 sm:p-7 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold tracking-tight">Step 1: Choose Your Audio Source</h2>
+          <p class="text-xs text-[var(--color-text-muted)]">Paste any YouTube, music URL or upload your audio file</p>
+        </div>
+        <div class="flex items-center gap-2 nm-inset-sm p-1.5 self-start sm:self-auto">
+          <button id="tab-url-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold active" onclick="switchSourceTab('url')">Web URL</button>
+          <button id="tab-upload-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold" onclick="switchSourceTab('upload')">Upload File</button>
+        </div>
+      </div>
+
+      <!-- URL Input Deck -->
+      <div id="url-input-section" class="space-y-3">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input type="text" id="url-input" placeholder="Paste YouTube link, SoundCloud track, or music URL..." class="flex-1 text-xs sm:text-sm pl-4 pr-4 py-3.5" autocomplete="off">
+          <button id="inspect-btn" onclick="inspectUrl()" class="nm-btn-primary px-6 py-3.5 text-xs sm:text-sm flex items-center justify-center gap-2">
+            <span id="inspect-btn-text">Load Track</span>
+            <svg id="inspect-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- File Upload Deck -->
+      <div id="upload-input-section" class="space-y-3 hidden">
+        <div id="drop-zone" class="nm-inset-box p-8 text-center cursor-pointer hover:border-[var(--color-accent)] transition-all border-2 border-dashed border-[var(--nm-border)]">
+          <input type="file" id="file-input" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg,.aac,.opus,.webm" class="hidden">
+          <div class="space-y-2">
+            <svg class="w-10 h-10 mx-auto text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <p class="text-xs sm:text-sm font-semibold">Drop your audio file here (.mp3, .wav, .flac, .m4a)</p>
+            <p class="text-[11px] text-[var(--color-text-muted)]">Processes with pristine audio fidelity on device</p>
+          </div>
+        </div>
+
+        <div id="upload-progress-box" class="hidden nm-card-sm p-4 space-y-2">
+          <div class="flex justify-between text-xs font-mono">
+            <span id="upload-status-text">Uploading audio...</span>
+            <span id="upload-percent-text">0%</span>
+          </div>
+          <div class="w-full bg-[var(--nm-surface-dark)] h-2 rounded-full overflow-hidden nm-inset-sm">
+            <div id="upload-bar-fill" class="bg-[var(--color-accent)] h-full transition-all duration-200" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: Track Loaded & Stem Processing Rack -->
+    <section id="stem-console" class="nm-card p-5 sm:p-7 space-y-7 hidden">
+
+      <!-- Loaded Track Info Bar -->
+      <div class="flex items-center justify-between pb-5 border-b border-[var(--nm-border)]">
+        <div class="flex items-center gap-4">
+          <img id="track-thumb" src="" alt="Cover" class="w-16 h-16 rounded-xl object-cover nm-inset-sm border border-[var(--nm-border)]">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="track-badge" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-bold">READY</span>
+              <span id="track-duration" class="text-[11px] font-mono text-[var(--color-text-muted)]">--:--</span>
+            </div>
+            <h3 id="track-title" class="text-sm sm:text-base font-bold truncate max-w-md mt-1">Audio Loaded</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stem Operation Selector Grid (What to Remove / Isolate) -->
+      <div class="space-y-4">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold tracking-tight">Step 2: Choose Stem Operation</h3>
+          <p class="text-xs text-[var(--color-text-muted)]">Select which track element you want to remove or isolate</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+
+          <!-- 1. Vocal Remover / Karaoke (Remove Lyrics) -->
+          <div id="card-vocal-remover" class="stem-card nm-card-sm p-4 border-2 border-[var(--color-accent)] selected" onclick="selectStemMode('vocal_remover')">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🎤</span>
+                <span class="text-xs font-bold text-[var(--color-accent)]">Vocal Remover</span>
+              </div>
+              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-bold">Karaoke</span>
+            </div>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+              Phase cancellation removes center lead vocals and lyrics while preserving beat, bass, and instrumental.
+            </p>
+          </div>
+
+          <!-- 2. Acapella / Vocal Isolator (Vocals Only) -->
+          <div id="card-vocal-isolate" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('vocal_isolate')">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🗣️</span>
+                <span class="text-xs font-bold">Vocal Isolator</span>
+              </div>
+              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-bold">Acapella</span>
+            </div>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+              Formant bandpass isolates the human vocal frequencies (200Hz - 4.2kHz) for clean vocal chops & remixing.
+            </p>
+          </div>
+
+          <!-- 3. Bass Remover (Take Out Bass / Mute Low-End) -->
+          <div id="card-bass-remove" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('bass_remove')">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🎸</span>
+                <span class="text-xs font-bold text-amber-500">Bass Remover</span>
+              </div>
+              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">Mute 808s</span>
+            </div>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+              240Hz high-pass filter cuts sub-bass, 808s, and bass guitar, leaving melody, guitar, piano, and chords.
+            </p>
+          </div>
+
+          <!-- 4. Sub-Bass & 808 Isolator (Bass Only) -->
+          <div id="card-bass-only" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('bass_only')">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🔊</span>
+                <span class="text-xs font-bold">Sub-Bass Isolator</span>
+              </div>
+              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded nm-inset-sm text-[var(--color-text-muted)] font-bold">Sub Groove</span>
+            </div>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+              Low-pass filter extracts only the kick punch, 808 glide, and sub-bass frequencies below 220Hz.
+            </p>
+          </div>
+
+          <!-- 5. Drums & Percussion Focus -->
+          <div id="card-drums-only" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('drums_only')">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🥁</span>
+                <span class="text-xs font-bold">Drums & Rhythm</span>
+              </div>
+              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded nm-inset-sm text-[var(--color-text-muted)] font-bold">Beats Only</span>
+            </div>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+              Dynamic transient enhancement focusing on kick drum punch, snare snap, and claps.
+            </p>
+          </div>
+
+          <!-- 6. Instrumental Master -->
+          <div id="card-instrumental" class="stem-card nm-card-sm p-4 border-2 border-transparent" onclick="selectStemMode('instrumental')">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🎹</span>
+                <span class="text-xs font-bold text-emerald-400">Full Instrumental</span>
+              </div>
+              <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">Music Only</span>
+            </div>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+              Full backing music with high-frequency air sheen and complete center vocal removal.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Step 3: Live Headphone Audition Section -->
+      <div class="nm-inset-box p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold tracking-tight flex items-center gap-2">
+              <span>Live Headphone Audition</span>
+              <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Real-Time DSP</span>
+            </h4>
+            <p class="text-[11px] text-[var(--color-text-muted)]">Audition the processed stem before committing to full download</p>
+          </div>
+
+          <!-- Audition Duration Selector -->
+          <div class="flex items-center gap-1.5 nm-inset-sm p-1 self-start sm:self-auto">
+            <button id="dur-15" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setAuditionDuration(15)">15s</button>
+            <button id="dur-30" class="nm-btn px-2.5 py-1 text-[11px] active" onclick="setAuditionDuration(30)">30s</button>
+            <button id="dur-60" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setAuditionDuration(60)">60s</button>
+            <button id="dur-full" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setAuditionDuration('full')">Full Track</button>
+          </div>
+        </div>
+
+        <!-- Start Time Offset -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-[var(--color-text-muted)] font-mono text-[11px]">Start Audition At:</span>
+          <input type="text" id="audition-start-time" value="00:00" placeholder="00:00" class="w-16 text-center text-xs py-1">
+          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setAuditionStart('00:00')">0:00 Intro</button>
+          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setAuditionStart('00:30')">0:30 Drop/Chorus</button>
+          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setAuditionStart('01:00')">1:00</button>
+        </div>
+
+        <!-- Live Audio Player -->
+        <div class="nm-card-sm p-3">
+          <audio id="live-audition-player" controls class="w-full h-9"></audio>
+        </div>
+
+        <!-- Audition Trigger Button -->
+        <button id="btn-audition" onclick="generateAudition()" class="nm-btn w-full py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border border-[var(--color-accent)]">
+          <svg class="w-4 h-4 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span id="audition-btn-text">Audition 30s Preview (Karaoke / Vocal Remover)</span>
+          <svg id="audition-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+        </button>
+      </div>
+
+      <!-- Step 4: Export Full Mastered Stem -->
+      <div class="pt-3 border-t border-[var(--nm-border)] space-y-4">
+        <button id="export-stem-btn" onclick="startStemExport()" class="nm-btn-primary w-full py-4 text-sm sm:text-base flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span id="export-btn-text">Export Mastered Stem (320kbps MP3)</span>
+        </button>
+        <p class="text-[11px] text-center text-[var(--color-text-muted)]">Generates studio-grade 320kbps MP3 with ID3 album art embedded directly on your device</p>
+      </div>
+    </section>
+
+    <!-- Progress Card -->
+    <section id="progress-card" class="nm-card p-6 space-y-4 hidden">
+      <div class="flex items-center justify-between text-xs font-mono">
+        <span id="progress-title" class="font-bold flex items-center gap-2">
+          <svg class="animate-spin h-4 w-4 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          Extracting Stem...
+        </span>
+        <span id="progress-percent" class="font-bold text-[var(--color-accent)]">0%</span>
+      </div>
+      <div class="w-full bg-[var(--nm-surface-dark)] h-2.5 rounded-full overflow-hidden nm-inset-sm">
+        <div id="progress-bar-fill" class="bg-[var(--color-accent)] h-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+      <div id="progress-detail" class="text-[11px] font-mono text-[var(--color-text-muted)] text-center">Processing FFmpeg audio filtergraph...</div>
+    </section>
+
+    <!-- Download Card -->
+    <section id="success-card" class="nm-card p-6 space-y-4 hidden text-center">
+      <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/20">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <div>
+        <h3 class="text-base font-bold">Stem Extraction Complete!</h3>
+        <p id="success-filename" class="text-xs font-mono text-[var(--color-text-muted)] truncate max-w-md mx-auto mt-1">track.mp3</p>
+      </div>
+      <div class="nm-inset-sm p-3 max-w-lg mx-auto">
+        <audio id="audio-final-player" controls class="w-full h-9"></audio>
+      </div>
+      <div class="pt-2">
+        <a id="download-trigger-btn" href="#" class="nm-btn-primary inline-flex items-center gap-2 px-8 py-3.5 text-xs sm:text-sm font-bold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download Isolated Track (320kbps MP3)
+        </a>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // State
+    let selectedStem = 'vocal_remover';
+    let selectedDuration = 30;
+    let currentUploadId = null;
+
+    // Theme Switcher
+    function initTheme() {
+      const saved = localStorage.getItem('nm_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcons(saved);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('nm_theme', target);
+      updateThemeIcons(target);
+    }
+
+    function updateThemeIcons(theme) {
+      const sun = document.getElementById('theme-icon-sun');
+      const moon = document.getElementById('theme-icon-moon');
+      if (theme === 'light') {
+        sun.classList.remove('hidden');
+        moon.classList.add('hidden');
+      } else {
+        sun.classList.add('hidden');
+        moon.classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
+    initTheme();
+
+    // Source Tabs
+    function switchSourceTab(tab) {
+      const urlBtn = document.getElementById('tab-url-btn');
+      const uploadBtn = document.getElementById('tab-upload-btn');
+      const urlSec = document.getElementById('url-input-section');
+      const uploadSec = document.getElementById('upload-input-section');
+
+      if (tab === 'url') {
+        urlBtn.classList.add('active');
+        uploadBtn.classList.remove('active');
+        urlSec.classList.remove('hidden');
+        uploadSec.classList.add('hidden');
+      } else {
+        uploadBtn.classList.add('active');
+        urlBtn.classList.remove('active');
+        uploadSec.classList.remove('hidden');
+        urlSec.classList.add('hidden');
+      }
+    }
+
+    // Upload Handling
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-[var(--color-accent)]'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-[var(--color-accent)]'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-[var(--color-accent)]');
+      if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) handleFileUpload(fileInput.files[0]);
+    });
+
+    async function handleFileUpload(file) {
+      const progressBox = document.getElementById('upload-progress-box');
+      const statusText = document.getElementById('upload-status-text');
+      const percentText = document.getElementById('upload-percent-text');
+      const barFill = document.getElementById('upload-bar-fill');
+
+      progressBox.classList.remove('hidden');
+      statusText.textContent = `Uploading ${file.name}...`;
+
+      const formData = new FormData();
+      formData.append('audio_file', file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload', true);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          percentText.textContent = `${pct}%`;
+          barFill.style.width = `${pct}%`;
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          if (res.success) {
+            currentUploadId = res.upload_id;
+            loadTrack({
+              title: res.filename,
+              duration: res.duration || 0,
+              thumbnail: res.thumbnail || '',
+              badge: res.format ? res.format.toUpperCase() : 'UPLOAD'
+            });
+            progressBox.classList.add('hidden');
+          } else {
+            alert('Upload error: ' + (res.error || 'Server rejected file'));
+            progressBox.classList.add('hidden');
+          }
+        } else {
+          alert('Upload failed (HTTP ' + xhr.status + ')');
+          progressBox.classList.add('hidden');
+        }
+      };
+
+      xhr.onerror = () => {
+        alert('Network error during upload');
+        progressBox.classList.add('hidden');
+      };
+
+      xhr.send(formData);
+    }
+
+    // Inspect URL
+    async function inspectUrl() {
+      const url = document.getElementById('url-input').value.trim();
+      if (!url) {
+        alert('Please paste a video or music link first.');
+        return;
+      }
+
+      const btn = document.getElementById('inspect-btn');
+      const btnText = document.getElementById('inspect-btn-text');
+      const spinner = document.getElementById('inspect-spinner');
+
+      btn.disabled = true;
+      btnText.textContent = 'Loading…';
+      spinner.classList.remove('hidden');
+
+      try {
+        const res = await fetch('/api/info', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({url})
+        });
+
+        if (!res.ok) throw new Error('Status ' + res.status);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to inspect link');
+
+        currentUploadId = null;
+        loadTrack({
+          title: data.title,
+          duration: data.duration || 0,
+          thumbnail: data.thumbnail || '',
+          badge: data.platform || 'STREAM'
+        });
+
+      } catch (err) {
+        alert('Could not load track: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Load Track';
+        spinner.classList.add('hidden');
+      }
+    }
+
+    function loadTrack(info) {
+      document.getElementById('track-title').textContent = info.title;
+      document.getElementById('track-badge').textContent = info.badge;
+      if (info.thumbnail) {
+        document.getElementById('track-thumb').src = info.thumbnail;
+      } else {
+        document.getElementById('track-thumb').src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="%238e8e93" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+      }
+
+      if (info.duration > 0) {
+        const mins = Math.floor(info.duration / 60);
+        const secs = Math.floor(info.duration % 60);
+        document.getElementById('track-duration').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+      }
+
+      document.getElementById('stem-console').classList.remove('hidden');
+      document.getElementById('stem-console').scrollIntoView({ behavior: 'smooth' });
+      updateLabels();
+    }
+
+    // Stem Selection
+    function selectStemMode(mode) {
+      selectedStem = mode;
+      const modes = ['vocal_remover', 'vocal_isolate', 'bass_remove', 'bass_only', 'drums_only', 'instrumental'];
+      modes.forEach(m => {
+        const card = document.getElementById(`card-${m.replace('_', '-')}`);
+        if (card) {
+          card.classList.remove('selected');
+          card.style.borderColor = 'transparent';
+        }
+      });
+
+      const activeCard = document.getElementById(`card-${mode.replace('_', '-')}`);
+      if (activeCard) {
+        activeCard.classList.add('selected');
+        activeCard.style.borderColor = 'var(--color-accent)';
+      }
+      updateLabels();
+    }
+
+    function setAuditionDuration(dur) {
+      selectedDuration = dur;
+      ['dur-15', 'dur-30', 'dur-60', 'dur-full'].forEach(id => {
+        document.getElementById(id)?.classList.remove('active');
+      });
+      const map = {15: 'dur-15', 30: 'dur-30', 60: 'dur-60', 'full': 'dur-full'};
+      document.getElementById(map[dur] || 'dur-30')?.classList.add('active');
+      updateLabels();
+    }
+
+    function setAuditionStart(t) {
+      document.getElementById('audition-start-time').value = t;
+    }
+
+    function getStemLabel(mode) {
+      const map = {
+        'vocal_remover': 'Karaoke / Vocal Remover',
+        'vocal_isolate': 'Acapella / Vocal Isolator',
+        'bass_remove': 'Bass Remover (Mute Low-End)',
+        'bass_only': 'Sub-Bass Isolator',
+        'drums_only': 'Drums & Rhythm Only',
+        'instrumental': 'Full Instrumental'
+      };
+      return map[mode] || mode;
+    }
+
+    function updateLabels() {
+      const stemName = getStemLabel(selectedStem);
+      const durLabel = selectedDuration === 'full' ? 'Full Track' : `${selectedDuration}s`;
+
+      const audBtn = document.getElementById('audition-btn-text');
+      if (audBtn && !audBtn.textContent.includes('…')) {
+        audBtn.textContent = `Audition ${durLabel} Preview (${stemName})`;
+      }
+
+      const expBtn = document.getElementById('export-btn-text');
+      if (expBtn) {
+        expBtn.textContent = `Export Mastered Stem (${stemName} • 320kbps MP3)`;
+      }
+    }
+
+    // Audition Call
+    async function generateAudition() {
+      const url = document.getElementById('url-input').value.trim();
+      if (!url && !currentUploadId) {
+        alert('Please load a URL or upload a track first.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-audition');
+      const btnText = document.getElementById('audition-btn-text');
+      const spinner = document.getElementById('audition-spinner');
+      const pill = document.getElementById('status-pill');
+
+      btn.disabled = true;
+      btnText.textContent = 'Rendering stem preview…';
+      spinner.classList.remove('hidden');
+      if (pill) pill.textContent = 'DSP Rendering…';
+
+      const startTime = document.getElementById('audition-start-time').value.trim() || '00:00';
+
+      const payload = {
+        url: url,
+        upload_id: currentUploadId,
+        mode: 'audio',
+        audio_codec: 'mp3',
+        stem_filter: selectedStem,
+        is_preview: true,
+        preview_duration: selectedDuration,
+        start_time: startTime
+      };
+
+      try {
+        const res = await fetch('/api/preview', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Status ' + res.status);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to start audition');
+
+        pollAudition(data.job_id);
+
+      } catch (e) {
+        alert('Audition error: ' + e.message);
+        btn.disabled = false;
+        updateLabels();
+        spinner.classList.add('hidden');
+        if (pill) pill.textContent = 'Error';
+      }
+    }
+
+    function pollAudition(jobId) {
+      const btn = document.getElementById('btn-audition');
+      const spinner = document.getElementById('audition-spinner');
+      const pill = document.getElementById('status-pill');
+
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/status/${jobId}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data.success) return;
+
+          const job = data.job;
+          if (job.status === 'finished') {
+            clearInterval(interval);
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+            updateLabels();
+
+            if (pill) pill.textContent = 'Audition Ready 🎧';
+
+            const player = document.getElementById('live-audition-player');
+            player.src = `/api/file/${jobId}`;
+            player.load();
+            player.play().catch(e => console.log('Autoplay prevented', e));
+
+          } else if (job.status === 'error') {
+            clearInterval(interval);
+            alert('Stem processing error: ' + (job.error || 'FFmpeg mastering error'));
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+            updateLabels();
+            if (pill) pill.textContent = 'Error';
+          }
+        } catch (e) {
+          console.error('Poll error', e);
+        }
+      }, 700);
+    }
+
+    // Export Final Full Stem
+    async function startStemExport() {
+      const url = document.getElementById('url-input').value.trim();
+      if (!url && !currentUploadId) {
+        alert('Please load a URL or upload a track first.');
+        return;
+      }
+
+      const payload = {
+        url: url,
+        upload_id: currentUploadId,
+        mode: 'audio',
+        audio_codec: 'mp3',
+        stem_filter: selectedStem
+      };
+
+      const renderBtn = document.getElementById('export-stem-btn');
+      renderBtn.disabled = true;
+
+      const progressCard = document.getElementById('progress-card');
+      const progressBar = document.getElementById('progress-bar-fill');
+      const progressPercent = document.getElementById('progress-percent');
+      const progressDetail = document.getElementById('progress-detail');
+      const successCard = document.getElementById('success-card');
+
+      progressCard.classList.remove('hidden');
+      progressCard.scrollIntoView({ behavior: 'smooth' });
+      successCard.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/download', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Status ' + res.status);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Server error');
+
+        const jobId = data.job_id;
+        const interval = setInterval(async () => {
+          try {
+            const pollRes = await fetch(`/api/status/${jobId}`);
+            if (!pollRes.ok) return;
+            const pollData = await pollRes.json();
+            if (!pollData.success) return;
+
+            const job = pollData.job;
+            progressBar.style.width = `${job.progress || 0}%`;
+            progressPercent.textContent = `${job.progress || 0}%`;
+            progressDetail.textContent = job.message || 'Processing...';
+
+            if (job.status === 'finished') {
+              clearInterval(interval);
+              progressCard.classList.add('hidden');
+              renderBtn.disabled = false;
+
+              document.getElementById('success-filename').textContent = `${job.filename} (${job.file_size})`;
+              const dlBtn = document.getElementById('download-trigger-btn');
+              dlBtn.href = `/api/file/${jobId}`;
+              dlBtn.setAttribute('download', job.filename);
+
+              const finalPlayer = document.getElementById('audio-final-player');
+              finalPlayer.src = `/api/file/${jobId}`;
+              finalPlayer.load();
+
+              successCard.classList.remove('hidden');
+              successCard.scrollIntoView({ behavior: 'smooth' });
+
+            } else if (job.status === 'error') {
+              clearInterval(interval);
+              alert('Export failed: ' + (job.error || 'Unknown mastering error'));
+              progressCard.classList.add('hidden');
+              renderBtn.disabled = false;
+            }
+          } catch (e) {
+            console.error('Job error', e);
+          }
+        }, 900);
+
+      } catch (err) {
+        alert('Export failed: ' + err.message);
+        renderBtn.disabled = false;
+        progressCard.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('url-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') inspectUrl();
+    });
+  </script>
+</body>
+</html>
