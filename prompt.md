@@ -117,16 +117,16 @@ To escape the generic "AI generator look", we researched authentic human-designe
 
 ## 4. Audio DSP & FFmpeg Filterchain Reference
 
-Alongside the Neumorphic visual redesign, the audio processing backend was rebuilt using these FFmpeg acoustic filters:
+Alongside the Neumorphic visual redesign, the audio processing backend was rebuilt using these high-fidelity FFmpeg acoustic filters:
 
 | Feature | Filter Chain | Description |
 | :--- | :--- | :--- |
 | **8D Binaural Orbit** | `stereowiden=delay=18:feedback=0.25:crossfeed=0.25:drymix=0.8,apulsator=mode=sine:hz=0.125:amount=0.85:offset_l=0:offset_r=0.5` | Smooth 360° circular horizontal rotation with custom typed rotation period in seconds. |
 | **16D Multi-Axis Orbit** | `stereowiden=delay=25:feedback=0.38:crossfeed=0.32:drymix=0.75,apulsator=mode=sine:hz=0.187:amount=0.85:offset_l=0:offset_r=0.5` | Dual-harmonic trajectory with elevation crossfeed and cathedral reverb. |
-| **Vocal Remover (Karaoke)** | `pan=stereo\|c0=c0-c1\|c1=c1-c0,bass=g=3.5:f=120` | Phase cancellation of center-panned lead vocals & lyrics with low-end recovery. |
-| **Vocal Isolator (Acapella)** | `highpass=f=200,lowpass=f=4200` | Formant bandpass isolating vocal presence while suppressing side instruments. |
-| **Bass Remover** | `highpass=f=250,bass=g=-24:f=180` | High-pass 240Hz filter taking out all basslines, 808s, and low-end rumble. |
-| **Sub-Bass Focus** | `lowpass=f=220,bass=g=5:f=100` | Isolates the kick groove and sub-bass frequencies. |
+| **Vocal Remover (Karaoke)** | `asplit=2[l][h];[l]lowpass=f=190,bass=g=4:f=100[low];[h]highpass=f=190,stereotools=mlev=0.03:slev=1.45,treble=g=2:f=8000[high];[low][high]amix=inputs=2:weights=1.15 1.0` | **Frequency-Split Phase Cancellation**: Keeps centered kick drum & bass (<190Hz) 100% punchy while cancelling center vocal harmonics (>190Hz). |
+| **Human Voice Only (Acapella)** | `highpass=f=80,lowpass=f=12000,stereotools=slev=0.15:mlev=1.65,equalizer=f=1000:width_type=o:width=1.5:g=3.5,equalizer=f=2800:width_type=o:width=1.5:g=4.0,equalizer=f=6000:width_type=o:width=1.5:g=2.5,dialoguenhance=original=0.35:enhance=2.8:voice=4,volume=2.2` | **Vocal Formant Speech Extractor**: Full 80Hz-12kHz vocal spectrum with 1kHz/2.8kHz/6kHz formant boost and dialogue enhancement. No RNNoise gating to prevent voice cuts! |
+| **Clean Backing Track** | `stereotools=mlev=0.20:slev=1.35,bass=g=3:f=110,treble=g=2.5:f=7500` | Smooth center vocal attenuation preserving acoustic instruments and ambient textures. |
+| **Remove Boomy Bass** | `highpass=f=180,bass=g=-22:f=150,volume=1.3` | Low-end cut below 180Hz eliminating muddy sub-bass rumble, 808s, and mic-handling thuds. |
 | **Pitch Shifter** | `rubberband=pitch=2^(semitones/12)` | Pristine ±6 semitone pitch shifting without altering playback tempo. |
 | **Air Clarity Sheen** | `treble=g=3.5:f=8000,crystalizer=i=1.5` | Harmonic exciter adding spatial presence and top-end shimmer. |
 | **Slowed + Reverb** | `atempo=0.88,asetrate=44100*0.92,aresample=44100,aecho=0.8:0.85:80\|1200:0.35\|0.18` | Viral Lo-Fi / Vaporwave slowed aesthetic with ethereal decay. |
@@ -137,24 +137,63 @@ Alongside the Neumorphic visual redesign, the audio processing backend was rebui
 
 ## 5. Live Application Access
 
-* **Permanent Gateway**: [https://abhianand123.github.io/ytdown/](https://abhianand123.github.io/ytdown/)
-* **Live Studio Direct**: [https://uni-winds-driving-stream.trycloudflare.com/8d](https://uni-winds-driving-stream.trycloudflare.com/8d)
-* **Main Downloader**: [https://uni-winds-driving-stream.trycloudflare.com/](https://uni-winds-driving-stream.trycloudflare.com/)
-
+* **Permanent GitHub Pages Gateway**: [https://abhianand123.github.io/ytdown/](https://abhianand123.github.io/ytdown/)
+* **Active Cloudflare Tunnel**: [https://exhibitions-dialog-issues-jungle.trycloudflare.com](https://exhibitions-dialog-issues-jungle.trycloudflare.com)
+  * **Section 1: Main Downloader**: [https://exhibitions-dialog-issues-jungle.trycloudflare.com/](https://exhibitions-dialog-issues-jungle.trycloudflare.com/)
+  * **Section 2: 8D / 16D Spatial Audio Studio**: [https://exhibitions-dialog-issues-jungle.trycloudflare.com/8d](https://exhibitions-dialog-issues-jungle.trycloudflare.com/8d)
+  * **Section 3: Dedicated Stem & Vocal Studio**: [https://exhibitions-dialog-issues-jungle.trycloudflare.com/stems](https://exhibitions-dialog-issues-jungle.trycloudflare.com/stems)
 
 ---
 
 ## 6. Three Dedicated Studios Overview
 
-1. **Universal Media Downloader & Clipper** (/):
+1. **Universal Media Downloader & Clipper** (`/`):
    - Fast stream extraction, container conversion, clip trimming bounds, and quick stem removal toggles.
-2. **8D / 16D Spatial Audio Studio** (/8d):
+2. **8D / 16D Spatial Audio Studio** (`/8d`):
    - 360° binaural circular & multi-axis elevation orbit, typed rotation speed in seconds, azimuth visualizer radar, acoustic EQ shelf, and spatial reverb.
-3. **Stem Splitter & Track Isolator Studio** (/stems):
+3. **Stem Splitter & Track Isolator Studio** (`/stems`):
    - Dedicated third section for musical stem extraction:
-     - 🎤 **Vocal Remover / Karaoke**: Center phase cancellation removing lead voice and lyrics.
-     - 🗣️ **Acapella / Vocal Isolator**: Formant bandpass isolating speech & vocal presence.
-     - 🎸 **Bass Remover**: 240Hz high-pass cutting sub-bass, 808s, and basslines.
-     - 🔊 **Sub-Bass Isolator**: 220Hz low-pass groove extraction.
-     - 🥁 **Drums & Rhythm Only**: Transient rhythm & beat focus.
-     - 🎹 **Complete Instrumental**: Full backing music with vocal cancellation and harmonic sheen.
+     - 🗣️ **Human Voice Only**: Extracts pure singing or speaking voice, mutes all background music.
+     - 🎤 **Vocal Remover / Karaoke**: Eliminates lead vocals while preserving punchy bass and drums.
+     - 🎸 **Clean Backing Track**: Smooth vocal attenuation preserving natural accompaniment.
+     - 🔇 **Remove Boomy Bass**: Cleans up muddy dialogue and video audio.
+
+---
+
+## 7. Deep Research: How to Do Vocal & Stem Separation Better on the Web
+
+Based on Google research across modern audio architectures (*VocalRemover.org, LALAL.AI, Moises, Meta Demucs, UVR5, ONNX Runtime Web*):
+
+### 7.1 Why Naive Filters Cause "Voice Cut" and "Low Voice"
+1. **The RNNoise Flaw for Music**: RNNoise (`arnndn`) is an RNN model designed purely for stationary speech denoising (fans, air conditioners, microphone hiss). When used on music with drums, synths, and guitars, the RNN detects musical transients as "noise" and violently clamps down/gates the audio signal. This cuts words in half, chops the voice, and causes sudden volume drops.
+2. **The Telephone Filter Flaw**: Low-passing at 3800Hz destroys upper vocal formants, sibilance (consonants like *s*, *t*, *f*), and presence between 4kHz and 10kHz, making the voice sound like an underwater AM radio.
+3. **The Center-Cancellation Bass Loss Flaw**: In stereo mixing, lead vocals, kick drums, and bass guitar are all mixed dead-center. Inverting the phase across the entire spectrum cancels the kick and bass along with the voice, leaving a thin, hollow sound.
+
+### 7.2 The Two Modern Paradigms for Vocal Separation
+
+```mermaid
+flowchart TD
+    Audio[Stereo Audio Input] --> Choice{Processing Route}
+    Choice -->|Instant & Zero Wait| RouteA["⚡ Frequency-Split DSP / Web Audio API"]
+    Choice -->|Deep Learning AI| RouteB["🧠 Deep Neural Network (Demucs / UVR5 / ONNX)"]
+
+    RouteA --> DSP1["Lowpass (<190Hz): Centered Kick & Bass Untouched"]
+    RouteA --> DSP2["Highpass (>190Hz): Mid/Side Phase Nulling of Vocals"]
+    DSP1 --> Recombine["amix / WebAudio Merger -> Punchy Studio Karaoke"]
+    DSP2 --> Recombine
+
+    RouteB --> AI1["Demucs v4 Hybrid Transformer / Spectrogram Masking"]
+    AI1 --> AI2["4 Isolated Output Stems: Vocals, Drums, Bass, Other"]
+    AI2 --> WebGPU["Can run client-side in Chrome via ONNX Runtime Web + WebGPU"]
+```
+
+### 7.3 How to Run AI Separation Directly in the Browser (Client-Side WebGPU)
+Modern web browsers (Chrome 113+, Edge, Safari 18+) support **WebGPU** and **ONNX Runtime Web** (`onnxruntime-web`), allowing heavy source-separation models to execute 100% inside the browser with zero cloud server costs:
+* **Pre-trained Model**: Meta's `HTDemucs` converted to ONNX (`htdemucs_embedded.onnx`, ~120MB - 170MB).
+* **Caching**: The model is downloaded once and stored in the browser's `IndexedDB` or Cache API.
+* **Execution**: Run off the main UI thread via a **Web Worker** using WebGPU tensor pipelines.
+* **Open-Source References**:
+  - [Vocal Splitter Local (Chrome Extension / WebGPU)](https://github.com/Sajadapp/Vocal-Splitter-Local)
+  - [Demucs-Web by timcsy](https://github.com/timcsy/demucs-web)
+  - [Demucs-ONNX by StemSplit](https://github.com/StemSplit/demucs-onnx)
+  - [Ultimate Vocal Remover GUI (UVR5)](https://github.com/Anjok07/ultimatevocalremovergui)
