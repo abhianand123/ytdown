@@ -197,3 +197,21 @@ Modern web browsers (Chrome 113+, Edge, Safari 18+) support **WebGPU** and **ONN
   - [Demucs-Web by timcsy](https://github.com/timcsy/demucs-web)
   - [Demucs-ONNX by StemSplit](https://github.com/StemSplit/demucs-onnx)
   - [Ultimate Vocal Remover GUI (UVR5)](https://github.com/Anjok07/ultimatevocalremovergui)
+
+---
+
+## 8. Meta Demucs AI Backend Service (`main.py` + FastAPI)
+
+We built an asynchronous, production-ready AI separation microservice using **FastAPI** and **Meta Demucs (`htdemucs`)**:
+
+### 8.1 API Endpoints
+* **`POST /api/separate`**: Accepts uploaded `.mp3`, `.wav`, `.m4a`, `.flac` files up to 100MB. Runs Demucs asynchronously with `--two-stems=vocals` without blocking the event loop.
+* **`GET /api/download/{job_id}/{stem}`**: Serves `vocals.wav` and `no_vocals.wav` (alias `instrumental`) as standard attachments.
+* **`GET /` & `GET /demucs`**: Serves an integrated, Neumorphic web interface with drag-and-drop file upload, animated processing state, and dual HTML5 `<audio>` players for Vocals and Instrumental.
+* **`GET /api/health`**: Returns system status, FFmpeg path, and supported audio formats.
+
+### 8.2 Production Features & Safeguards
+* **Asynchronous Subprocess Execution**: Uses `asyncio.create_subprocess_exec` so heavy Demucs tensor operations do not block other API requests.
+* **Automated File Lifecycle & Cleanup**: Background worker runs every 15 minutes to delete temporary job folders older than 1 hour.
+* **FFmpeg Verification**: Validates system `ffmpeg` executable presence before processing.
+* **Cross-Origin Resource Sharing (CORS)**: Fully enabled for clean cross-origin frontend communication.
