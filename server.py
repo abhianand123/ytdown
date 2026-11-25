@@ -364,6 +364,12 @@ cleanup_thread.start()
 
 
 # ── Routes ────────────────────────────────────────────────────────
+try:
+    from telemetry import system_telemetry
+except Exception as e:
+    logger.warning(f"Could not import system_telemetry: {e}")
+    system_telemetry = None
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -378,6 +384,18 @@ def spatial_studio():
 @app.route("/demucs")
 def stem_studio():
     return render_template("stems.html")
+
+@app.route("/dashboard")
+@app.route("/telemetry")
+@app.route("/hardware")
+def hardware_dashboard():
+    return render_template("dashboard.html")
+
+@app.route("/api/system/stats", methods=["GET"])
+def api_system_stats():
+    if system_telemetry:
+        return jsonify(system_telemetry.get_full_snapshot())
+    return jsonify({"error": "Telemetry module unavailable"}), 503
 
 TEMP_JOBS_DIR = BASE_DIR / "temp_jobs"
 TEMP_JOBS_DIR.mkdir(parents=True, exist_ok=True)
