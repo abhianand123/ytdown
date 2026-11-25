@@ -344,7 +344,7 @@
             <span>Spatial Audio Studio</span>
             <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border border-[var(--color-accent)] font-semibold">Pro DSP</span>
           </h1>
-          <p class="text-[11px] text-[var(--color-text-muted)] hidden sm:block">8D/16D Binaural Orbit • Stem Extraction • Acoustic Rack</p>
+          <p class="text-[11px] text-[var(--color-text-muted)] hidden sm:block">8D/16D Binaural Orbit • Acoustic Master Rack</p>
         </div>
       </div>
 
@@ -477,36 +477,14 @@
         </div>
       </div>
 
-      <!-- 2. Stem Extraction & Track Isolation Deck ("Take out bass or lyrics") -->
-      <div class="space-y-3 pt-4 border-t border-[var(--nm-border)]">
-        <div>
-          <h4 class="text-xs sm:text-sm font-bold tracking-tight">Stem Extraction & Isolation Deck</h4>
-          <p class="text-[11px] text-[var(--color-text-muted)]">Isolate or eliminate specific music stems (vocals, basslines, or backing track)</p>
+        <!-- Dedicated UVR5 Studio Callout -->
+        <div class="pt-4 border-t border-[var(--nm-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold tracking-tight">Need AI Vocal &amp; Instrumental Separation?</h4>
+            <p class="text-[11px] text-[var(--color-text-muted)]">Powered by Ultimate Vocal Remover 5 (UVR5) in the Stem Studio</p>
+          </div>
+          <a href="/stems" class="nm-btn px-3.5 py-2 text-xs font-bold text-[var(--color-accent)]">Open UVR5 Stem Studio →</a>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-          <button id="stem-full" class="nm-btn p-3 text-left active" onclick="setStemFilter('none')">
-            <div class="text-xs font-bold">🎼 Full Mix</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Original instruments & vocals</div>
-          </button>
-          <button id="stem-vocal-isolate" class="nm-btn p-3 text-left border border-cyan-500/40" onclick="setStemFilter('vocal_isolate')">
-            <div class="text-xs font-bold text-cyan-400">🗣️ Human Voice Only</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Voice alone • Mutes music</div>
-          </button>
-          <button id="stem-vocal-remover" class="nm-btn p-3 text-left" onclick="setStemFilter('vocal_remover')">
-            <div class="text-xs font-bold text-[var(--color-accent)]">🎤 Vocal Remover</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Karaoke • Keeps music & bass</div>
-          </button>
-          <button id="stem-instrumental" class="nm-btn p-3 text-left" onclick="setStemFilter('instrumental')">
-            <div class="text-xs font-bold text-emerald-400">🎸 Clean Backing Track</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Pure music • Zero lyrics</div>
-          </button>
-          <button id="stem-bass-remove" class="nm-btn p-3 text-left" onclick="setStemFilter('bass_remove')">
-            <div class="text-xs font-bold text-amber-500">🔇 Remove Boomy Bass</div>
-            <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Cuts 808s • Clear dialogue</div>
-          </button>
-        </div>
-      </div>
 
       <!-- 3. Spatial Dimension Mode (8D vs 16D) -->
       <div class="space-y-3 pt-4 border-t border-[var(--nm-border)]">
@@ -558,39 +536,8 @@
           <p class="text-[11px] text-[var(--color-text-muted)]">Hardware equalizers, spatial reverb, pitch shifter, and viral mix signatures</p>
         </div>
 
-        <!-- Separate Dedicated Toggle Cards for Vocals & Bass (Direct Quick Toggles) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <!-- 1. Vocal Remover / Karaoke (Remove Lyrics) -->
-          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer border border-[var(--color-accent-subtle)] hover:border-[var(--color-accent)] transition-all">
-            <div>
-              <div class="text-xs font-bold flex items-center gap-1.5 text-[var(--color-accent)]">
-                <span>🎤 Vocal Remover (Karaoke)</span>
-                <span class="text-[9px] uppercase px-1.5 py-0.2 rounded bg-[var(--color-accent-subtle)] font-mono font-bold">Lyrics Out</span>
-              </div>
-              <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">Phase cancel center lyrics & lead vocals</div>
-            </div>
-            <div class="relative">
-              <input type="checkbox" id="vocal-remover-toggle" onchange="toggleVocalRemover(this.checked)" class="sr-only">
-              <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
-            </div>
-          </label>
-
-          <!-- 2. Bass Remover (Take Out Bass) -->
-          <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer border border-[var(--nm-border)] hover:border-amber-500 transition-all">
-            <div>
-              <div class="text-xs font-bold flex items-center gap-1.5 text-amber-500">
-                <span>🎸 Bass Remover (Cut Bass)</span>
-                <span class="text-[9px] uppercase px-1.5 py-0.2 rounded bg-amber-500/10 font-mono font-bold">Low-End Out</span>
-              </div>
-              <div class="text-[10px] text-[var(--color-text-muted)] mt-0.5">240Hz high-pass cuts basslines & 808s</div>
-            </div>
-            <div class="relative">
-              <input type="checkbox" id="bass-remover-toggle" onchange="toggleBassRemover(this.checked)" class="sr-only">
-              <div class="nm-toggle-track"><div class="nm-toggle-thumb"></div></div>
-            </div>
-          </label>
-
-          <!-- 3. Deep Bass Warmth -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- 1. Deep Bass Warmth -->
           <label class="nm-card-sm p-3.5 flex items-center justify-between cursor-pointer border border-[var(--nm-border)]">
             <div>
               <div class="text-xs font-bold">Deep Bass Warmth</div>
@@ -776,7 +723,6 @@
     let currentSpatialMode = '8d';
     let currentIntensity = 7;
     let currentSpeedSec = 8.0;
-    let currentStemFilter = 'none';
     let currentSpecialPreset = 'none';
     let currentPitch = 0;
     let currentPreviewDuration = 30;
@@ -1039,60 +985,7 @@
       updateOrbitSpeed(sec);
     }
 
-    // ── STEM FILTER SELECTION ("Take out bass or lyrics") ──
-    function setStemFilter(filter) {
-      currentStemFilter = filter;
-      const stems = ['stem-full', 'stem-vocal-remover', 'stem-vocal-isolate', 'stem-instrumental', 'stem-bass-remove'];
-      stems.forEach(s => document.getElementById(s)?.classList.remove('active'));
-
-      const activeMap = {
-        'none': 'stem-full',
-        'vocal_remover': 'stem-vocal-remover',
-        'vocal_isolate': 'stem-vocal-isolate',
-        'instrumental': 'stem-instrumental',
-        'bass_remove': 'stem-bass-remove'
-      };
-
-      const activeId = activeMap[filter] || 'stem-full';
-      document.getElementById(activeId)?.classList.add('active');
-
-      // Keep dedicated toggle switches in exact sync
-      const vToggle = document.getElementById('vocal-remover-toggle');
-      if (vToggle) vToggle.checked = (filter === 'vocal_remover');
-
-      const bToggle = document.getElementById('bass-remover-toggle');
-      if (bToggle) bToggle.checked = (filter === 'bass_remove');
-
-      // Auto-adjust bass-boost toggle for consistency
-      const bassBoostEl = document.getElementById('bass-boost');
-      if (filter === 'bass_remove' && bassBoostEl) {
-        bassBoostEl.checked = false;
-      }
-
-      updateButtonLabels();
-    }
-
-    function toggleVocalRemover(checked) {
-      if (checked) {
-        setStemFilter('vocal_remover');
-      } else {
-        if (currentStemFilter === 'vocal_remover') setStemFilter('none');
-      }
-    }
-
-    function toggleBassRemover(checked) {
-      if (checked) {
-        setStemFilter('bass_remove');
-      } else {
-        if (currentStemFilter === 'bass_remove') setStemFilter('none');
-      }
-    }
-
-    function toggleBassBoost(checked) {
-      if (checked && currentStemFilter === 'bass_remove') {
-        setStemFilter('none');
-      }
-    }
+    function toggleBassBoost(checked) {}
 
     // ── SPATIAL MODE SELECTION ──
     function setSpatialMode(mode) {
@@ -1211,10 +1104,6 @@
       const sliderVal = document.getElementById('intensity-slider') ? document.getElementById('intensity-slider').value : currentIntensity;
 
       let tag = modeUpper;
-      if (currentStemFilter === 'vocal_isolate') tag += ' • Voice Only';
-      else if (currentStemFilter === 'vocal_remover') tag += ' • Karaoke';
-      else if (currentStemFilter === 'instrumental') tag += ' • Clean Music';
-      else if (currentStemFilter === 'bass_remove') tag += ' • No-Bass';
 
       if (currentSpecialPreset === 'slowed_reverb') tag += ' • Slowed';
       else if (currentSpecialPreset === 'nightcore') tag += ' • Nightcore';
@@ -1272,7 +1161,6 @@
         spatial_clarity: clarity,
         spatial_pitch: currentPitch,
         spatial_preset: currentSpecialPreset,
-        stem_filter: currentStemFilter,
         is_preview: true,
         preview_duration: currentPreviewDuration,
         start_time: startTime
@@ -1383,7 +1271,6 @@
         spatial_clarity: clarity,
         spatial_pitch: currentPitch,
         spatial_preset: currentSpecialPreset,
-        stem_filter: currentStemFilter,
         trim: isTrim,
         start_time: startTime,
         end_time: endTime
