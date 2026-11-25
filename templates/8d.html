@@ -934,7 +934,7 @@
         const res = await fetch('/api/info', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({url})
+          body: JSON.stringify({url, single_track: true})
         });
 
         if (!res.ok) throw new Error('Status ' + res.status);
