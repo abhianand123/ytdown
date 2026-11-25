@@ -24,13 +24,39 @@ if os.path.isdir(termux_bin) and termux_bin not in os.environ.get("PATH", ""):
 
 from flask import Flask, request, jsonify, render_template, send_file, Response
 import yt_dlp
+import requests
 
-try:
-    from ai_separator import separate_audio_track, has_demucs, has_mdx_onnx
-except Exception as _ai_imp_err:
-    separate_audio_track = None
-    def has_demucs(): return False
-    def has_mdx_onnx(): return False
+UVR5_SERVICE_URL = os.environ.get("UVR5_SERVICE_URL", "http://127.0.0.1:5005").rstrip("/")
+UVR5_DEFAULT_MODEL = "UVR-MDX-NET-Inst_HQ_3.onnx"
+UVR5_MODELS_CATALOG = [
+    {
+        "filename": "UVR-MDX-NET-Inst_HQ_3.onnx",
+        "label": "UVR-MDX-NET Inst HQ 3 (Default • Fast ARM64)",
+        "arch": "MDX-Net ONNX",
+        "approx_size_mb": 64,
+        "recommended": True,
+        "is_default": True,
+        "description": "Fast, low-RAM official UVR5 ONNX model tuned for ARM64 CPU stem separation.",
+    },
+    {
+        "filename": "UVR-MDX-NET-Voc_FT.onnx",
+        "label": "UVR-MDX-NET Voc FT (Vocal Focus)",
+        "arch": "MDX-Net ONNX",
+        "approx_size_mb": 67,
+        "recommended": False,
+        "is_default": False,
+        "description": "Fine-tuned MDX-Net vocal extraction model for lead vocals and acapella isolation.",
+    },
+    {
+        "filename": "model_bs_roformer_ep_317_sdr_12.9755.ckpt",
+        "label": "BS-RoFormer Ep 317 SDR 12.97 (Max Quality)",
+        "arch": "BS-RoFormer PyTorch",
+        "approx_size_mb": 640,
+        "recommended": False,
+        "is_default": False,
+        "description": "Ultra-high SDR transformer checkpoint; significantly heavier RAM and CPU usage.",
+    },
+]
 
 # Configure logging
 logging.basicConfig(
@@ -188,49 +214,16 @@ def build_spatial_audio_filter(
     clarity_boost=False,
     pitch_semitones=0,
     tempo=1.0,
-    preset="none",
-    stem_filter="none"
+    preset="none"
 ):
     """
-    Constructs a comprehensive, hardware-grade FFmpeg audio filtergraph.
-    Supports 8D / 16D spatial panning, stem filters (vocal remover / karaoke, vocal isolate, bass remover, sub-bass focus),
-    pitch & tempo adjustment, acoustic enhancements (deep bass shelf, air clarity), and viral presets (slowed+reverb, nightcore, 432Hz).
+    Constructs a hardware-grade FFmpeg audio filtergraph.
+    Supports 8D / 16D spatial panning, pitch & tempo adjustment, acoustic enhancements
+    (deep bass shelf, air clarity), and presets (slowed+reverb, nightcore, 432Hz).
     """
     filters = []
 
-    # 1. Stem Filtering (Studio Karaoke / Human Voice Only / Clean Music / Bass Remover)
-    if stem_filter in ("vocal_remover", "karaoke"):
-        # Studio Karaoke: High-fidelity frequency-split cancellation
-        # Preserves punchy centered bass & kick drum (<190Hz), cancels centered vocal band (>190Hz), preserves airy stereo shimmer
-        filters.append("asplit=2[l][h];[l]lowpass=f=190,bass=g=4:f=100[low];[h]highpass=f=190,stereotools=mlev=0.03:slev=1.45,treble=g=2:f=8000[high];[low][high]amix=inputs=2:weights=1.15 1.0")
-    elif stem_filter in ("vocal_isolate", "acapella", "voice_only", "speech_only"):
-        # Human Voice Only: Center speech extraction + full-range human vocal bandpass + vocal formant enhancement + dialogue balance + volume normalization
-        # Eliminates aggressive RNNoise gating that causes "voice cut" / choppy audio, and removes telephone-muffling lowpass
-        voice_chain = [
-            "highpass=f=80",
-            "lowpass=f=12000",
-            "stereotools=slev=0.15:mlev=1.65",
-            "equalizer=f=1000:width_type=o:width=1.5:g=3.5",
-            "equalizer=f=2800:width_type=o:width=1.5:g=4.0",
-            "equalizer=f=6000:width_type=o:width=1.5:g=2.5",
-            "dialoguenhance=original=0.35:enhance=2.8:voice=4",
-            "volume=2.2"
-        ]
-        filters.append(",".join(voice_chain))
-    elif stem_filter in ("bass_remove", "no_bass"):
-        # Clean speech & dialogue: Cut boomy sub-bass, rumble, and 808s
-        filters.append("highpass=f=180,bass=g=-22:f=150,volume=1.3")
-    elif stem_filter in ("instrumental", "backing_track", "clean_music"):
-        # Full stereo instrumental with wide accompaniment, rich bass, and crisp air
-        filters.append("stereotools=mlev=0.20:slev=1.35,bass=g=3:f=110,treble=g=2.5:f=7500")
-    elif stem_filter in ("bass_only", "bass_isolate"):
-        # Sub-bass extraction
-        filters.append("lowpass=f=220,bass=g=5:f=100,volume=1.3")
-    elif stem_filter in ("drums_only", "percussion"):
-        # Transient kick & snare rhythm extraction
-        filters.append("highpass=f=60,equalizer=f=120:width_type=h:width=60:g=4,equalizer=f=3500:width_type=h:width=1200:g=3")
-
-    # 2. Pitch Shifting (± Semitones using rubberband)
+    # 1. Pitch Shifting (± Semitones using rubberband)
     try:
         pitch = float(pitch_semitones)
     except (ValueError, TypeError):
@@ -240,7 +233,7 @@ def build_spatial_audio_filter(
         pitch_factor = 2.0 ** (pitch / 12.0)
         filters.append(f"rubberband=pitch={pitch_factor:.5f}")
 
-    # 3. Special Sound Signatures / Presets
+    # 2. Special Sound Signatures / Presets
     if preset == "slowed_reverb":
         filters.append("atempo=0.88,asetrate=44100*0.92,aresample=44100")
     elif preset == "nightcore":
@@ -256,14 +249,14 @@ def build_spatial_audio_filter(
         except (ValueError, TypeError):
             pass
 
-    # 4. Acoustic Enhancements: Bass Warmth & Air Clarity
-    if bass_boost and stem_filter != "bass_remove":
+    # 3. Acoustic Enhancements: Bass Warmth & Air Clarity
+    if bass_boost:
         filters.append("bass=g=4.5:f=110:w=0.6")
 
-    if clarity_boost and stem_filter != "bass_only":
+    if clarity_boost:
         filters.append("treble=g=3.5:f=8000,crystalizer=i=1.5")
 
-    # 5. Spatial Orbit: 8D or 16D Binaural Panning
+    # 4. Spatial Orbit: 8D or 16D Binaural Panning
     mode_lower = str(mode).lower() if mode else "none"
     if mode_lower in ("8d", "16d"):
         try:
@@ -293,8 +286,8 @@ def build_spatial_audio_filter(
             filters.append("stereowiden=delay=18:feedback=0.25:crossfeed=0.25:drymix=0.8")
             filters.append(f"apulsator=mode=sine:hz={hz:.4f}:amount={amount:.2f}:offset_l=0:offset_r=0.5")
 
-    # 6. Psychoacoustic Reverb
-    if reverb and stem_filter not in ("bass_only", "vocal_isolate"):
+    # 5. Psychoacoustic Reverb
+    if reverb:
         if mode_lower == "16d":
             filters.append("aecho=0.8:0.88:45|90:0.3|0.2")
         elif preset == "slowed_reverb":
@@ -366,10 +359,10 @@ def cleanup_old_files():
                     try: f.unlink()
                     except: pass
 
-            # Cleanup expired AI separation job directories (> 1 hour old)
-            if TEMP_JOBS_DIR.exists():
-                for d in TEMP_JOBS_DIR.iterdir():
-                    if d.is_dir() and datetime.fromtimestamp(d.stat().st_mtime) < upload_cutoff:
+            # Cleanup expired UVR5 job directories (> 1 hour old)
+            if UVR5_JOBS_DIR.exists():
+                for d in UVR5_JOBS_DIR.iterdir():
+                    if d.is_dir() and not d.name.startswith("_") and datetime.fromtimestamp(d.stat().st_mtime) < upload_cutoff:
                         try: shutil.rmtree(d, ignore_errors=True)
                         except: pass
         except Exception as e:
@@ -395,9 +388,8 @@ def spatial_studio():
     return render_template("8d.html")
 
 @app.route("/stems")
+@app.route("/uvr5")
 @app.route("/splitter")
-@app.route("/remover")
-@app.route("/demucs")
 def stem_studio():
     return render_template("stems.html")
 
@@ -413,15 +405,39 @@ def api_system_stats():
         return jsonify(system_telemetry.get_full_snapshot())
     return jsonify({"error": "Telemetry module unavailable"}), 503
 
-TEMP_JOBS_DIR = BASE_DIR / "temp_jobs"
-TEMP_JOBS_DIR.mkdir(parents=True, exist_ok=True)
+UVR5_JOBS_DIR = BASE_DIR / "uvr5_jobs"
+UVR5_JOBS_DIR.mkdir(parents=True, exist_ok=True)
+UVR5_MODELS_DIR = BASE_DIR / "models" / "uvr5"
+UVR5_MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _acquire_audio_for_ai(job_dir: Path, url: str = "", upload_id: str = "", uploaded_file=None, progress_cb=None):
-    """Obtains local audio file for AI separation from upload, upload_id, or URL (single-track, cached)."""
+def _get_uvr5_health():
+    try:
+        resp = requests.get(f"{UVR5_SERVICE_URL}/health", timeout=1.5)
+        if resp.ok:
+            return resp.json()
+    except Exception:
+        pass
+    try:
+        from uvr5_service import uvr5_service
+        snap = uvr5_service.status_snapshot()
+        snap["mode"] = "in_process"
+        return snap
+    except Exception:
+        return {
+            "status": "offline",
+            "separator_initialized": False,
+            "default_model": UVR5_DEFAULT_MODEL,
+            "models_dir": str(UVR5_MODELS_DIR),
+            "service_url": UVR5_SERVICE_URL,
+        }
+
+
+def _acquire_audio_for_uvr5(job_dir: Path, url: str = "", upload_id: str = "", uploaded_file=None, progress_cb=None):
+    """Obtains local audio file for UVR5 separation from upload, upload_id, or URL."""
     if uploaded_file and uploaded_file.filename:
-        ext = Path(uploaded_file.filename).suffix.lower()
-        allowed = {".mp3", ".wav", ".m4a", ".flac", ".aac", ".ogg", ".opus", ".webm"}
+        ext = Path(uploaded_file.filename).suffix.lower() or ".wav"
+        allowed = {".mp3", ".wav", ".m4a", ".flac", ".aac", ".ogg", ".opus", ".webm", ".wma"}
         if ext not in allowed:
             raise ValueError(f"Unsupported audio format '{ext}'. Allowed: .mp3, .wav, .m4a, .flac, .aac, .ogg")
         in_path = job_dir / f"input{ext}"
@@ -441,19 +457,20 @@ def _acquire_audio_for_ai(job_dir: Path, url: str = "", upload_id: str = "", upl
         cached = find_cached_source(url)
         if cached:
             if progress_cb:
-                progress_cb(6, "Instant load from cached audio track...")
+                progress_cb(10, "Loaded track from local source cache...")
             dst = job_dir / f"input{cached.suffix.lower()}"
             shutil.copy2(cached, dst)
             return dst, cached.stem
 
         if progress_cb:
-            progress_cb(4, "Downloading track audio for AI separation...")
+            progress_cb(6, "Downloading single track audio for UVR5...")
         ydl_opts = {
             "format": "bestaudio/best",
             "outtmpl": str(job_dir / "dl_source.%(ext)s"),
             "quiet": True,
             "no_warnings": True,
             "noplaylist": True,
+            "extract_flat": "in_playlist",
             "socket_timeout": 20,
             "retries": 3,
             "nocheckcertificate": True,
@@ -471,12 +488,24 @@ def _acquire_audio_for_ai(job_dir: Path, url: str = "", upload_id: str = "", upl
             raise ValueError("Failed to download audio from URL.")
         src = dl_files[0]
         save_to_source_cache(url, src)
-        return src, f"{title}{src.suffix.lower()}"
+        dst = job_dir / f"input{src.suffix.lower()}"
+        shutil.move(str(src), str(dst))
+        return dst, f"{title}{dst.suffix.lower()}"
 
     raise ValueError("Missing uploaded audio file, upload_id, or music URL.")
 
 
-def _run_ai_separation_worker(job_id: str, job_dir: Path, input_file: Path, display_name: str, engine: str, start_sec, duration_sec, url: str = "", upload_id: str = ""):
+def _run_uvr5_worker(
+    job_id: str,
+    job_dir: Path,
+    input_file: Path,
+    display_name: str,
+    model_name: str,
+    start_sec,
+    duration_sec,
+    url: str = "",
+    upload_id: str = "",
+):
     def update_progress(pct: int, msg: str):
         with JOBS_LOCK:
             if job_id in JOBS:
@@ -486,27 +515,61 @@ def _run_ai_separation_worker(job_id: str, job_dir: Path, input_file: Path, disp
 
     try:
         if input_file is None:
-            input_file, display_name = _acquire_audio_for_ai(
+            input_file, display_name = _acquire_audio_for_uvr5(
                 job_dir, url=url, upload_id=upload_id, progress_cb=update_progress
             )
 
-        out_dir = job_dir / "separated" / "htdemucs" / input_file.stem
-        out_dir.mkdir(parents=True, exist_ok=True)
-        vocals_wav = out_dir / "vocals.wav"
-        no_vocals_wav = out_dir / "no_vocals.wav"
+        update_progress(20, f"Dispatching to UVR5 engine ({model_name})...")
+        result = None
 
-        if separate_audio_track is None:
-            raise RuntimeError("AI separation module (ai_separator.py) failed to load.")
+        # Prefer headless Debian UVR5 microservice when running
+        service_up = False
+        try:
+            hc = requests.get(f"{UVR5_SERVICE_URL}/health", timeout=2)
+            service_up = hc.ok
+        except Exception:
+            service_up = False
 
-        result = separate_audio_track(
-            input_path=input_file,
-            vocals_out=vocals_wav,
-            instrumental_out=no_vocals_wav,
-            preferred_engine=engine,
-            start_sec=start_sec,
-            duration_sec=duration_sec,
-            progress_cb=update_progress,
-        )
+        if service_up:
+            update_progress(35, f"Separating via UVR5 Debian service ({model_name})...")
+            payload = {
+                "input_path": str(input_file),
+                "output_dir": str(job_dir),
+                "model": model_name,
+                "start_sec": start_sec,
+                "duration_sec": duration_sec,
+                "output_format": "WAV",
+                "cleanup_input": True,
+                "job_id": job_id,
+            }
+            resp = requests.post(f"{UVR5_SERVICE_URL}/separate", json=payload, timeout=1800)
+            if not resp.ok:
+                detail = resp.text
+                try:
+                    detail = resp.json().get("detail", detail)
+                except Exception:
+                    pass
+                raise RuntimeError(f"UVR5 service error ({resp.status_code}): {detail}")
+            result = resp.json()
+        else:
+            # In-process fallback if audio_separator is available directly in current Python env
+            try:
+                from uvr5_service import uvr5_service
+            except Exception as imp_err:
+                raise RuntimeError(
+                    f"UVR5 microservice at {UVR5_SERVICE_URL} is offline and audio-separator is not installed in this Python process ({imp_err})."
+                )
+            update_progress(35, f"Running UVR5 Separator in-process ({model_name})...")
+            result = uvr5_service.separate_file(
+                input_path=input_file,
+                output_dir=job_dir,
+                model_name=model_name,
+                start_sec=start_sec,
+                duration_sec=duration_sec,
+                output_format="WAV",
+                cleanup_input=True,
+                job_id=job_id,
+            )
 
         with JOBS_LOCK:
             if job_id in JOBS:
@@ -514,34 +577,77 @@ def _run_ai_separation_worker(job_id: str, job_dir: Path, input_file: Path, disp
                     "status": "finished",
                     "progress": 100,
                     "filename": display_name,
-                    "vocals_url": f"/api/download/{job_id}/vocals",
-                    "instrumental_url": f"/api/download/{job_id}/no_vocals",
-                    "engine": result.get("engine"),
-                    "engine_label": result.get("engine_label"),
-                    "ai_used": result.get("ai_used", True),
+                    "model": result.get("model", model_name),
+                    "vocals_path": result.get("vocals_path"),
+                    "instrumental_path": result.get("instrumental_path"),
+                    "vocals_size": result.get("vocals_size"),
+                    "instrumental_size": result.get("instrumental_size"),
+                    "vocals_url": f"/api/uvr5/download/{job_id}/vocals",
+                    "instrumental_url": f"/api/uvr5/download/{job_id}/instrumental",
                     "elapsed_sec": result.get("elapsed_sec"),
-                    "message": f"Complete via {result.get('engine_label')} ({result.get('elapsed_sec')}s)",
+                    "message": f"Complete via {result.get('model', model_name)} ({result.get('elapsed_sec')}s)",
                 })
     except Exception as e:
-        logger.error(f"AI separation failed [{job_id}]: {e}")
+        logger.error(f"UVR5 separation failed [{job_id}]: {e}")
+        if input_file and Path(input_file).exists():
+            try:
+                Path(input_file).unlink()
+            except Exception:
+                pass
         with JOBS_LOCK:
             if job_id in JOBS:
                 JOBS[job_id]["status"] = "error"
                 JOBS[job_id]["error"] = str(e)
-                JOBS[job_id]["message"] = f"AI separation failed: {e}"
+                JOBS[job_id]["message"] = f"UVR5 separation failed: {e}"
 
 
-@app.route("/api/separate", methods=["POST"])
-@app.route("/api/separate_async", methods=["POST"])
-def api_separate():
+@app.route("/api/uvr5/models", methods=["GET"])
+def api_uvr5_models():
+    try:
+        resp = requests.get(f"{UVR5_SERVICE_URL}/models", timeout=2)
+        if resp.ok:
+            data = resp.json()
+            data["service_online"] = True
+            return jsonify(data)
+    except Exception:
+        pass
+
+    fallback_models = []
+    for item in UVR5_MODELS_CATALOG:
+        p = UVR5_MODELS_DIR / item["filename"]
+        fallback_models.append({
+            **item,
+            "cached": p.is_file() and p.stat().st_size > 0,
+        })
+    return jsonify({
+        "service_online": False,
+        "default_model": UVR5_DEFAULT_MODEL,
+        "loaded_model": None,
+        "models_dir": str(UVR5_MODELS_DIR),
+        "segment_size": 256,
+        "batch_size": 1,
+        "models": fallback_models,
+    })
+
+
+@app.route("/api/uvr5/separate", methods=["POST"])
+def api_uvr5_separate():
     is_json = request.is_json
     payload = request.get_json(force=True, silent=True) or {} if is_json else request.form
 
     uploaded = request.files.get("file") or request.files.get("audio_file")
     url = (payload.get("url") or "").strip()
     upload_id = (payload.get("upload_id") or "").strip()
-    engine = (payload.get("engine") or "mdx_onnx").strip()
-    async_mode = str(payload.get("async_mode") or request.args.get("async") or ("1" if request.path.endswith("_async") else "0")).lower() in ("1", "true", "yes")
+    model_name = (payload.get("model") or UVR5_DEFAULT_MODEL).strip()
+    allowed_models = {m["filename"] for m in UVR5_MODELS_CATALOG}
+    if model_name not in allowed_models:
+        return jsonify({
+            "detail": f"Unsupported UVR5 model '{model_name}'. Allowed: {', '.join(sorted(allowed_models))}"
+        }), 400
+
+    async_mode = str(
+        payload.get("async_mode") or request.args.get("async") or "0"
+    ).lower() in ("1", "true", "yes")
 
     start_sec = parse_time_seconds(payload.get("start_time"))
     dur_raw = payload.get("duration", "full")
@@ -556,15 +662,16 @@ def api_separate():
         return jsonify({"detail": "Please provide an audio file, upload_id, or music URL."}), 400
 
     job_id = uuid.uuid4().hex[:12]
-    job_dir = TEMP_JOBS_DIR / job_id
+    job_dir = UVR5_JOBS_DIR / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save uploaded file immediately in request context before spawning worker thread
     input_file = None
     display_name = "audio_track"
     try:
         if uploaded or upload_id:
-            input_file, display_name = _acquire_audio_for_ai(job_dir, upload_id=upload_id, uploaded_file=uploaded)
+            input_file, display_name = _acquire_audio_for_uvr5(
+                job_dir, upload_id=upload_id, uploaded_file=uploaded
+            )
     except Exception as e:
         shutil.rmtree(job_dir, ignore_errors=True)
         return jsonify({"detail": str(e)}), 400
@@ -573,72 +680,81 @@ def api_separate():
         JOBS[job_id] = {
             "id": job_id,
             "status": "queued",
-            "progress": 2,
-            "message": f"Queued for {engine.upper()} Neural AI separation...",
+            "progress": 4,
+            "message": f"Queued for UVR5 ({model_name})...",
             "filename": display_name,
+            "model": model_name,
             "vocals_url": None,
             "instrumental_url": None,
-            "engine": engine,
-            "engine_label": None,
-            "ai_used": None,
+            "vocals_path": None,
+            "instrumental_path": None,
+            "elapsed_sec": None,
             "error": None,
             "created_at": datetime.now(),
         }
 
     if async_mode:
         threading.Thread(
-            target=_run_ai_separation_worker,
-            args=(job_id, job_dir, input_file, display_name, engine, start_sec, duration_sec, url, upload_id),
+            target=_run_uvr5_worker,
+            args=(job_id, job_dir, input_file, display_name, model_name, start_sec, duration_sec, url, upload_id),
             daemon=True,
         ).start()
         return jsonify({
             "success": True,
             "status": "queued",
             "job_id": job_id,
-            "message": "AI separation started in background",
+            "model": model_name,
+            "message": "UVR5 separation queued in background",
         })
 
-    # Synchronous execution path (for external API callers / FastAPI parity)
-    _run_ai_separation_worker(job_id, job_dir, input_file, display_name, engine, start_sec, duration_sec, url, upload_id)
+    _run_uvr5_worker(job_id, job_dir, input_file, display_name, model_name, start_sec, duration_sec, url, upload_id)
     with JOBS_LOCK:
-        job = JOBS.get(job_id, {})
+        job = dict(JOBS.get(job_id, {}))
     if job.get("status") != "finished":
-        return jsonify({"detail": job.get("error") or "AI separation failed"}), 500
+        return jsonify({"detail": job.get("error") or "UVR5 separation failed"}), 500
 
     return jsonify({
         "status": "success",
         "job_id": job_id,
         "filename": job.get("filename"),
+        "model": job.get("model"),
+        "vocals_path": job.get("vocals_path"),
+        "instrumental_path": job.get("instrumental_path"),
         "vocals_url": job.get("vocals_url"),
         "instrumental_url": job.get("instrumental_url"),
-        "engine": job.get("engine"),
-        "engine_label": job.get("engine_label"),
-        "ai_used": job.get("ai_used"),
         "elapsed_sec": job.get("elapsed_sec"),
     })
 
-@app.route("/api/download/<job_id>/<stem>", methods=["GET"])
-def api_download_demucs(job_id, stem):
-    job_dir = TEMP_JOBS_DIR / job_id
-    if not job_dir.exists():
-        return jsonify({"detail": "Job not found or expired"}), 404
 
-    stem_name = "no_vocals" if stem.lower() in ("no_vocals", "instrumental") else stem.lower()
-    target_file = None
-    for cand in job_dir.rglob(f"{stem_name}.wav"):
-        if cand.is_file():
-            target_file = cand
-            break
+@app.route("/api/uvr5/status/<job_id>", methods=["GET"])
+def api_uvr5_status(job_id):
+    with JOBS_LOCK:
+        job = JOBS.get(job_id)
+        if not job:
+            return jsonify({"detail": "Job not found"}), 404
+        return jsonify({k: (v.isoformat() if isinstance(v, datetime) else v) for k, v in job.items()})
 
-    if not target_file:
-        return jsonify({"detail": f"Stem '{stem}' not found"}), 404
 
+@app.route("/api/uvr5/download/<job_id>/<stem>", methods=["GET"])
+def api_uvr5_download(job_id, stem):
+    job_dir = UVR5_JOBS_DIR / job_id
+    if not job_dir.is_dir():
+        return jsonify({"detail": "UVR5 job not found or expired"}), 404
+
+    stem_norm = "instrumental" if stem.lower() in ("instrumental", "no_vocals", "music") else "vocals"
+    matches = list(job_dir.glob(f"{stem_norm}.*"))
+    if not matches:
+        return jsonify({"detail": f"Stem '{stem_norm}' not found"}), 404
+
+    target_file = matches[0]
+    ext = target_file.suffix.lower()
+    mime = "audio/wav" if ext == ".wav" else ("audio/flac" if ext == ".flac" else "audio/mpeg")
     is_preview = str(request.args.get("preview", "0")).lower() in ("1", "true", "yes")
     return send_file(
         str(target_file),
-        mimetype="audio/wav",
+        mimetype=mime,
         as_attachment=not is_preview,
-        download_name=f"{job_id}_{stem_name}.wav",
+        download_name=f"{job_id}_{stem_norm}{ext}",
         conditional=True,
     )
 
@@ -724,10 +840,7 @@ def health():
         "timestamp": datetime.now().isoformat(),
         "ffmpeg": ffmpeg_available,
         "platform": sys.platform,
-        "ai_engines": {
-            "mdx_onnx": has_mdx_onnx(),
-            "demucs": has_demucs(),
-        }
+        "uvr5": _get_uvr5_health(),
     })
 
 @app.route("/api/info", methods=["POST"])
@@ -883,7 +996,6 @@ def run_download_task(job_id: str, url: str, options: dict):
     spatial_pitch = options.get("spatial_pitch", 0)
     spatial_tempo = options.get("spatial_tempo", 1.0)
     spatial_preset = options.get("spatial_preset", "none")
-    stem_filter = options.get("stem_filter", "none")
 
     format_id = options.get("format_id")
     has_audio = options.get("has_audio", False)
@@ -923,7 +1035,6 @@ def run_download_task(job_id: str, url: str, options: dict):
         options.get("single_track")
         or download_mode in ("8d", "16d")
         or spatial_audio != "none"
-        or stem_filter != "none"
         or is_watch_with_mix
     )
 
@@ -1127,7 +1238,6 @@ def run_download_task(job_id: str, url: str, options: dict):
         spatial_mode = "16d" if (spatial_audio == "16d") else ("8d" if (spatial_audio == "8d") else None)
         has_effects = (
             bool(spatial_mode)
-            or (stem_filter not in (None, "", "none"))
             or (spatial_preset not in (None, "", "none"))
             or (abs(float(spatial_pitch or 0)) >= 0.1)
             or bool(spatial_clarity)
@@ -1139,18 +1249,6 @@ def run_download_task(job_id: str, url: str, options: dict):
             tag_parts = []
             if spatial_mode:
                 tag_parts.append(spatial_mode.upper())
-            if stem_filter in ("vocal_remover", "karaoke"):
-                tag_parts.append("KARAOKE")
-            elif stem_filter in ("vocal_isolate", "acapella", "voice_only", "speech_only"):
-                tag_parts.append("VOICE-ONLY")
-            elif stem_filter in ("bass_remove", "no_bass"):
-                tag_parts.append("NO-BASS")
-            elif stem_filter in ("bass_only", "bass_isolate"):
-                tag_parts.append("BASS-ONLY")
-            elif stem_filter in ("drums_only", "percussion"):
-                tag_parts.append("DRUMS")
-            elif stem_filter in ("instrumental", "backing_track", "clean_music"):
-                tag_parts.append("CLEAN-MUSIC")
             if spatial_preset == "slowed_reverb":
                 tag_parts.append("SLOWED+REVERB")
             elif spatial_preset == "nightcore":
@@ -1175,8 +1273,7 @@ def run_download_task(job_id: str, url: str, options: dict):
                 clarity_boost=spatial_clarity,
                 pitch_semitones=spatial_pitch,
                 tempo=spatial_tempo,
-                preset=spatial_preset,
-                stem_filter=stem_filter
+                preset=spatial_preset
             )
             clean_stem = safe_filename(final_file.stem, 70)
             spatial_out = job_folder / f"{tag_str} {clean_stem}.mp3"
