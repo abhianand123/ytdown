@@ -950,6 +950,21 @@
         });
 
       } catch (err) {
+        if (String(err.message).toLowerCase().includes('fetch')) {
+          try {
+            const gRes = await fetch('https://api.github.com/repos/abhianand123/ytdown/contents/url.txt?ref=main&t=' + Date.now());
+            if (gRes.ok) {
+              const gMeta = await gRes.json();
+              const latest = atob((gMeta.content || '').replace(/\s/g, '')).trim();
+              if (latest && latest.startsWith('http') && latest !== window.location.origin) {
+                if (confirm('This tunnel link expired and moved to:\n' + latest + '\n\nClick OK to jump to the live server.')) {
+                  window.location.href = latest + window.location.pathname;
+                }
+                return;
+              }
+            }
+          } catch (_) {}
+        }
         alert('Could not load track: ' + err.message);
       } finally {
         btn.disabled = false;
