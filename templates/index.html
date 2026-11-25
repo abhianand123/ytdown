@@ -592,6 +592,7 @@
       </div>
 
       <!-- Acoustic & Stem Processing Tools (Vocal Remover / Karaoke, Bass Remover, 8D Spatial) -->
+      <!-- Spatial Audio Option (Clean, No Legacy Vocal Removal) -->
       <div class="border-t border-[rgba(255,255,255,0.06)] pt-5 space-y-3.5">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
@@ -601,8 +602,8 @@
               </svg>
             </div>
             <div>
-              <h3 class="text-xs sm:text-sm font-semibold text-[var(--color-text-primary)]">Stem & Acoustic Processing</h3>
-              <p class="text-[11px] text-[var(--color-text-muted)]">Remove vocals (karaoke), take out bass, or add 8D spatial motion</p>
+              <h3 class="text-xs sm:text-sm font-semibold text-[var(--color-text-primary)]">Audio Mastering &amp; Studios</h3>
+              <p class="text-[11px] text-[var(--color-text-muted)]">Add 8D spatial panning or launch UVR5 AI vocal isolation</p>
             </div>
           </div>
           <a href="/8d" class="text-[11px] text-[var(--color-accent)] hover:underline flex items-center gap-1 font-semibold">
@@ -611,43 +612,7 @@
           </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <!-- Voice Only / Dialogue -->
-          <label class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-cyan-400 transition-all">
-            <div>
-              <div class="text-xs font-bold text-cyan-400">🗣️ Voice Only</div>
-              <div class="text-[10px] text-[var(--color-text-muted)]">Dialogue • Mutes Music</div>
-            </div>
-            <div class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="voice-only-toggle-main" onchange="handleMainStemToggle('voice')" class="sr-only peer">
-              <div class="w-10 h-5 nm-switch-track peer-focus:outline-none peer peer-checked:bg-cyan-500 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all after:shadow-md"></div>
-            </div>
-          </label>
-
-          <!-- Vocal Remover / Karaoke -->
-          <label class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-[var(--color-accent)] transition-all">
-            <div>
-              <div class="text-xs font-bold text-[var(--color-accent)]">🎤 Vocal Remover</div>
-              <div class="text-[10px] text-[var(--color-text-muted)]">Karaoke • Lyrics Out</div>
-            </div>
-            <div class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="vocal-remover-toggle-main" onchange="handleMainStemToggle('vocal')" class="sr-only peer">
-              <div class="w-10 h-5 nm-switch-track peer-focus:outline-none peer peer-checked:bg-[var(--color-accent)] peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all after:shadow-md"></div>
-            </div>
-          </label>
-
-          <!-- Bass Remover -->
-          <label class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-amber-500 transition-all">
-            <div>
-              <div class="text-xs font-bold text-amber-500">🎸 Bass Remover</div>
-              <div class="text-[10px] text-[var(--color-text-muted)]">Mute 808s & Bass</div>
-            </div>
-            <div class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="bass-remover-toggle-main" onchange="handleMainStemToggle('bass')" class="sr-only peer">
-              <div class="w-10 h-5 nm-switch-track peer-focus:outline-none peer peer-checked:bg-amber-500 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all after:shadow-md"></div>
-            </div>
-          </label>
-
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <!-- 8D Audio Effect -->
           <label class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-purple-400 transition-all">
             <div>
@@ -659,6 +624,15 @@
               <div class="w-10 h-5 nm-switch-track peer-focus:outline-none peer peer-checked:bg-purple-500 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all after:shadow-md"></div>
             </div>
           </label>
+
+          <!-- UVR5 AI Stem Studio Link -->
+          <a href="/stems" class="nm-card p-3 flex items-center justify-between cursor-pointer border border-[rgba(255,255,255,0.06)] hover:border-[var(--color-accent)] transition-all">
+            <div>
+              <div class="text-xs font-bold text-[var(--color-accent)]">🎛️ UVR5 AI Stem Studio</div>
+              <div class="text-[10px] text-[var(--color-text-muted)]">Headless UVR5 Vocals &amp; Instrumental Splitter</div>
+            </div>
+            <svg class="w-4 h-4 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>
         </div>
       </div>
 
@@ -1081,23 +1055,6 @@
       document.getElementById('media-card').classList.remove('hidden');
     }
 
-    function handleMainStemToggle(type) {
-      const voice = document.getElementById('voice-only-toggle-main');
-      const vocal = document.getElementById('vocal-remover-toggle-main');
-      const bass = document.getElementById('bass-remover-toggle-main');
-
-      if (type === 'voice' && voice?.checked) {
-        if (vocal) vocal.checked = false;
-        if (bass) bass.checked = false;
-      } else if (type === 'vocal' && vocal?.checked) {
-        if (voice) voice.checked = false;
-        if (bass) bass.checked = false;
-      } else if (type === 'bass' && bass?.checked) {
-        if (voice) voice.checked = false;
-        if (vocal) vocal.checked = false;
-      }
-    }
-
     // Start Download job
     async function initiateDownload() {
       const url = document.getElementById('url-input').value.trim();
@@ -1112,15 +1069,6 @@
         return;
       }
 
-      let stemFilter = 'none';
-      if (document.getElementById('voice-only-toggle-main')?.checked) {
-        stemFilter = 'vocal_isolate';
-      } else if (document.getElementById('vocal-remover-toggle-main')?.checked) {
-        stemFilter = 'vocal_remover';
-      } else if (document.getElementById('bass-remover-toggle-main')?.checked) {
-        stemFilter = 'bass_remove';
-      }
-
       const spatial8D = document.getElementById('spatial-8d-toggle-main')?.checked ? '8d' : 'none';
 
       const payload = {
@@ -1133,7 +1081,6 @@
         trim: isTrim,
         start_time: startTime,
         end_time: endTime,
-        stem_filter: stemFilter,
         spatial_audio: spatial8D
       };
 
