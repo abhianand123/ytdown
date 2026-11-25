@@ -1006,6 +1006,32 @@
       xhr.send(formData);
     }
 
+    // Stale-tunnel auto-recovery when an old trycloudflare tab hits network 'Failed to fetch'
+    async function tryRedirectIfStaleTunnel(trackUrl) {
+      try {
+        const res = await fetch('https://api.github.com/repos/abhianand123/ytdown/contents/url.txt?ref=main&t=' + Date.now());
+        if (!res.ok) return false;
+        const meta = await res.json();
+        const latest = atob((meta.content || '').replace(/\s/g, '')).trim();
+        if (latest && latest.startsWith('http') && latest !== window.location.origin) {
+          const qs = trackUrl ? ('?url=' + encodeURIComponent(trackUrl)) : '';
+          if (confirm('This tunnel link expired and your phone moved to:\n' + latest + '\n\nClick OK to jump directly to the live server.')) {
+            window.location.href = latest + window.location.pathname + qs;
+          }
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    (function restoreUrlFromQuery() {
+      const p = new URLSearchParams(window.location.search).get('url');
+      if (p) {
+        const inp = document.getElementById('url-input');
+        if (inp) inp.value = p;
+      }
+    })();
+
     // Inspect URL
     async function inspectUrl() {
       const url = document.getElementById('url-input').value.trim();
@@ -1045,6 +1071,10 @@
         });
 
       } catch (err) {
+        if (String(err.message).toLowerCase().includes('fetch')) {
+          const redirected = await tryRedirectIfStaleTunnel(url);
+          if (redirected) return;
+        }
         alert('Could not load track: ' + err.message);
       } finally {
         btn.disabled = false;
