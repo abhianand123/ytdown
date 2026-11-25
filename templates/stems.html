@@ -3,19 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stem Splitter & Track Isolator Studio | OmniDownloader Pro</title>
-  <meta name="description" content="Isolate or remove musical stems: Vocal Remover (Karaoke), Acapella (Vocals Only), Bass Remover, Sub-Bass Isolator, Drums & Instrumental with live headphone audition.">
+  <title>UVR5 AI Stem Studio | OmniDownloader Pro</title>
+  <meta name="description" content="Headless Ultimate Vocal Remover 5 (UVR5) studio powered by ARM64 ONNX Runtime &amp; PyTorch: cleanly separate Vocals and Instrumental stems.">
 
-  <!-- Inter & JetBrains Mono Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* ── DUAL NEUMORPHIC COLOR PALETTE ENGINE ── */
     :root {
-      /* Dark Industrial Obsidian & Signal Orange (Teenage Engineering Hardware) */
       --nm-bg: #151517;
       --nm-surface: #1e1e22;
       --nm-surface-light: #242429;
@@ -42,7 +39,6 @@
     }
 
     [data-theme="light"] {
-      /* Classic Dribbble Soft Clay & Terracotta */
       --nm-bg: #e0e5ec;
       --nm-surface: #e0e5ec;
       --nm-surface-light: #eaeff6;
@@ -79,7 +75,6 @@
 
     .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-    /* Tactile Neumorphic Classes */
     .nm-card {
       background: var(--nm-surface);
       box-shadow: var(--nm-raised);
@@ -123,6 +118,10 @@
       background: var(--nm-surface-dark);
       color: var(--color-accent);
     }
+    .nm-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
 
     .nm-btn-primary {
       background: var(--color-accent);
@@ -135,16 +134,19 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .nm-btn-primary:hover {
+    .nm-btn-primary:hover:not(:disabled) {
       background: var(--color-accent-hover);
       box-shadow: 0 6px 20px var(--color-accent-glow);
     }
-    .nm-btn-primary:active {
+    .nm-btn-primary:active:not(:disabled) {
       box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
       transform: translateY(1px);
     }
+    .nm-btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
-    /* Inputs */
     input[type=text], input[type=number] {
       background: var(--nm-surface-dark);
       box-shadow: var(--nm-inset-sm);
@@ -161,20 +163,14 @@
       box-shadow: var(--nm-inset-sm), 0 0 0 2px var(--color-accent-subtle);
     }
 
-    /* Stem Card Active State */
-    .stem-card {
+    .model-card {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
     }
-    .stem-card.selected {
+    .model-card.selected {
       border-color: var(--color-accent) !important;
       background: var(--nm-surface-dark) !important;
       box-shadow: var(--nm-inset-sm) !important;
-    }
-
-    button:focus-visible, input:focus-visible, a:focus-visible {
-      outline: 2px solid var(--color-accent);
-      outline-offset: 2px;
     }
   </style>
 </head>
@@ -182,1517 +178,568 @@
 
   <div class="w-full max-w-4xl mx-auto space-y-6">
 
-    <!-- Global Top Navigation Bar Across All 3 Studios -->
+    <!-- Global Top Navigation Bar -->
     <header class="flex flex-col sm:flex-row items-center justify-between nm-card p-4 sm:p-5 gap-3">
-      <div class="flex items-center gap-3">
-        <a href="/" class="nm-btn p-2 sm:px-3 sm:py-2 flex items-center gap-1.5 text-xs font-semibold" title="Universal Downloader">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <a href="/" class="nm-btn px-3 py-2 flex items-center gap-1.5 text-xs font-semibold" title="Universal Downloader">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
           <span>Downloader</span>
         </a>
-        <a href="/8d" class="nm-btn p-2 sm:px-3 sm:py-2 flex items-center gap-1.5 text-xs font-semibold" title="8D / 16D Spatial Studio">
+        <a href="/8d" class="nm-btn px-3 py-2 flex items-center gap-1.5 text-xs font-semibold" title="8D / 16D Spatial Studio">
           <span>🎧 8D Studio</span>
         </a>
-        <span class="text-xs font-bold text-[var(--color-accent)] px-3 py-1.5 rounded-lg nm-inset-sm flex items-center gap-1.5 border border-[var(--color-accent-subtle)]">
-          <span>🎛️ Stem Studio</span>
+        <span class="text-xs font-bold text-[var(--color-accent)] px-3 py-2 rounded-xl nm-inset-sm flex items-center gap-1.5 border border-[var(--color-accent-subtle)]">
+          <span>🎛️ UVR5 Stem Studio</span>
         </span>
-        <a href="/dashboard" class="nm-btn p-2 sm:px-3 sm:py-2 flex items-center gap-1.5 text-xs font-semibold" title="Phone Hardware Dashboard">
+        <a href="/dashboard" class="nm-btn px-3 py-2 flex items-center gap-1.5 text-xs font-semibold" title="Phone Hardware Dashboard">
           <span>📊 Dashboard</span>
         </a>
       </div>
 
       <div class="flex items-center gap-3 self-end sm:self-auto">
         <div id="status-pill" class="text-[11px] font-mono px-3 py-1.5 rounded-full nm-inset-sm text-[var(--color-text-muted)] border border-[var(--nm-border)]">
-          DSP Ready
+          Checking UVR5...
         </div>
 
-        <!-- Light / Dark Theme Switcher -->
-        <button id="theme-toggle-btn" class="nm-btn p-2.5 rounded-xl flex items-center justify-center text-[var(--color-text)]" aria-label="Toggle visual theme">
+        <button id="theme-toggle-btn" class="nm-btn p-2.5 rounded-xl flex items-center justify-center text-[var(--color-text)]" aria-label="Toggle theme">
           <svg id="theme-icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="theme-icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
       </div>
     </header>
 
-    <!-- Studio Hero Banner -->
-    <div class="nm-card p-5 sm:p-7 space-y-2 text-center sm:text-left">
+    <!-- Studio Hero -->
+    <section class="nm-card p-5 sm:p-7 space-y-2 text-center sm:text-left">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
-          <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight flex items-center justify-center sm:justify-start gap-2.5">
-            <span>Stem Splitter & Track Isolator</span>
-            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border border-[var(--color-accent)] font-bold">Section 3</span>
+          <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight flex items-center justify-center sm:justify-start gap-2.5 flex-wrap">
+            <span>Ultimate Vocal Remover 5 (UVR5)</span>
+            <span class="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border border-[var(--color-accent)] font-bold">Headless AI Engine</span>
           </h1>
           <p class="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
-            Dedicated studio to remove or isolate vocals, lyrics, basslines, 808s, and instruments from any song.
+            True neural source separation running on ARM64 Debian CPU via <span class="font-mono">audio-separator[cpu]</span> &amp; <span class="font-mono">onnxruntime</span>.
           </p>
         </div>
         <div class="hidden sm:flex items-center gap-2 font-mono text-[11px] text-[var(--color-text-muted)] nm-inset-sm px-3 py-2">
-          <span>Phase-Cancellation</span>
+          <span>segment=256</span>
           <span>•</span>
-          <span>Formant Filters</span>
+          <span>batch=1</span>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Step 1: Audio Source Selection (URL or Upload) -->
+    <!-- Step 1: Audio Source -->
     <section class="nm-card p-5 sm:p-7 space-y-5">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-base sm:text-lg font-bold tracking-tight">Step 1: Choose Your Audio Source</h2>
-          <p class="text-xs text-[var(--color-text-muted)]">Paste any YouTube, music URL or upload your audio file</p>
+          <h2 class="text-base sm:text-lg font-bold tracking-tight">Step 1: Choose Audio Source</h2>
+          <p class="text-xs text-[var(--color-text-muted)]">Upload a local song file or paste a music/YouTube URL</p>
         </div>
         <div class="flex items-center gap-2 nm-inset-sm p-1.5 self-start sm:self-auto">
-          <button id="tab-url-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold active" onclick="switchSourceTab('url')">Web URL</button>
-          <button id="tab-upload-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold" onclick="switchSourceTab('upload')">Upload File</button>
-          <button id="tab-demucs-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold text-purple-400" onclick="switchSourceTab('demucs')">🧠 AI Stem Studio</button>
+          <button id="tab-upload-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold active" onclick="switchSourceTab('upload')">Upload File</button>
+          <button id="tab-url-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold" onclick="switchSourceTab('url')">Web URL</button>
         </div>
       </div>
 
-      <!-- URL Input Deck -->
-      <div id="url-input-section" class="space-y-3">
+      <!-- Upload Input Section -->
+      <div id="upload-input-section" class="space-y-3">
+        <label class="nm-inset-box p-6 flex flex-col items-center justify-center gap-2 border border-dashed border-[var(--color-text-dim)] cursor-pointer hover:border-[var(--color-accent)] transition-colors text-center">
+          <svg class="w-8 h-8 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+          <span class="text-xs sm:text-sm font-semibold">Click to select audio file (.mp3, .wav, .m4a, .flac, .ogg)</span>
+          <span id="selected-file-label" class="text-[11px] font-mono text-[var(--color-text-muted)]">No file chosen yet</span>
+          <input type="file" id="audio-file-input" accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.opus,.webm" class="hidden" onchange="onFilePicked(event)">
+        </label>
+      </div>
+
+      <!-- URL Input Section -->
+      <div id="url-input-section" class="space-y-3 hidden">
         <div class="flex flex-col sm:flex-row gap-3">
-          <input type="text" id="url-input" placeholder="Paste YouTube link, SoundCloud track, or music URL..." class="flex-1 text-xs sm:text-sm pl-4 pr-4 py-3.5" autocomplete="off">
-          <button id="inspect-btn" onclick="inspectUrl()" class="nm-btn-primary px-6 py-3.5 text-xs sm:text-sm flex items-center justify-center gap-2">
-            <span id="inspect-btn-text">Load Track</span>
-            <svg id="inspect-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <input type="text" id="url-input" placeholder="Paste YouTube, YouTube Music, or SoundCloud link..." class="flex-1 text-xs sm:text-sm pl-4 pr-4 py-3.5" autocomplete="off">
+          <button id="inspect-btn" onclick="inspectUrl()" class="nm-btn px-6 py-3.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
+            <span id="inspect-btn-text">Inspect Track</span>
           </button>
         </div>
+        <p id="url-error-box" class="hidden text-xs text-red-400 font-mono nm-inset-sm px-3 py-2"></p>
       </div>
 
-      <!-- File Upload Deck -->
-      <div id="upload-input-section" class="space-y-3 hidden">
-        <div id="drop-zone" class="nm-inset-box p-8 text-center cursor-pointer hover:border-[var(--color-accent)] transition-all border-2 border-dashed border-[var(--nm-border)]">
-          <input type="file" id="file-input" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg,.aac,.opus,.webm" class="hidden">
-          <div class="space-y-2">
-            <svg class="w-10 h-10 mx-auto text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-            <p class="text-xs sm:text-sm font-semibold">Drop your audio file here (.mp3, .wav, .flac, .m4a)</p>
-            <p class="text-[11px] text-[var(--color-text-muted)]">Processes with pristine audio fidelity on device</p>
-          </div>
+      <!-- Loaded Source Summary -->
+      <div id="source-preview-card" class="hidden nm-inset-box p-4 flex items-center gap-4">
+        <img id="source-thumb" src="" alt="" class="w-14 h-14 rounded-xl object-cover hidden shrink-0">
+        <div class="min-w-0 flex-1">
+          <p id="source-title" class="text-sm font-bold truncate"></p>
+          <p id="source-meta" class="text-[11px] font-mono text-[var(--color-text-muted)] mt-0.5 truncate"></p>
         </div>
-
-        <div id="upload-progress-box" class="hidden nm-card-sm p-4 space-y-2">
-          <div class="flex justify-between text-xs font-mono">
-            <span id="upload-status-text">Uploading audio...</span>
-            <span id="upload-percent-text">0%</span>
-          </div>
-          <div class="w-full bg-[var(--nm-surface-dark)] h-2 rounded-full overflow-hidden nm-inset-sm">
-            <div id="upload-bar-fill" class="bg-[var(--color-accent)] h-full transition-all duration-200" style="width: 0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Neural AI Input Deck (UVR MDX-Net & Meta Demucs v4) -->
-      <div id="demucs-input-section" class="space-y-4 hidden">
-        <!-- URL Input inside AI Studio -->
-        <div class="nm-card-sm p-4 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <label for="ai-url-input" class="text-xs font-bold text-purple-400">Option A: Paste YouTube / Music URL</label>
-            <button type="button" onclick="syncUrlToAi()" class="nm-btn px-2.5 py-1 text-[10px] font-mono text-[var(--color-text-muted)]">Use Link from Web URL Tab</button>
-          </div>
-          <input type="text" id="ai-url-input" placeholder="Paste YouTube, YouTube Music, or SoundCloud link for AI separation..." class="w-full text-xs sm:text-sm pl-4 pr-4 py-3" autocomplete="off">
-        </div>
-
-        <div id="demucs-drop-zone" class="nm-inset-box p-6 text-center cursor-pointer hover:border-purple-500 transition-all border-2 border-dashed border-purple-500/30 rounded-xl">
-          <input type="file" id="demucs-file-input" accept=".mp3,.wav,.m4a,.flac,.aac,.ogg" class="hidden">
-          <div class="space-y-1.5">
-            <div class="w-10 h-10 mx-auto rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-            </div>
-            <p id="demucs-file-label" class="text-xs sm:text-sm font-semibold">Option B: Click or Drop Audio File (.mp3, .wav, .m4a, .flac)</p>
-            <p class="text-[11px] text-[var(--color-text-muted)] font-mono">Runs genuinely on Neural AI Backend • Max 100MB</p>
-          </div>
-        </div>
-
-        <!-- AI Model & Segment Options -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="nm-card-sm p-3.5 space-y-2">
-            <div class="text-[11px] font-mono uppercase text-[var(--color-text-muted)]">Neural AI Model</div>
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <button type="button" id="ai-eng-mdx" onclick="selectAiEngine('mdx_onnx')" class="nm-btn py-2 px-2.5 text-[11px] font-bold active text-purple-400">⚡ UVR MDX-Net</button>
-              <button type="button" id="ai-eng-demucs" onclick="selectAiEngine('htdemucs')" class="nm-btn py-2 px-2.5 text-[11px] font-bold">🧠 Demucs v4</button>
-            </div>
-            <p id="ai-engine-hint" class="text-[10px] text-[var(--color-text-muted)]">ONNX Runtime neural network (~4x faster on phone CPU).</p>
-          </div>
-
-          <div class="nm-card-sm p-3.5 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-mono uppercase text-[var(--color-text-muted)]">Length & Start</span>
-              <input type="text" id="ai-start-time" value="00:00" placeholder="00:00" class="w-16 text-center text-[11px] py-0.5">
-            </div>
-            <div class="grid grid-cols-3 gap-1.5 text-xs">
-              <button type="button" id="ai-dur-30" onclick="selectAiDuration('30')" class="nm-btn py-1.5 text-[11px] active">30s Quick</button>
-              <button type="button" id="ai-dur-60" onclick="selectAiDuration('60')" class="nm-btn py-1.5 text-[11px]">60s Clip</button>
-              <button type="button" id="ai-dur-full" onclick="selectAiDuration('full')" class="nm-btn py-1.5 text-[11px]">Full Song</button>
-            </div>
-            <p class="text-[10px] text-[var(--color-text-muted)]">30s renders fast on phone; Full runs async safely (no 524 timeout).</p>
-          </div>
-        </div>
-
-        <button id="demucs-submit-btn" onclick="submitDemucsSeparation()" class="nm-btn w-full py-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border border-purple-500/40 text-purple-400 hover:border-purple-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          <span id="demucs-submit-text">Run Neural AI Stem Separation</span>
-          <svg id="demucs-submit-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-        </button>
-
-        <!-- AI Async Progress State -->
-        <div id="demucs-progress-card" class="nm-card-sm p-4 hidden space-y-3 border border-purple-500/30">
-          <div class="flex items-center justify-between text-xs font-mono">
-            <div class="flex items-center gap-2 text-purple-400 font-bold">
-              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-              <span id="demucs-progress-status">Queued for Neural AI...</span>
-            </div>
-            <span id="demucs-progress-pct" class="font-bold text-purple-400">0%</span>
-          </div>
-          <div class="w-full bg-[var(--nm-surface-dark)] h-2.5 rounded-full overflow-hidden nm-inset-sm">
-            <div id="demucs-progress-bar" class="bg-purple-500 h-full transition-all duration-300" style="width: 2%"></div>
-          </div>
-          <p class="text-[11px] font-mono text-[var(--color-text-muted)] text-center" id="demucs-progress-sub">Async job active — zero timeout. Watch live CPU telemetry in 📊 Dashboard.</p>
-        </div>
-
-        <!-- AI Dual Audio Results -->
-        <div id="demucs-results-deck" class="space-y-4 hidden">
-          <div class="flex items-center justify-between text-xs font-mono nm-inset-sm px-3 py-2 border border-emerald-500/20">
-            <span id="demucs-engine-badge" class="text-emerald-400 font-bold">✅ Separated by Neural AI</span>
-            <span id="demucs-elapsed-badge" class="text-[var(--color-text-muted)]">--</span>
-          </div>
-
-          <!-- Vocals Player -->
-          <div class="nm-card-sm p-4 space-y-2 border-l-4 border-cyan-400">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
-                <span>🗣️ Isolated Vocals (Acapella)</span>
-              </span>
-              <a id="demucs-vocals-dl" href="#" download="vocals.wav" class="nm-btn px-3 py-1 text-[11px] font-bold text-cyan-400 flex items-center gap-1 border border-cyan-500/30">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Download WAV
-              </a>
-            </div>
-            <div class="nm-inset-sm p-2">
-              <audio id="demucs-vocals-player" controls class="w-full h-8" crossorigin="anonymous"></audio>
-            </div>
-          </div>
-
-          <!-- Instrumental Player -->
-          <div class="nm-card-sm p-4 space-y-2 border-l-4 border-[var(--color-accent)]">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-[var(--color-accent)] flex items-center gap-1.5">
-                <span>🎸 Instrumental (No Vocals)</span>
-              </span>
-              <a id="demucs-inst-dl" href="#" download="no_vocals.wav" class="nm-btn px-3 py-1 text-[11px] font-bold text-[var(--color-accent)] flex items-center gap-1 border border-[var(--color-accent)]/30">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Download WAV
-              </a>
-            </div>
-            <div class="nm-inset-sm p-2">
-              <audio id="demucs-inst-player" controls class="w-full h-8" crossorigin="anonymous"></audio>
-            </div>
-          </div>
-        </div>
+        <button onclick="clearSource()" class="nm-btn px-3 py-1.5 text-[11px] font-semibold">Clear</button>
       </div>
     </section>
 
-    <!-- Step 2: Track Loaded & Stem Processing Rack -->
-    <section id="stem-console" class="nm-card p-5 sm:p-7 space-y-7 hidden">
-
-      <!-- Loaded Track Info Bar -->
-      <div class="flex items-center justify-between pb-5 border-b border-[var(--nm-border)]">
-        <div class="flex items-center gap-4">
-          <img id="track-thumb" src="" alt="Cover" class="w-16 h-16 rounded-xl object-cover nm-inset-sm border border-[var(--nm-border)]">
-          <div>
-            <div class="flex items-center gap-2">
-              <span id="track-badge" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-bold">READY</span>
-              <span id="track-duration" class="text-[11px] font-mono text-[var(--color-text-muted)]">--:--</span>
-            </div>
-            <h3 id="track-title" class="text-sm sm:text-base font-bold truncate max-w-md mt-1">Audio Loaded</h3>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stem Operation Selector Grid (What to Remove / Isolate) -->
-      <div class="space-y-4">
+    <!-- Step 2: UVR5 Model & Memory-Safe Settings -->
+    <section class="nm-card p-5 sm:p-7 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h3 class="text-sm sm:text-base font-bold tracking-tight">Step 2: Choose Stem Operation</h3>
-          <p class="text-xs text-[var(--color-text-muted)]">Select which track element you want to remove or isolate</p>
+          <h2 class="text-base sm:text-lg font-bold tracking-tight">Step 2: Select UVR5 Neural Model</h2>
+          <p class="text-xs text-[var(--color-text-muted)]">Cached persistently in <span class="font-mono">./models/uvr5</span> • Locked single-job execution</p>
         </div>
+        <span class="text-[11px] font-mono text-[var(--color-text-muted)] nm-inset-sm px-3 py-1.5">Output: Dual 16-bit WAV</span>
+      </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+      <div id="model-grid" class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <!-- Populated from /api/uvr5/models -->
+      </div>
 
-          <!-- 1. Human Voice Only (Acapella / Speech Solo) -->
-          <div id="card-vocal-isolate" class="stem-card nm-card-sm p-4 border-2 border-cyan-500/50 cursor-pointer transition-all" onclick="selectStemMode('vocal_isolate')">
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="text-xl">🗣️</span>
-                <span class="text-xs sm:text-sm font-bold text-cyan-400">Human Voice Only</span>
-              </div>
-              <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20">Voice Solo</span>
-            </div>
-            <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
-              Keeps ONLY the human voice and dialogue. Completely mutes all background music, drums, and instruments. Perfect for reels, TikToks, shorts, and voiceovers.
-            </p>
+      <!-- Optional Clip Settings -->
+      <div class="nm-inset-box p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <p class="text-xs font-bold">Processing Range</p>
+          <p class="text-[11px] text-[var(--color-text-muted)]">Use a clip on mobile CPU for fast previews, or process the full song.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" class="nm-btn px-3 py-1.5 text-xs font-semibold duration-btn" data-dur="30" onclick="selectDuration('30')">30s Clip</button>
+          <button type="button" class="nm-btn px-3 py-1.5 text-xs font-semibold duration-btn" data-dur="60" onclick="selectDuration('60')">60s Clip</button>
+          <button type="button" class="nm-btn px-3 py-1.5 text-xs font-semibold duration-btn active" data-dur="full" onclick="selectDuration('full')">Full Track</button>
+          <div id="start-time-wrap" class="hidden items-center gap-1.5 ml-1">
+            <span class="text-[11px] font-mono text-[var(--color-text-muted)]">Start:</span>
+            <input type="text" id="start-time-input" value="00:00" class="w-20 text-xs text-center py-1.5" placeholder="00:00">
           </div>
-
-          <!-- 2. Vocal Remover / Karaoke (Music Only) -->
-          <div id="card-vocal-remover" class="stem-card nm-card-sm p-4 border-2 border-[var(--color-accent)] selected cursor-pointer transition-all" onclick="selectStemMode('vocal_remover')">
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="text-xl">🎤</span>
-                <span class="text-xs sm:text-sm font-bold text-[var(--color-accent)]">Vocal Remover</span>
-              </div>
-              <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-bold">Karaoke</span>
-            </div>
-            <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
-              Removes all singing, lyrics, and speech. Leaves clean background music with punchy bass and wide instruments for karaoke, covers, or video BGM.
-            </p>
-          </div>
-
-          <!-- 3. Clean Backing Track (Full Instrumental) -->
-          <div id="card-instrumental" class="stem-card nm-card-sm p-4 border-2 border-transparent cursor-pointer transition-all" onclick="selectStemMode('instrumental')">
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="text-xl">🎸</span>
-                <span class="text-xs sm:text-sm font-bold text-emerald-400">Clean Backing Track</span>
-              </div>
-              <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">Music Only</span>
-            </div>
-            <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
-              Full studio-quality instrumental music with zero vocals. Enhanced stereo sound and crisp instruments for background score in video edits.
-            </p>
-          </div>
-
-          <!-- 4. Remove Boomy Bass (Dialogue Clarity) -->
-          <div id="card-bass-remove" class="stem-card nm-card-sm p-4 border-2 border-transparent cursor-pointer transition-all" onclick="selectStemMode('bass_remove')">
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="text-xl">🔇</span>
-                <span class="text-xs sm:text-sm font-bold text-amber-500">Remove Boomy Bass</span>
-              </div>
-              <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">Clear Speech</span>
-            </div>
-            <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
-              Cuts heavy bass, 808 rumbles, and low-end hums so voices and speech sound clear and don't distort phone speakers.
-            </p>
-          </div>
-
         </div>
       </div>
 
-      <!-- Step 3: Live Headphone Audition Section -->
-      <div class="nm-inset-box p-4 sm:p-5 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h4 class="text-xs sm:text-sm font-bold tracking-tight flex items-center gap-2">
-              <span>Live Headphone Audition</span>
-              <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Real-Time DSP</span>
-            </h4>
-            <p class="text-[11px] text-[var(--color-text-muted)]">Audition the processed stem before committing to full download</p>
-          </div>
-
-          <!-- Audition Duration Selector -->
-          <div class="flex items-center gap-1.5 nm-inset-sm p-1 self-start sm:self-auto">
-            <button id="dur-15" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setAuditionDuration(15)">15s</button>
-            <button id="dur-30" class="nm-btn px-2.5 py-1 text-[11px] active" onclick="setAuditionDuration(30)">30s</button>
-            <button id="dur-60" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setAuditionDuration(60)">60s</button>
-            <button id="dur-full" class="nm-btn px-2.5 py-1 text-[11px]" onclick="setAuditionDuration('full')">Full Track</button>
-          </div>
-        </div>
-
-        <!-- Start Time Offset -->
-        <div class="flex flex-wrap items-center gap-2 text-xs">
-          <span class="text-[var(--color-text-muted)] font-mono text-[11px]">Start Audition At:</span>
-          <input type="text" id="audition-start-time" value="00:00" placeholder="00:00" class="w-16 text-center text-xs py-1">
-          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setAuditionStart('00:00')">0:00 Intro</button>
-          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setAuditionStart('00:30')">0:30 Drop/Chorus</button>
-          <button class="nm-btn px-2 py-1 text-[10px]" onclick="setAuditionStart('01:00')">1:00</button>
-        </div>
-
-        <!-- Live Audio Player -->
-        <div class="nm-card-sm p-3">
-          <audio id="live-audition-player" controls class="w-full h-9" crossorigin="anonymous"></audio>
-        </div>
-
-        <!-- ⚡ In-Browser Real-Time Web Audio Studio -->
-        <div class="nm-inset-sm p-4 space-y-3 rounded-xl border border-cyan-500/20">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-              Live WebAudio Real-Time Engine (Zero Latency)
-            </span>
-            <label class="nm-switch scale-90">
-              <input type="checkbox" id="webaudio-toggle" onchange="toggleWebAudioEngine(this.checked)">
-              <span class="nm-slider"></span>
-            </label>
-          </div>
-
-          <div id="webaudio-controls" class="space-y-3 pt-2 border-t border-[var(--nm-border)] opacity-50 pointer-events-none transition-all duration-300">
-            <!-- Mode Selector Chips -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
-              <button id="wa-mode-karaoke" onclick="setWebAudioPreset('karaoke')" class="nm-btn py-1.5 px-2 active font-bold text-[var(--color-accent)]">🎤 Live Karaoke</button>
-              <button id="wa-mode-vocal" onclick="setWebAudioPreset('vocal')" class="nm-btn py-1.5 px-2 font-bold text-cyan-400">🗣️ Voice Solo</button>
-              <button id="wa-mode-bass" onclick="setWebAudioPreset('bass')" class="nm-btn py-1.5 px-2 font-bold text-emerald-400">🔊 Bass Guard</button>
-              <button id="wa-mode-bypass" onclick="setWebAudioPreset('bypass')" class="nm-btn py-1.5 px-2">🎵 Bypass (Raw)</button>
-            </div>
-
-            <!-- Fine-Tuning Sliders -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-              <div class="space-y-1">
-                <div class="flex justify-between text-[10px] font-mono text-[var(--color-text-muted)]">
-                  <span>Vocal Cancellation</span>
-                  <span id="wa-cancel-val" class="text-cyan-400">100%</span>
-                </div>
-                <input type="range" id="wa-cancel-slider" min="0" max="100" value="100" oninput="updateWebAudioParams()" class="w-full h-1.5 accent-cyan-400">
-              </div>
-
-              <div class="space-y-1">
-                <div class="flex justify-between text-[10px] font-mono text-[var(--color-text-muted)]">
-                  <span>Bass Guard Shelf</span>
-                  <span id="wa-bass-val" class="text-emerald-400">180 Hz</span>
-                </div>
-                <input type="range" id="wa-bass-slider" min="60" max="280" value="180" oninput="updateWebAudioParams()" class="w-full h-1.5 accent-emerald-400">
-              </div>
-
-              <div class="space-y-1">
-                <div class="flex justify-between text-[10px] font-mono text-[var(--color-text-muted)]">
-                  <span>Vocal Formant Clarity</span>
-                  <span id="wa-clarity-val" class="text-[var(--color-accent)]">+4 dB</span>
-                </div>
-                <input type="range" id="wa-clarity-slider" min="-6" max="12" value="4" oninput="updateWebAudioParams()" class="w-full h-1.5 accent-[var(--color-accent)]">
-              </div>
-            </div>
-
-            <!-- Instant In-Browser Export Button -->
-            <div class="pt-2 flex flex-wrap items-center justify-between gap-2">
-              <span class="text-[10px] text-[var(--color-text-muted)]">⚡ Real-time processing running 100% inside your browser via Web Audio API</span>
-              <button onclick="exportWebAudioWav()" class="nm-btn px-3 py-1.5 text-[11px] font-bold text-cyan-400 flex items-center gap-1.5 border border-cyan-500/30 hover:border-cyan-400">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Export WebAudio (.WAV)
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Audition Trigger Button -->
-        <button id="btn-audition" onclick="generateAudition()" class="nm-btn w-full py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border border-[var(--color-accent)]">
-          <svg class="w-4 h-4 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span id="audition-btn-text">Audition 30s Preview (Karaoke / Vocal Remover)</span>
-          <svg id="audition-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+      <div class="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <button id="separate-btn" onclick="startSeparation()" class="nm-btn-primary flex-1 py-4 px-6 text-sm flex items-center justify-center gap-2.5">
+          <span id="separate-btn-text">Separate Vocals &amp; Instrumental</span>
         </button>
       </div>
 
-      <!-- Step 4: Export Full Mastered Stem -->
-      <div class="pt-3 border-t border-[var(--nm-border)] space-y-4">
-        <button id="export-stem-btn" onclick="startStemExport()" class="nm-btn-primary w-full py-4 text-sm sm:text-base flex items-center justify-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span id="export-btn-text">Export Mastered Stem (320kbps MP3)</span>
-        </button>
-        <p class="text-[11px] text-center text-[var(--color-text-muted)]">Generates studio-grade 320kbps MP3 with ID3 album art embedded directly on your device</p>
-      </div>
-    </section>
-
-    <!-- Progress Card -->
-    <section id="progress-card" class="nm-card p-6 space-y-4 hidden">
-      <div class="flex items-center justify-between text-xs font-mono">
-        <span id="progress-title" class="font-bold flex items-center gap-2">
-          <svg class="animate-spin h-4 w-4 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          Extracting Stem...
-        </span>
-        <span id="progress-percent" class="font-bold text-[var(--color-accent)]">0%</span>
-      </div>
-      <div class="w-full bg-[var(--nm-surface-dark)] h-2.5 rounded-full overflow-hidden nm-inset-sm">
-        <div id="progress-bar-fill" class="bg-[var(--color-accent)] h-full transition-all duration-300" style="width: 0%"></div>
-      </div>
-      <div id="progress-detail" class="text-[11px] font-mono text-[var(--color-text-muted)] text-center">Processing FFmpeg audio filtergraph...</div>
-    </section>
-
-    <!-- Download Card -->
-    <section id="success-card" class="nm-card p-6 space-y-4 hidden text-center">
-      <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/20">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-      </div>
-      <div>
-        <h3 class="text-base font-bold">Stem Extraction Complete!</h3>
-        <p id="success-filename" class="text-xs font-mono text-[var(--color-text-muted)] truncate max-w-md mx-auto mt-1">track.mp3</p>
-      </div>
-      <div class="nm-inset-sm p-3 max-w-lg mx-auto">
-        <audio id="audio-final-player" controls class="w-full h-9"></audio>
-      </div>
-      <div class="pt-2">
-        <a id="download-trigger-btn" href="#" class="nm-btn-primary inline-flex items-center gap-2 px-8 py-3.5 text-xs sm:text-sm font-bold">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          Download Isolated Track (320kbps MP3)
-        </a>
-      </div>
-    </section>
-
-    <!-- AI Stem Separation Architecture & Web Ecosystem Guide -->
-    <section class="nm-card p-6 space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/30">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <!-- Progress / Error Status -->
+      <div id="progress-panel" class="hidden nm-inset-box p-4 space-y-2.5">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span id="progress-message" class="text-[var(--color-text)] truncate pr-2">Preparing UVR5 job...</span>
+          <span id="progress-pct" class="text-[var(--color-accent)] font-bold">0%</span>
         </div>
+        <div class="w-full h-2.5 rounded-full bg-[var(--nm-surface)] overflow-hidden p-0.5 nm-inset-sm">
+          <div id="progress-bar" class="h-full rounded-full transition-all duration-300" style="width: 5%; background: var(--color-accent);"></div>
+        </div>
+      </div>
+
+      <div id="error-banner" class="hidden nm-inset-box p-4 border border-red-500/40 text-xs font-mono text-red-400"></div>
+    </section>
+
+    <!-- Step 3: Output Stems -->
+    <section id="results-section" class="hidden nm-card p-5 sm:p-7 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h3 class="text-sm font-bold text-[var(--color-text-primary)]">AI Stem Separation Architecture & WebGPU Future</h3>
-          <p class="text-xs text-[var(--color-text-muted)]">How classic DSP math vs Deep Neural Networks separate vocals and music</p>
+          <h2 class="text-base sm:text-lg font-bold tracking-tight">Step 3: Separated Stems Ready</h2>
+          <p id="result-summary" class="text-xs font-mono text-[var(--color-text-muted)] mt-0.5"></p>
         </div>
+        <button onclick="toggleBothPlayback()" id="sync-play-btn" class="nm-btn px-4 py-2 text-xs font-semibold">
+          ▶ Play / Pause Both in Sync
+        </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div class="nm-card-sm p-4 space-y-2 border-l-2 border-cyan-400">
-          <h4 class="font-bold text-cyan-400 text-xs">⚡ Studio DSP & Frequency-Split Phase Cancellation (Current Engine)</h4>
-          <p class="text-[var(--color-text-muted)] leading-relaxed">
-            Splits frequencies into low-bass and mid/high bands. Cancels center vocal harmonics while keeping the bassline and kick drum 100% punchy.
-            <strong>Advantages:</strong> Instant (0.01s), zero GPU required, runs in Termux & Browser, and eliminates voice cutting or robotic artifacts.
-          </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Vocals Stem Card -->
+        <div class="nm-inset-box p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold flex items-center gap-2">
+                <span>🎤 Vocals</span>
+              </h3>
+              <p class="text-[11px] font-mono text-[var(--color-text-muted)]">Lead &amp; backing vocals stem</p>
+            </div>
+            <a id="vocals-download-link" href="#" download class="nm-btn px-3.5 py-2 text-xs font-semibold text-[var(--color-accent)]">
+              ⬇ Download WAV
+            </a>
+          </div>
+          <audio id="vocals-player" controls preload="metadata" class="w-full h-10"></audio>
         </div>
 
-        <div class="nm-card-sm p-4 space-y-2 border-l-2 border-purple-400">
-          <h4 class="font-bold text-purple-400 text-xs">🧠 Neural AI Transformers (Demucs v4 / UVR5 / HTDemucs)</h4>
-          <p class="text-[var(--color-text-muted)] leading-relaxed">
-            Uses deep learning spectrogram masking trained on millions of multitrack recordings to separate 4 independent stems (Vocals, Drums, Bass, Instruments) even with heavy stereo reverb.
-            Can run client-side in the browser via <strong>ONNX Runtime Web + WebGPU</strong> (e.g. <em>Vocal Splitter Local</em>).
-          </p>
+        <!-- Instrumental Stem Card -->
+        <div class="nm-inset-box p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold flex items-center gap-2">
+                <span>🎹 Instrumental</span>
+              </h3>
+              <p class="text-[11px] font-mono text-[var(--color-text-muted)]">Accompaniment / Karaoke stem</p>
+            </div>
+            <a id="inst-download-link" href="#" download class="nm-btn px-3.5 py-2 text-xs font-semibold text-[var(--color-accent)]">
+              ⬇ Download WAV
+            </a>
+          </div>
+          <audio id="inst-player" controls preload="metadata" class="w-full h-10"></audio>
         </div>
-      </div>
-
-      <!-- Links to Top AI Tools -->
-      <div class="pt-2 border-t border-[var(--nm-border)] flex flex-wrap items-center gap-2 text-xs">
-        <span class="text-[var(--color-text-muted)] font-mono text-[11px]">Top AI Stem Tools:</span>
-        <a href="https://github.com/Sajadapp/Vocal-Splitter-Local" target="_blank" rel="noopener" class="nm-btn px-2.5 py-1 text-[11px] text-purple-400 flex items-center gap-1 border border-purple-500/30 hover:border-purple-400">
-          <span>Vocal Splitter Local (WebGPU)</span>
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-        </a>
-        <a href="https://github.com/facebookresearch/demucs" target="_blank" rel="noopener" class="nm-btn px-2.5 py-1 text-[11px] text-cyan-400 flex items-center gap-1 border border-cyan-500/30 hover:border-cyan-400">
-          <span>Meta Demucs v4</span>
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-        </a>
-        <a href="https://github.com/Anjok07/ultimatevocalremovergui" target="_blank" rel="noopener" class="nm-btn px-2.5 py-1 text-[11px] text-emerald-400 flex items-center gap-1 border border-emerald-500/30 hover:border-emerald-400">
-          <span>Ultimate Vocal Remover (UVR5)</span>
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-        </a>
-        <a href="https://vocalremover.org" target="_blank" rel="noopener" class="nm-btn px-2.5 py-1 text-[11px] text-[var(--color-accent)] flex items-center gap-1 border border-[var(--color-accent)]/30 hover:border-[var(--color-accent)]">
-          <span>VocalRemover.org</span>
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-        </a>
       </div>
     </section>
 
   </div>
 
   <script>
-    // State
-    let selectedStem = 'vocal_isolate';
-    let selectedDuration = 30;
-    let currentUploadId = null;
-    let activePollInterval = null;
+    const state = {
+      sourceMode: "upload",
+      selectedFile: null,
+      uploadedId: null,
+      inspectedUrl: null,
+      selectedModel: "UVR-MDX-NET-Inst_HQ_3.onnx",
+      selectedDuration: "full",
+      activeJobId: null,
+      pollTimer: null,
+      models: []
+    };
 
-    function clearAnyActivePoll() {
-      if (activePollInterval) {
-        clearInterval(activePollInterval);
-        activePollInterval = null;
-      }
-    }
-
-    // Theme Switcher
-    function initTheme() {
-      const saved = localStorage.getItem('nm_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
-      updateThemeIcons(saved);
-    }
-
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const target = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', target);
-      localStorage.setItem('nm_theme', target);
-      updateThemeIcons(target);
-    }
-
-    function updateThemeIcons(theme) {
-      const sun = document.getElementById('theme-icon-sun');
-      const moon = document.getElementById('theme-icon-moon');
-      if (theme === 'light') {
-        sun.classList.remove('hidden');
-        moon.classList.add('hidden');
-      } else {
-        sun.classList.add('hidden');
-        moon.classList.remove('hidden');
-      }
-    }
-
-    document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
-    initTheme();
-
-    // Source Tabs
-    function switchSourceTab(tab) {
-      const urlBtn = document.getElementById('tab-url-btn');
-      const uploadBtn = document.getElementById('tab-upload-btn');
-      const demucsBtn = document.getElementById('tab-demucs-btn');
-      const urlSec = document.getElementById('url-input-section');
-      const uploadSec = document.getElementById('upload-input-section');
-      const demucsSec = document.getElementById('demucs-input-section');
-
-      [urlBtn, uploadBtn, demucsBtn].forEach(b => b?.classList.remove('active'));
-      [urlSec, uploadSec, demucsSec].forEach(s => s?.classList.add('hidden'));
-
-      if (tab === 'url') {
-        urlBtn.classList.add('active');
-        urlSec.classList.remove('hidden');
-      } else if (tab === 'upload') {
-        uploadBtn.classList.add('active');
-        uploadSec.classList.remove('hidden');
-      } else if (tab === 'demucs') {
-        demucsBtn.classList.add('active');
-        demucsSec.classList.remove('hidden');
-      }
-    }
-
-    // Demucs / Neural AI Handling (Async — Zero Cloudflare 524 Timeout)
-    let demucsSelectedFile = null;
-    let selectedAiEngine = 'mdx_onnx';
-    let selectedAiDuration = '30';
-    let aiPollTimer = null;
-
-    const demucsDropZone = document.getElementById('demucs-drop-zone');
-    const demucsFileInput = document.getElementById('demucs-file-input');
-    const demucsFileLabel = document.getElementById('demucs-file-label');
-
-    // Check backend health & AI availability on load
-    (async function checkAiHealth() {
-      try {
-        const res = await fetch('/api/health');
-        if (res.ok) {
-          const data = await res.json();
-          const pill = document.getElementById('status-pill');
-          if (pill && data.ai_engines) {
-            if (data.ai_engines.mdx_onnx || data.ai_engines.demucs) {
-              pill.textContent = 'DSP + Neural AI Live 🧠';
-              pill.classList.add('text-emerald-400');
-            }
-          }
-        }
-      } catch (e) {}
+    // Theme handling
+    (function initTheme() {
+      const saved = localStorage.getItem("omni_theme") || "dark";
+      applyTheme(saved);
+      document.getElementById("theme-toggle-btn").addEventListener("click", () => {
+        const current = document.documentElement.getAttribute("data-theme") || "dark";
+        applyTheme(current === "dark" ? "light" : "dark");
+      });
     })();
 
-    function syncUrlToAi() {
-      const mainUrl = document.getElementById('url-input').value.trim();
-      if (!mainUrl) {
-        alert('No URL entered in the Web URL tab yet.');
-        return;
-      }
-      document.getElementById('ai-url-input').value = mainUrl;
-    }
-
-    function selectAiEngine(eng) {
-      selectedAiEngine = eng;
-      document.getElementById('ai-eng-mdx')?.classList.toggle('active', eng === 'mdx_onnx');
-      document.getElementById('ai-eng-demucs')?.classList.toggle('active', eng === 'htdemucs');
-      const hint = document.getElementById('ai-engine-hint');
-      if (hint) {
-        hint.textContent = eng === 'mdx_onnx'
-          ? 'UVR MDX-Net ONNX neural model (~4x faster on phone CPU, crisp vocals).'
-          : 'Meta Demucs v4 HTDemucs neural transformer (deeper separation, slower on phone).';
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("omni_theme", theme);
+      const sun = document.getElementById("theme-icon-sun");
+      const moon = document.getElementById("theme-icon-moon");
+      if (theme === "dark") {
+        sun.classList.remove("hidden");
+        moon.classList.add("hidden");
+      } else {
+        sun.classList.add("hidden");
+        moon.classList.remove("hidden");
       }
     }
 
-    function selectAiDuration(dur) {
-      selectedAiDuration = dur;
-      ['30', '60', 'full'].forEach(d => {
-        document.getElementById(`ai-dur-${d}`)?.classList.toggle('active', d === dur);
-      });
+    function switchSourceTab(mode) {
+      state.sourceMode = mode;
+      document.getElementById("tab-upload-btn").classList.toggle("active", mode === "upload");
+      document.getElementById("tab-url-btn").classList.toggle("active", mode === "url");
+      document.getElementById("upload-input-section").classList.toggle("hidden", mode !== "upload");
+      document.getElementById("url-input-section").classList.toggle("hidden", mode !== "url");
     }
 
-    if (demucsDropZone && demucsFileInput) {
-      demucsDropZone.addEventListener('click', () => demucsFileInput.click());
-      demucsDropZone.addEventListener('dragover', (e) => { e.preventDefault(); demucsDropZone.style.borderColor = '#c084fc'; });
-      demucsDropZone.addEventListener('dragleave', () => { demucsDropZone.style.borderColor = ''; });
-      demucsDropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        demucsDropZone.style.borderColor = '';
-        if (e.dataTransfer.files.length) handleDemucsFile(e.dataTransfer.files[0]);
-      });
-      demucsFileInput.addEventListener('change', () => {
-        if (demucsFileInput.files.length) handleDemucsFile(demucsFileInput.files[0]);
-      });
+    function onFilePicked(evt) {
+      const file = evt.target.files && evt.target.files[0];
+      if (!file) return;
+      state.selectedFile = file;
+      state.uploadedId = null;
+      document.getElementById("selected-file-label").textContent = `${file.name} (${formatBytes(file.size)})`;
+      showPreview(file.name, `Local upload • ${formatBytes(file.size)}`, "");
     }
 
-    function handleDemucsFile(file) {
-      demucsSelectedFile = file;
-      demucsFileLabel.innerHTML = `<span class="font-bold text-purple-400">${file.name}</span> (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    function clearSource() {
+      state.selectedFile = null;
+      state.uploadedId = null;
+      state.inspectedUrl = null;
+      document.getElementById("audio-file-input").value = "";
+      document.getElementById("selected-file-label").textContent = "No file chosen yet";
+      document.getElementById("url-input").value = "";
+      document.getElementById("source-preview-card").classList.add("hidden");
+      hideError();
     }
 
-    async function submitDemucsSeparation() {
-      const aiUrl = (document.getElementById('ai-url-input')?.value || '').trim() || document.getElementById('url-input').value.trim();
-      if (!demucsSelectedFile && !aiUrl && !currentUploadId) {
-        alert('Please select an audio file OR paste a music/YouTube URL first.');
-        return;
+    function showPreview(title, meta, thumbUrl) {
+      document.getElementById("source-title").textContent = title;
+      document.getElementById("source-meta").textContent = meta;
+      const img = document.getElementById("source-thumb");
+      if (thumbUrl) {
+        img.src = thumbUrl;
+        img.classList.remove("hidden");
+      } else {
+        img.classList.add("hidden");
       }
+      document.getElementById("source-preview-card").classList.remove("hidden");
+    }
 
-      if (aiPollTimer) {
-        clearInterval(aiPollTimer);
-        aiPollTimer = null;
-      }
-
-      const btn = document.getElementById('demucs-submit-btn');
-      const btnText = document.getElementById('demucs-submit-text');
-      const spinner = document.getElementById('demucs-submit-spinner');
-      const progressCard = document.getElementById('demucs-progress-card');
-      const statusEl = document.getElementById('demucs-progress-status');
-      const pctEl = document.getElementById('demucs-progress-pct');
-      const barEl = document.getElementById('demucs-progress-bar');
-      const resultsDeck = document.getElementById('demucs-results-deck');
-
-      btn.disabled = true;
-      btnText.textContent = 'Running Neural AI Separation…';
-      spinner.classList.remove('hidden');
-      progressCard.classList.remove('hidden');
-      resultsDeck.classList.add('hidden');
-      barEl.style.width = '3%';
-      pctEl.textContent = '3%';
-      statusEl.textContent = 'Uploading & queuing AI job...';
-
-      const formData = new FormData();
-      if (demucsSelectedFile) {
-        formData.append('file', demucsSelectedFile);
-      } else if (aiUrl) {
-        formData.append('url', aiUrl);
-      } else if (currentUploadId) {
-        formData.append('upload_id', currentUploadId);
-      }
-      formData.append('engine', selectedAiEngine);
-      formData.append('duration', selectedAiDuration);
-      formData.append('start_time', document.getElementById('ai-start-time')?.value.trim() || '00:00');
-      formData.append('async_mode', '1');
-
+    async function tryTunnelRecovery(errMsg) {
+      if (!String(errMsg).includes("Failed to fetch")) return false;
       try {
-        const res = await fetch('/api/separate_async', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({ detail: 'HTTP ' + res.status }));
-          throw new Error(errData.detail || errData.error || 'Failed to start AI separation');
-        }
-
-        const startData = await res.json();
-        const jobId = startData.job_id;
-        if (!jobId) throw new Error('Server did not return AI job ID');
-
-        const startTs = Date.now();
-        aiPollTimer = setInterval(async () => {
-          try {
-            const pRes = await fetch(`/api/status/${jobId}?t=${Date.now()}`);
-            if (!pRes.ok) return;
-            const pData = await pRes.json();
-            if (!pData.success || !pData.job) return;
-
-            const job = pData.job;
-            const pct = job.progress || 5;
-            barEl.style.width = `${pct}%`;
-            pctEl.textContent = `${pct}%`;
-            statusEl.textContent = job.message || 'Processing Neural AI...';
-            const elapsedSec = Math.round((Date.now() - startTs) / 1000);
-            document.getElementById('demucs-progress-sub').textContent = `Elapsed: ${elapsedSec}s • Open 📊 Dashboard tab to watch phone CPU/GPU`;
-
-            if (job.status === 'finished') {
-              clearInterval(aiPollTimer);
-              aiPollTimer = null;
-
-              const vocalsPlayer = document.getElementById('demucs-vocals-player');
-              vocalsPlayer.src = `${job.vocals_url}?preview=1&t=${Date.now()}`;
-              document.getElementById('demucs-vocals-dl').href = job.vocals_url;
-
-              const instPlayer = document.getElementById('demucs-inst-player');
-              instPlayer.src = `${job.instrumental_url}?preview=1&t=${Date.now()}`;
-              document.getElementById('demucs-inst-dl').href = job.instrumental_url;
-
-              document.getElementById('demucs-engine-badge').textContent = `✅ ${job.engine_label || 'Neural AI Separation'}`;
-              document.getElementById('demucs-elapsed-badge').textContent = `${job.elapsed_sec || elapsedSec}s`;
-
-              progressCard.classList.add('hidden');
-              resultsDeck.classList.remove('hidden');
-              resultsDeck.scrollIntoView({ behavior: 'smooth' });
-
-              btn.disabled = false;
-              btnText.textContent = 'Run Neural AI Stem Separation';
-              spinner.classList.add('hidden');
-            } else if (job.status === 'error') {
-              clearInterval(aiPollTimer);
-              aiPollTimer = null;
-              alert('AI Separation Error: ' + (job.error || 'Unknown error'));
-              progressCard.classList.add('hidden');
-              btn.disabled = false;
-              btnText.textContent = 'Run Neural AI Stem Separation';
-              spinner.classList.add('hidden');
-            }
-          } catch (pollErr) {
-            console.warn('AI poll warning:', pollErr);
+        const ghRes = await fetch("https://raw.githubusercontent.com/abhianand123/ytdown/main/url.txt?t=" + Date.now());
+        if (ghRes.ok) {
+          const latestUrl = (await ghRes.text()).trim();
+          if (latestUrl.startsWith("https://") && !latestUrl.startsWith(window.location.origin)) {
+            window.location.href = latestUrl + window.location.pathname;
+            return true;
           }
-        }, 1200);
-
-      } catch (err) {
-        alert('AI Error: ' + err.message);
-        progressCard.classList.add('hidden');
-        btn.disabled = false;
-        btnText.textContent = 'Run Neural AI Stem Separation';
-        spinner.classList.add('hidden');
-      }
-    }
-
-    // Upload Handling
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-
-    dropZone.addEventListener('click', () => fileInput.click());
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-[var(--color-accent)]'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-[var(--color-accent)]'));
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('border-[var(--color-accent)]');
-      if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]);
-    });
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files.length) handleFileUpload(fileInput.files[0]);
-    });
-
-    async function handleFileUpload(file) {
-      const progressBox = document.getElementById('upload-progress-box');
-      const statusText = document.getElementById('upload-status-text');
-      const percentText = document.getElementById('upload-percent-text');
-      const barFill = document.getElementById('upload-bar-fill');
-
-      progressBox.classList.remove('hidden');
-      statusText.textContent = `Uploading ${file.name}...`;
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/api/upload', true);
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const pct = Math.round((e.loaded / e.total) * 100);
-          percentText.textContent = `${pct}%`;
-          barFill.style.width = `${pct}%`;
         }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const res = JSON.parse(xhr.responseText);
-          if (res.success) {
-            currentUploadId = res.upload_id;
-            loadTrack({
-              title: res.filename,
-              duration: res.duration || 0,
-              thumbnail: res.thumbnail || '',
-              badge: res.format ? res.format.toUpperCase() : 'UPLOAD'
-            });
-            progressBox.classList.add('hidden');
-          } else {
-            alert('Upload error: ' + (res.error || 'Server rejected file'));
-            progressBox.classList.add('hidden');
-          }
-        } else {
-          alert('Upload failed (HTTP ' + xhr.status + ')');
-          progressBox.classList.add('hidden');
-        }
-      };
-
-      xhr.onerror = () => {
-        alert('Network error during upload');
-        progressBox.classList.add('hidden');
-      };
-
-      xhr.send(formData);
-    }
-
-    // Stale-tunnel auto-recovery when an old trycloudflare tab hits network 'Failed to fetch'
-    async function tryRedirectIfStaleTunnel(trackUrl) {
-      try {
-        const res = await fetch('https://api.github.com/repos/abhianand123/ytdown/contents/url.txt?ref=main&t=' + Date.now());
-        if (!res.ok) return false;
-        const meta = await res.json();
-        const latest = atob((meta.content || '').replace(/\s/g, '')).trim();
-        if (latest && latest.startsWith('http') && latest !== window.location.origin) {
-          const qs = trackUrl ? ('?url=' + encodeURIComponent(trackUrl)) : '';
-          if (confirm('This tunnel link expired and your phone moved to:\n' + latest + '\n\nClick OK to jump directly to the live server.')) {
-            window.location.href = latest + window.location.pathname + qs;
-          }
-          return true;
-        }
-      } catch (e) {}
+      } catch (_) {}
       return false;
     }
 
-    (function restoreUrlFromQuery() {
-      const p = new URLSearchParams(window.location.search).get('url');
-      if (p) {
-        const inp = document.getElementById('url-input');
-        if (inp) inp.value = p;
-      }
-    })();
-
-    // Inspect URL
     async function inspectUrl() {
-      const url = document.getElementById('url-input').value.trim();
+      const url = document.getElementById("url-input").value.trim();
+      const errBox = document.getElementById("url-error-box");
+      errBox.classList.add("hidden");
       if (!url) {
-        alert('Please paste a video or music link first.');
+        errBox.textContent = "Please paste a valid music or video URL first.";
+        errBox.classList.remove("hidden");
         return;
       }
 
-      const btn = document.getElementById('inspect-btn');
-      const btnText = document.getElementById('inspect-btn-text');
-      const spinner = document.getElementById('inspect-spinner');
-
+      const btn = document.getElementById("inspect-btn");
+      const btnText = document.getElementById("inspect-btn-text");
       btn.disabled = true;
-      btnText.textContent = 'Loading…';
-      spinner.classList.remove('hidden');
+      btnText.textContent = "Inspecting...";
 
       try {
-        const res = await fetch('/api/info', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({url, single_track: true})
+        const res = await fetch("/api/info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, single_track: true })
         });
-
         if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || ('Status ' + res.status));
+          const txt = await res.text();
+          let msg = `Status ${res.status}`;
+          try { msg = JSON.parse(txt).error || msg; } catch (_) {}
+          throw new Error(msg);
         }
         const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Failed to inspect link');
-
-        currentUploadId = null;
-        loadTrack({
-          title: data.title,
-          duration: data.duration || 0,
-          thumbnail: data.thumbnail || '',
-          badge: data.platform || 'STREAM'
-        });
-
+        if (!data.success) throw new Error(data.error || "Could not inspect track");
+        state.inspectedUrl = url;
+        const dur = data.duration_str ? ` • ${data.duration_str}` : "";
+        showPreview(data.title || "Loaded Track", `${data.author || data.platform || "Audio"}${dur}`, data.thumbnail || "");
       } catch (err) {
-        if (String(err.message).toLowerCase().includes('fetch')) {
-          const redirected = await tryRedirectIfStaleTunnel(url);
-          if (redirected) return;
-        }
-        alert('Could not load track: ' + err.message);
+        if (await tryTunnelRecovery(err.message)) return;
+        errBox.textContent = `Could not inspect URL (${err.message}). Tip: you can also click Separate directly.`;
+        errBox.classList.remove("hidden");
       } finally {
         btn.disabled = false;
-        btnText.textContent = 'Load Track';
-        spinner.classList.add('hidden');
+        btnText.textContent = "Inspect Track";
       }
     }
 
-    function loadTrack(info) {
-      document.getElementById('track-title').textContent = info.title;
-      document.getElementById('track-badge').textContent = info.badge;
-      if (info.thumbnail) {
-        document.getElementById('track-thumb').src = info.thumbnail;
+    function selectDuration(dur) {
+      state.selectedDuration = dur;
+      document.querySelectorAll(".duration-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.dur === dur);
+      });
+      const startWrap = document.getElementById("start-time-wrap");
+      if (dur === "full") {
+        startWrap.classList.add("hidden");
+        startWrap.classList.remove("flex");
       } else {
-        document.getElementById('track-thumb').src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="%238e8e93" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+        startWrap.classList.remove("hidden");
+        startWrap.classList.add("flex");
       }
-
-      if (info.duration > 0) {
-        const mins = Math.floor(info.duration / 60);
-        const secs = Math.floor(info.duration % 60);
-        document.getElementById('track-duration').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-      }
-
-      document.getElementById('stem-console').classList.remove('hidden');
-      document.getElementById('stem-console').scrollIntoView({ behavior: 'smooth' });
-      updateLabels();
     }
 
-    // Stem Selection
-    function selectStemMode(mode) {
-      selectedStem = mode;
-      const modes = ['vocal_isolate', 'vocal_remover', 'instrumental', 'bass_remove'];
-      modes.forEach(m => {
-        const card = document.getElementById(`card-${m.replace('_', '-')}`);
-        if (card) {
-          card.classList.remove('selected');
-          card.style.borderColor = 'transparent';
-        }
+    function selectModel(filename) {
+      state.selectedModel = filename;
+      document.querySelectorAll(".model-card").forEach(card => {
+        card.classList.toggle("selected", card.dataset.model === filename);
       });
-
-      const activeCard = document.getElementById(`card-${mode.replace('_', '-')}`);
-      if (activeCard) {
-        activeCard.classList.add('selected');
-        activeCard.style.borderColor = (mode === 'vocal_isolate') ? '#22d3ee' : 'var(--color-accent)';
-      }
-      updateLabels();
     }
 
-    function setAuditionDuration(dur) {
-      selectedDuration = dur;
-      ['dur-15', 'dur-30', 'dur-60', 'dur-full'].forEach(id => {
-        document.getElementById(id)?.classList.remove('active');
+    function renderModels(models) {
+      const grid = document.getElementById("model-grid");
+      grid.innerHTML = "";
+      models.forEach(m => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.dataset.model = m.filename;
+        card.className = "model-card nm-card-sm p-4 text-left space-y-2 border border-[var(--nm-border)]" +
+          (m.filename === state.selectedModel ? " selected" : "");
+        card.onclick = () => selectModel(m.filename);
+
+        const badge = m.cached
+          ? `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Cached</span>`
+          : `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">Auto-Download ~${m.approx_size_mb}MB</span>`;
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-[11px] font-mono font-bold text-[var(--color-accent)]">${m.arch}</span>
+            ${badge}
+          </div>
+          <p class="text-xs font-bold leading-snug break-all">${m.filename}</p>
+          <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">${m.description}</p>
+        `;
+        grid.appendChild(card);
       });
-      const map = {15: 'dur-15', 30: 'dur-30', 60: 'dur-60', 'full': 'dur-full'};
-      document.getElementById(map[dur] || 'dur-30')?.classList.add('active');
-      updateLabels();
     }
 
-    function setAuditionStart(t) {
-      document.getElementById('audition-start-time').value = t;
-    }
-
-    function getStemLabel(mode) {
-      const map = {
-        'vocal_isolate': '🗣️ Human Voice Only (Dialogue / Acapella)',
-        'vocal_remover': '🎤 Vocal Remover (Karaoke)',
-        'instrumental': '🎸 Clean Backing Track (Music Only)',
-        'bass_remove': '🔇 Remove Boomy Bass (Clear Dialogue)'
-      };
-      return map[mode] || mode;
-    }
-
-    function updateLabels() {
-      const stemName = getStemLabel(selectedStem);
-      const durLabel = selectedDuration === 'full' ? 'Full Track' : `${selectedDuration}s`;
-
-      const audBtn = document.getElementById('audition-btn-text');
-      if (audBtn && !audBtn.textContent.includes('…')) {
-        audBtn.textContent = `Audition ${durLabel} Preview (${stemName})`;
-      }
-
-      const expBtn = document.getElementById('export-btn-text');
-      if (expBtn) {
-        expBtn.textContent = `Export Mastered Stem (${stemName} • 320kbps MP3)`;
-      }
-    }
-
-    // Audition Call
-    async function generateAudition() {
-      clearAnyActivePoll();
-      const url = document.getElementById('url-input').value.trim();
-      if (!url && !currentUploadId) {
-        alert('Please load a URL or upload a track first.');
-        return;
-      }
-
-      const btn = document.getElementById('btn-audition');
-      const btnText = document.getElementById('audition-btn-text');
-      const spinner = document.getElementById('audition-spinner');
-      const pill = document.getElementById('status-pill');
-
-      btn.disabled = true;
-      btnText.textContent = 'Rendering stem preview…';
-      spinner.classList.remove('hidden');
-      if (pill) pill.textContent = 'DSP Rendering…';
-
-      const startTime = document.getElementById('audition-start-time').value.trim() || '00:00';
-
-      const payload = {
-        url: url,
-        upload_id: currentUploadId,
-        mode: 'audio',
-        audio_codec: 'mp3',
-        stem_filter: selectedStem,
-        single_track: true,
-        is_preview: true,
-        preview_duration: selectedDuration,
-        start_time: startTime
-      };
-
+    async function loadStatusAndModels() {
+      const pill = document.getElementById("status-pill");
       try {
-        const res = await fetch('/api/preview', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || ('Status ' + res.status));
+        const [modelsRes, healthRes] = await Promise.all([
+          fetch("/api/uvr5/models"),
+          fetch("/api/health")
+        ]);
+        if (modelsRes.ok) {
+          const mData = await modelsRes.json();
+          state.models = mData.models || [];
+          if (mData.default_model) state.selectedModel = mData.default_model;
+          renderModels(state.models);
         }
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Failed to start audition');
-
-        pollAudition(data.job_id);
-
+        if (healthRes.ok) {
+          const hData = await healthRes.json();
+          const uvr = hData.uvr5 || {};
+          if (uvr.status === "ready") {
+            const busyTag = uvr.busy ? " • Busy (1 job running)" : "";
+            pill.textContent = `UVR5 Ready (${uvr.arch || "ARM64"})${busyTag}`;
+            pill.classList.remove("text-red-400");
+            pill.classList.add("text-emerald-400");
+          } else {
+            pill.textContent = "UVR5 Engine Offline";
+            pill.classList.add("text-amber-400");
+          }
+        }
       } catch (e) {
-        alert('Audition error: ' + e.message);
-        btn.disabled = false;
-        updateLabels();
-        spinner.classList.add('hidden');
-        if (pill) pill.textContent = 'Error';
+        pill.textContent = "UVR5 Status Unavailable";
       }
     }
 
-    function pollAudition(jobId) {
-      clearAnyActivePoll();
-      const btn = document.getElementById('btn-audition');
-      const spinner = document.getElementById('audition-spinner');
-      const pill = document.getElementById('status-pill');
+    function showError(msg) {
+      const el = document.getElementById("error-banner");
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
 
-      let pollCount = 0;
-      activePollInterval = setInterval(async () => {
-        pollCount++;
-        if (pollCount > 90) { // ~65s timeout
-          clearAnyActivePoll();
-          btn.disabled = false;
-          spinner.classList.add('hidden');
-          updateLabels();
-          if (pill) pill.textContent = 'Timeout';
-          alert('Audition took too long to render. Please try again.');
+    function hideError() {
+      document.getElementById("error-banner").classList.add("hidden");
+    }
+
+    async function startSeparation() {
+      hideError();
+      if (state.pollTimer) {
+        clearInterval(state.pollTimer);
+        state.pollTimer = null;
+      }
+
+      const btn = document.getElementById("separate-btn");
+      const btnText = document.getElementById("separate-btn-text");
+      const progressPanel = document.getElementById("progress-panel");
+      const resultsSection = document.getElementById("results-section");
+
+      const urlVal = document.getElementById("url-input").value.trim();
+      const formData = new FormData();
+      formData.append("model", state.selectedModel);
+      formData.append("duration", state.selectedDuration);
+      formData.append("async_mode", "1");
+      if (state.selectedDuration !== "full") {
+        formData.append("start_time", document.getElementById("start-time-input").value.trim() || "00:00");
+      }
+
+      if (state.sourceMode === "upload") {
+        if (!state.selectedFile) {
+          showError("Please pick an audio file in Step 1 first.");
           return;
         }
-
-        try {
-          const res = await fetch(`/api/status/${jobId}?t=${Date.now()}`);
-          if (!res.ok) return;
-          const data = await res.json();
-          if (!data.success) return;
-
-          const job = data.job;
-          if (job.status === 'finished') {
-            clearAnyActivePoll();
-            btn.disabled = false;
-            spinner.classList.add('hidden');
-            updateLabels();
-
-            if (pill) pill.textContent = 'Audition Ready 🎧';
-
-            const player = document.getElementById('live-audition-player');
-            player.src = `/api/file/${jobId}?t=${Date.now()}`;
-            player.load();
-            player.play().catch(e => console.log('Autoplay prevented', e));
-
-          } else if (job.status === 'error') {
-            clearAnyActivePoll();
-            alert('Stem processing error: ' + (job.error || 'FFmpeg mastering error'));
-            btn.disabled = false;
-            spinner.classList.add('hidden');
-            updateLabels();
-            if (pill) pill.textContent = 'Error';
-          }
-        } catch (e) {
-          console.error('Poll error', e);
+        formData.append("file", state.selectedFile);
+      } else {
+        if (!urlVal) {
+          showError("Please paste a valid YouTube or music URL in Step 1.");
+          return;
         }
-      }, 700);
-    }
-
-    // Export Final Full Stem
-    async function startStemExport() {
-      clearAnyActivePoll();
-      const url = document.getElementById('url-input').value.trim();
-      if (!url && !currentUploadId) {
-        alert('Please load a URL or upload a track first.');
-        return;
+        formData.append("url", urlVal);
       }
 
-      const payload = {
-        url: url,
-        upload_id: currentUploadId,
-        mode: 'audio',
-        audio_codec: 'mp3',
-        stem_filter: selectedStem,
-        single_track: true
+      btn.disabled = true;
+      btnText.textContent = "Separating via UVR5...";
+      resultsSection.classList.add("hidden");
+      progressPanel.classList.remove("hidden");
+      updateProgressUI(4, `Submitting job to UVR5 (${state.selectedModel})...`);
+
+      try {
+        const res = await fetch("/api/uvr5/separate", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || data.error || `HTTP ${res.status}`);
+        }
+        state.activeJobId = data.job_id;
+        pollJobStatus(data.job_id);
+      } catch (err) {
+        if (await tryTunnelRecovery(err.message)) return;
+        showError(`Failed to start UVR5 separation: ${err.message}`);
+        progressPanel.classList.add("hidden");
+        btn.disabled = false;
+        btnText.textContent = "Separate Vocals & Instrumental";
+      }
+    }
+
+    function updateProgressUI(pct, msg) {
+      document.getElementById("progress-pct").textContent = `${Math.round(pct)}%`;
+      document.getElementById("progress-bar").style.width = `${Math.max(4, Math.min(100, pct))}%`;
+      document.getElementById("progress-message").textContent = msg;
+    }
+
+    function pollJobStatus(jobId) {
+      const btn = document.getElementById("separate-btn");
+      const btnText = document.getElementById("separate-btn-text");
+      const progressPanel = document.getElementById("progress-panel");
+
+      const tick = async () => {
+        try {
+          const res = await fetch(`/api/uvr5/status/${jobId}?t=${Date.now()}`);
+          if (!res.ok) return;
+          const job = await res.json();
+          updateProgressUI(job.progress || 10, job.message || "Processing...");
+
+          if (job.status === "finished") {
+            clearInterval(state.pollTimer);
+            state.pollTimer = null;
+            btn.disabled = false;
+            btnText.textContent = "Separate Vocals & Instrumental";
+            renderResults(job);
+            loadStatusAndModels();
+          } else if (job.status === "error") {
+            clearInterval(state.pollTimer);
+            state.pollTimer = null;
+            btn.disabled = false;
+            btnText.textContent = "Separate Vocals & Instrumental";
+            progressPanel.classList.add("hidden");
+            showError(job.error || job.message || "UVR5 separation failed.");
+          }
+        } catch (_) {}
       };
 
-      const renderBtn = document.getElementById('export-stem-btn');
-      renderBtn.disabled = true;
-
-      const progressCard = document.getElementById('progress-card');
-      const progressBar = document.getElementById('progress-bar-fill');
-      const progressPercent = document.getElementById('progress-percent');
-      const progressDetail = document.getElementById('progress-detail');
-      const successCard = document.getElementById('success-card');
-
-      progressCard.classList.remove('hidden');
-      progressCard.scrollIntoView({ behavior: 'smooth' });
-      successCard.classList.add('hidden');
-
-      try {
-        const res = await fetch('/api/download', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || ('Status ' + res.status));
-        }
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Server error');
-
-        const jobId = data.job_id;
-        let pollCount = 0;
-        activePollInterval = setInterval(async () => {
-          pollCount++;
-          if (pollCount > 130) { // ~115s timeout
-            clearAnyActivePoll();
-            renderBtn.disabled = false;
-            progressCard.classList.add('hidden');
-            alert('Stem export took too long. Please try again.');
-            return;
-          }
-
-          try {
-            const pollRes = await fetch(`/api/status/${jobId}?t=${Date.now()}`);
-            if (!pollRes.ok) return;
-            const pollData = await pollRes.json();
-            if (!pollData.success) return;
-
-            const job = pollData.job;
-            progressBar.style.width = `${job.progress || 0}%`;
-            progressPercent.textContent = `${job.progress || 0}%`;
-            progressDetail.textContent = job.message || 'Processing...';
-
-            if (job.status === 'finished') {
-              clearAnyActivePoll();
-              progressCard.classList.add('hidden');
-              renderBtn.disabled = false;
-
-              document.getElementById('success-filename').textContent = `${job.filename} (${job.file_size})`;
-              const dlBtn = document.getElementById('download-trigger-btn');
-              dlBtn.href = `/api/file/${jobId}`;
-              dlBtn.setAttribute('download', job.filename);
-
-              const finalPlayer = document.getElementById('audio-final-player');
-              finalPlayer.src = `/api/file/${jobId}?t=${Date.now()}`;
-              finalPlayer.load();
-
-              successCard.classList.remove('hidden');
-              successCard.scrollIntoView({ behavior: 'smooth' });
-
-            } else if (job.status === 'error') {
-              clearAnyActivePoll();
-              alert('Export failed: ' + (job.error || 'Unknown mastering error'));
-              progressCard.classList.add('hidden');
-              renderBtn.disabled = false;
-            }
-          } catch (e) {
-            console.error('Job error', e);
-          }
-        }, 900);
-
-      } catch (err) {
-        alert('Export failed: ' + err.message);
-        renderBtn.disabled = false;
-        progressCard.classList.add('hidden');
-      }
+      tick();
+      state.pollTimer = setInterval(tick, 2000);
     }
 
-    document.getElementById('url-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') inspectUrl();
-    });
+    function renderResults(job) {
+      const vPlayer = document.getElementById("vocals-player");
+      const iPlayer = document.getElementById("inst-player");
+      const vLink = document.getElementById("vocals-download-link");
+      const iLink = document.getElementById("inst-download-link");
 
-    // ==========================================
-    // ⚡ In-Browser Real-Time Web Audio Engine
-    // ==========================================
-    let waAudioCtx = null;
-    let waSourceNode = null;
-    let waSplitter = null;
-    let waLeftGain = null;
-    let waRightGain = null;
-    let waMerger = null;
-    let waBassFilter = null;
-    let waClarityFilter = null;
-    let waCompressor = null;
-    let waMasterGain = null;
-    let isWebAudioActive = false;
-    let currentWaPreset = 'karaoke';
+      vPlayer.src = `${job.vocals_url}?preview=1`;
+      iPlayer.src = `${job.instrumental_url}?preview=1`;
+      vLink.href = job.vocals_url;
+      iLink.href = job.instrumental_url;
 
-    function initWebAudioGraph() {
-      if (waAudioCtx) return;
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        waAudioCtx = new AudioContextClass();
-
-        const player = document.getElementById('live-audition-player');
-        waSourceNode = waAudioCtx.createMediaElementSource(player);
-
-        waSplitter = waAudioCtx.createChannelSplitter(2);
-        waLeftGain = waAudioCtx.createGain();
-        waRightGain = waAudioCtx.createGain();
-        waMerger = waAudioCtx.createChannelMerger(2);
-
-        // Lowpass bass guard (retains heavy kick & sub-bass)
-        waBassFilter = waAudioCtx.createBiquadFilter();
-        waBassFilter.type = 'lowpass';
-        waBassFilter.frequency.value = 180;
-
-        // Vocal formant clarity peaking filter
-        waClarityFilter = waAudioCtx.createBiquadFilter();
-        waClarityFilter.type = 'peaking';
-        waClarityFilter.frequency.value = 2800;
-        waClarityFilter.Q.value = 1.4;
-        waClarityFilter.gain.value = 4;
-
-        // Dynamics compressor to prevent digital clipping
-        waCompressor = waAudioCtx.createDynamicsCompressor();
-        waCompressor.threshold.value = -12;
-        waCompressor.knee.value = 6;
-        waCompressor.ratio.value = 4;
-
-        waMasterGain = waAudioCtx.createGain();
-        waMasterGain.gain.value = 1.0;
-
-        rebuildWebAudioRouting();
-      } catch (err) {
-        console.warn('Web Audio initialization error:', err);
-      }
+      const secStr = job.elapsed_sec ? ` in ${job.elapsed_sec}s` : "";
+      document.getElementById("result-summary").textContent =
+        `${job.filename || "Audio Track"} • Model: ${job.model || state.selectedModel}${secStr}`;
+      document.getElementById("results-section").classList.remove("hidden");
     }
 
-    function toggleWebAudioEngine(enabled) {
-      isWebAudioActive = enabled;
-      const controls = document.getElementById('webaudio-controls');
-      if (controls) {
-        if (enabled) {
-          controls.classList.remove('opacity-50', 'pointer-events-none');
-          initWebAudioGraph();
-          if (waAudioCtx && waAudioCtx.state === 'suspended') {
-            waAudioCtx.resume();
-          }
-          rebuildWebAudioRouting();
-        } else {
-          controls.classList.add('opacity-50', 'pointer-events-none');
-          rebuildWebAudioRouting();
-        }
-      }
-    }
-
-    function rebuildWebAudioRouting() {
-      if (!waAudioCtx || !waSourceNode) return;
-
-      try {
-        waSourceNode.disconnect();
-        waLeftGain.disconnect();
-        waRightGain.disconnect();
-        waBassFilter.disconnect();
-        waClarityFilter.disconnect();
-        waMerger.disconnect();
-        waCompressor.disconnect();
-        waMasterGain.disconnect();
-      } catch (e) {}
-
-      if (!isWebAudioActive) {
-        // Direct bypass to output
-        waSourceNode.connect(waAudioCtx.destination);
-        return;
-      }
-
-      // Route Splitter & Bass Guard
-      waSourceNode.connect(waSplitter);
-      waSourceNode.connect(waBassFilter);
-      waBassFilter.connect(waMerger, 0, 0);
-      waBassFilter.connect(waMerger, 0, 1);
-
-      // Phase cancellation channels
-      waSplitter.connect(waLeftGain, 0);
-      waSplitter.connect(waRightGain, 1);
-
-      waLeftGain.connect(waMerger, 0, 0);
-      waRightGain.connect(waMerger, 0, 0);
-      waLeftGain.connect(waMerger, 0, 1);
-      waRightGain.connect(waMerger, 0, 1);
-
-      waMerger.connect(waClarityFilter);
-      waClarityFilter.connect(waCompressor);
-      waCompressor.connect(waMasterGain);
-      waMasterGain.connect(waAudioCtx.destination);
-
-      updateWebAudioParams();
-    }
-
-    function setWebAudioPreset(preset) {
-      currentWaPreset = preset;
-      ['karaoke', 'vocal', 'bass', 'bypass'].forEach(p => {
-        const btn = document.getElementById(`wa-mode-${p}`);
-        if (btn) {
-          btn.classList.toggle('active', p === preset);
-          btn.style.boxShadow = p === preset ? 'var(--nm-inset)' : 'var(--nm-raised)';
-        }
-      });
-
-      const cancelSlider = document.getElementById('wa-cancel-slider');
-      const bassSlider = document.getElementById('wa-bass-slider');
-      const claritySlider = document.getElementById('wa-clarity-slider');
-
-      if (preset === 'karaoke') {
-        cancelSlider.value = 100;
-        bassSlider.value = 180;
-        claritySlider.value = 3;
-      } else if (preset === 'vocal') {
-        cancelSlider.value = 0;
-        bassSlider.value = 80;
-        claritySlider.value = 8;
-      } else if (preset === 'bass') {
-        cancelSlider.value = 90;
-        bassSlider.value = 220;
-        claritySlider.value = -6;
-      } else if (preset === 'bypass') {
-        cancelSlider.value = 0;
-        bassSlider.value = 60;
-        claritySlider.value = 0;
-      }
-      updateWebAudioParams();
-    }
-
-    function updateWebAudioParams() {
-      if (!waAudioCtx || !isWebAudioActive) return;
-
-      const cancelPct = parseFloat(document.getElementById('wa-cancel-slider').value);
-      const bassFreq = parseFloat(document.getElementById('wa-bass-slider').value);
-      const clarityGain = parseFloat(document.getElementById('wa-clarity-slider').value);
-
-      document.getElementById('wa-cancel-val').textContent = `${Math.round(cancelPct)}%`;
-      document.getElementById('wa-bass-val').textContent = `${Math.round(bassFreq)} Hz`;
-      document.getElementById('wa-clarity-val').textContent = `${clarityGain > 0 ? '+' : ''}${Math.round(clarityGain)} dB`;
-
-      if (currentWaPreset === 'vocal') {
-        waLeftGain.gain.value = 0.55;
-        waRightGain.gain.value = 0.55;
-        waBassFilter.frequency.value = 80;
-        waClarityFilter.gain.value = clarityGain;
-      } else if (currentWaPreset === 'bypass') {
-        waLeftGain.gain.value = 0.5;
-        waRightGain.gain.value = 0.0;
-        waBassFilter.frequency.value = 20;
-        waClarityFilter.gain.value = 0;
+    function toggleBothPlayback() {
+      const v = document.getElementById("vocals-player");
+      const i = document.getElementById("inst-player");
+      if (!v.paused || !i.paused) {
+        v.pause();
+        i.pause();
       } else {
-        // Karaoke / Custom Cancellation
-        waLeftGain.gain.value = 0.9;
-        waRightGain.gain.value = -(cancelPct / 100.0) * 0.9;
-        waBassFilter.frequency.value = bassFreq;
-        waClarityFilter.gain.value = clarityGain;
+        const t = Math.min(v.currentTime || 0, i.currentTime || 0);
+        v.currentTime = t;
+        i.currentTime = t;
+        v.play().catch(() => {});
+        i.play().catch(() => {});
       }
     }
 
-    // Export in-browser processed audio to WAV
-    async function exportWebAudioWav() {
-      const player = document.getElementById('live-audition-player');
-      if (!player.src) {
-        alert('Please audition a preview first.');
-        return;
-      }
-
-      try {
-        const res = await fetch(player.src);
-        const arrayBuf = await res.arrayBuffer();
-
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        const tempCtx = new AudioContextClass();
-        const audioBuf = await tempCtx.decodeAudioData(arrayBuf);
-
-        const offlineCtx = new OfflineAudioContext(2, audioBuf.length, audioBuf.sampleRate);
-        const source = offlineCtx.createBufferSource();
-        source.buffer = audioBuf;
-
-        const splitter = offlineCtx.createChannelSplitter(2);
-        const leftGain = offlineCtx.createGain();
-        const rightGain = offlineCtx.createGain();
-        const merger = offlineCtx.createChannelMerger(2);
-
-        const cancelPct = parseFloat(document.getElementById('wa-cancel-slider').value);
-        const bassFreq = parseFloat(document.getElementById('wa-bass-slider').value);
-        const clarityGain = parseFloat(document.getElementById('wa-clarity-slider').value);
-
-        const bassFilter = offlineCtx.createBiquadFilter();
-        bassFilter.type = 'lowpass';
-        bassFilter.frequency.value = bassFreq;
-
-        const clarityFilter = offlineCtx.createBiquadFilter();
-        clarityFilter.type = 'peaking';
-        clarityFilter.frequency.value = 2800;
-        clarityFilter.Q.value = 1.4;
-        clarityFilter.gain.value = clarityGain;
-
-        if (currentWaPreset === 'vocal') {
-          leftGain.gain.value = 0.55;
-          rightGain.gain.value = 0.55;
-        } else {
-          leftGain.gain.value = 0.9;
-          rightGain.gain.value = -(cancelPct / 100.0) * 0.9;
-        }
-
-        source.connect(splitter);
-        source.connect(bassFilter);
-        bassFilter.connect(merger, 0, 0);
-        bassFilter.connect(merger, 0, 1);
-
-        splitter.connect(leftGain, 0);
-        splitter.connect(rightGain, 1);
-        leftGain.connect(merger, 0, 0);
-        rightGain.connect(merger, 0, 0);
-        leftGain.connect(merger, 0, 1);
-        rightGain.connect(merger, 0, 1);
-
-        merger.connect(clarityFilter);
-        clarityFilter.connect(offlineCtx.destination);
-        source.start();
-
-        const rendered = await offlineCtx.startRendering();
-        const wavBlob = audioBufferToWav(rendered);
-
-        const downloadUrl = URL.createObjectURL(wavBlob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `webaudio_${currentWaPreset}_${Date.now()}.wav`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(downloadUrl);
-      } catch (err) {
-        alert('WebAudio export error: ' + err.message);
-      }
+    function formatBytes(bytes) {
+      if (!bytes) return "0 B";
+      const k = 1024;
+      const sizes = ["B", "KB", "MB", "GB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
     }
 
-    // Helper: AudioBuffer to 16-bit PCM WAV Blob
-    function audioBufferToWav(buffer) {
-      const numChannels = buffer.numberOfChannels;
-      const sampleRate = buffer.sampleRate;
-      const format = 1; // PCM
-      const bitDepth = 16;
-      const bytesPerSample = bitDepth / 8;
-      const blockAlign = numChannels * bytesPerSample;
-
-      const interleaved = new Int16Array(buffer.length * numChannels);
-      for (let channel = 0; channel < numChannels; channel++) {
-        const channelData = buffer.getChannelData(channel);
-        for (let i = 0; i < channelData.length; i++) {
-          const sample = Math.max(-1, Math.min(1, channelData[i]));
-          interleaved[i * numChannels + channel] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-        }
-      }
-
-      const byteRate = sampleRate * blockAlign;
-      const dataSize = interleaved.length * bytesPerSample;
-      const bufferLength = 44 + dataSize;
-      const arrayBuffer = new ArrayBuffer(bufferLength);
-      const view = new DataView(arrayBuffer);
-
-      function writeString(view, offset, string) {
-        for (let i = 0; i < string.length; i++) {
-          view.setUint8(offset + i, string.charCodeAt(i));
-        }
-      }
-
-      writeString(view, 0, 'RIFF');
-      view.setUint32(4, 36 + dataSize, true);
-      writeString(view, 8, 'WAVE');
-      writeString(view, 12, 'fmt ');
-      view.setUint32(16, 16, true);
-      view.setUint16(20, format, true);
-      view.setUint16(22, numChannels, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, byteRate, true);
-      view.setUint16(32, blockAlign, true);
-      view.setUint16(34, bitDepth, true);
-      writeString(view, 36, 'data');
-      view.setUint32(40, dataSize, true);
-
-      let offset = 44;
-      for (let i = 0; i < interleaved.length; i++) {
-        view.setInt16(offset, interleaved[i], true);
-        offset += 2;
-      }
-
-      return new Blob([view], { type: 'audio/wav' });
-    }
+    loadStatusAndModels();
   </script>
 </body>
 </html>
