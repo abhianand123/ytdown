@@ -41,6 +41,8 @@ logging.basicConfig(
 logger = logging.getLogger("OmniDownloader")
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.jinja_env.auto_reload = True
 
 @app.after_request
 def add_cors_headers(response):
