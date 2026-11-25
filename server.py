@@ -25,6 +25,13 @@ if os.path.isdir(termux_bin) and termux_bin not in os.environ.get("PATH", ""):
 from flask import Flask, request, jsonify, render_template, send_file, Response
 import yt_dlp
 
+try:
+    from ai_separator import separate_audio_track, has_demucs, has_mdx_onnx
+except Exception as _ai_imp_err:
+    separate_audio_track = None
+    def has_demucs(): return False
+    def has_mdx_onnx(): return False
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -356,6 +363,13 @@ def cleanup_old_files():
                 if f.is_file() and datetime.fromtimestamp(f.stat().st_mtime) < upload_cutoff:
                     try: f.unlink()
                     except: pass
+
+            # Cleanup expired AI separation job directories (> 1 hour old)
+            if TEMP_JOBS_DIR.exists():
+                for d in TEMP_JOBS_DIR.iterdir():
+                    if d.is_dir() and datetime.fromtimestamp(d.stat().st_mtime) < upload_cutoff:
+                        try: shutil.rmtree(d, ignore_errors=True)
+                        except: pass
         except Exception as e:
             logger.error(f"Error in cleanup worker: {e}")
 
@@ -400,60 +414,205 @@ def api_system_stats():
 TEMP_JOBS_DIR = BASE_DIR / "temp_jobs"
 TEMP_JOBS_DIR.mkdir(parents=True, exist_ok=True)
 
-@app.route("/api/separate", methods=["POST"])
-def api_separate():
-    if "file" not in request.files:
-        return jsonify({"detail": "Missing uploaded file"}), 400
-    file = request.files["file"]
-    if not file or not file.filename:
-        return jsonify({"detail": "Empty filename"}), 400
 
-    ext = Path(file.filename).suffix.lower()
-    allowed = {".mp3", ".wav", ".m4a", ".flac"}
-    if ext not in allowed:
-        return jsonify({"detail": f"Unsupported audio format '{ext}'. Allowed: .mp3, .wav, .m4a, .flac"}), 400
+def _acquire_audio_for_ai(job_dir: Path, url: str = "", upload_id: str = "", uploaded_file=None, progress_cb=None):
+    """Obtains local audio file for AI separation from upload, upload_id, or URL (single-track, cached)."""
+    if uploaded_file and uploaded_file.filename:
+        ext = Path(uploaded_file.filename).suffix.lower()
+        allowed = {".mp3", ".wav", ".m4a", ".flac", ".aac", ".ogg", ".opus", ".webm"}
+        if ext not in allowed:
+            raise ValueError(f"Unsupported audio format '{ext}'. Allowed: .mp3, .wav, .m4a, .flac, .aac, .ogg")
+        in_path = job_dir / f"input{ext}"
+        uploaded_file.save(str(in_path))
+        return in_path, uploaded_file.filename
+
+    if upload_id:
+        matches = list(UPLOAD_DIR.glob(f"{upload_id}_*"))
+        if not matches:
+            raise ValueError("Uploaded file not found on server (expired or invalid upload_id).")
+        src = matches[0]
+        dst = job_dir / f"input{src.suffix.lower()}"
+        shutil.copy2(src, dst)
+        return dst, src.name[len(upload_id) + 1:]
+
+    if url:
+        cached = find_cached_source(url)
+        if cached:
+            if progress_cb:
+                progress_cb(6, "Instant load from cached audio track...")
+            dst = job_dir / f"input{cached.suffix.lower()}"
+            shutil.copy2(cached, dst)
+            return dst, cached.stem
+
+        if progress_cb:
+            progress_cb(4, "Downloading track audio for AI separation...")
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": str(job_dir / "dl_source.%(ext)s"),
+            "quiet": True,
+            "no_warnings": True,
+            "noplaylist": True,
+            "socket_timeout": 20,
+            "retries": 3,
+            "nocheckcertificate": True,
+        }
+        node_bin = shutil.which("node") or ("/data/data/com.termux/files/usr/bin/node" if os.path.exists("/data/data/com.termux/files/usr/bin/node") else None)
+        if node_bin:
+            ydl_opts["js_runtimes"] = {"node": {"path": node_bin}}
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            title = safe_filename(info.get("title") or "track", 70) if isinstance(info, dict) else "track"
+
+        dl_files = [f for f in job_dir.glob("dl_source.*") if f.is_file() and not f.name.endswith(".part")]
+        if not dl_files:
+            raise ValueError("Failed to download audio from URL.")
+        src = dl_files[0]
+        save_to_source_cache(url, src)
+        return src, f"{title}{src.suffix.lower()}"
+
+    raise ValueError("Missing uploaded audio file, upload_id, or music URL.")
+
+
+def _run_ai_separation_worker(job_id: str, job_dir: Path, input_file: Path, display_name: str, engine: str, start_sec, duration_sec, url: str = "", upload_id: str = ""):
+    def update_progress(pct: int, msg: str):
+        with JOBS_LOCK:
+            if job_id in JOBS:
+                JOBS[job_id]["status"] = "processing"
+                JOBS[job_id]["progress"] = pct
+                JOBS[job_id]["message"] = msg
+
+    try:
+        if input_file is None:
+            input_file, display_name = _acquire_audio_for_ai(
+                job_dir, url=url, upload_id=upload_id, progress_cb=update_progress
+            )
+
+        out_dir = job_dir / "separated" / "htdemucs" / input_file.stem
+        out_dir.mkdir(parents=True, exist_ok=True)
+        vocals_wav = out_dir / "vocals.wav"
+        no_vocals_wav = out_dir / "no_vocals.wav"
+
+        if separate_audio_track is None:
+            raise RuntimeError("AI separation module (ai_separator.py) failed to load.")
+
+        result = separate_audio_track(
+            input_path=input_file,
+            vocals_out=vocals_wav,
+            instrumental_out=no_vocals_wav,
+            preferred_engine=engine,
+            start_sec=start_sec,
+            duration_sec=duration_sec,
+            progress_cb=update_progress,
+        )
+
+        with JOBS_LOCK:
+            if job_id in JOBS:
+                JOBS[job_id].update({
+                    "status": "finished",
+                    "progress": 100,
+                    "filename": display_name,
+                    "vocals_url": f"/api/download/{job_id}/vocals",
+                    "instrumental_url": f"/api/download/{job_id}/no_vocals",
+                    "engine": result.get("engine"),
+                    "engine_label": result.get("engine_label"),
+                    "ai_used": result.get("ai_used", True),
+                    "elapsed_sec": result.get("elapsed_sec"),
+                    "message": f"Complete via {result.get('engine_label')} ({result.get('elapsed_sec')}s)",
+                })
+    except Exception as e:
+        logger.error(f"AI separation failed [{job_id}]: {e}")
+        with JOBS_LOCK:
+            if job_id in JOBS:
+                JOBS[job_id]["status"] = "error"
+                JOBS[job_id]["error"] = str(e)
+                JOBS[job_id]["message"] = f"AI separation failed: {e}"
+
+
+@app.route("/api/separate", methods=["POST"])
+@app.route("/api/separate_async", methods=["POST"])
+def api_separate():
+    is_json = request.is_json
+    payload = request.get_json(force=True, silent=True) or {} if is_json else request.form
+
+    uploaded = request.files.get("file") or request.files.get("audio_file")
+    url = (payload.get("url") or "").strip()
+    upload_id = (payload.get("upload_id") or "").strip()
+    engine = (payload.get("engine") or "mdx_onnx").strip()
+    async_mode = str(payload.get("async_mode") or request.args.get("async") or ("1" if request.path.endswith("_async") else "0")).lower() in ("1", "true", "yes")
+
+    start_sec = parse_time_seconds(payload.get("start_time"))
+    dur_raw = payload.get("duration", "full")
+    duration_sec = None
+    if dur_raw and str(dur_raw).lower() not in ("full", "0", "all", "none"):
+        try:
+            duration_sec = max(5.0, float(dur_raw))
+        except (ValueError, TypeError):
+            duration_sec = None
+
+    if not uploaded and not url and not upload_id:
+        return jsonify({"detail": "Please provide an audio file, upload_id, or music URL."}), 400
 
     job_id = uuid.uuid4().hex[:12]
     job_dir = TEMP_JOBS_DIR / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
-    input_file = job_dir / f"input{ext}"
-    output_dir = job_dir / "separated"
-    output_dir.mkdir(parents=True, exist_ok=True)
 
-    file.save(str(input_file))
+    # Save uploaded file immediately in request context before spawning worker thread
+    input_file = None
+    display_name = "audio_track"
+    try:
+        if uploaded or upload_id:
+            input_file, display_name = _acquire_audio_for_ai(job_dir, upload_id=upload_id, uploaded_file=uploaded)
+    except Exception as e:
+        shutil.rmtree(job_dir, ignore_errors=True)
+        return jsonify({"detail": str(e)}), 400
 
-    # Check for Demucs command first
-    demucs_bin = shutil.which("demucs")
-    ran_demucs = False
-    if demucs_bin:
-        cmd = [demucs_bin, "-n", "htdemucs", "--two-stems=vocals", "-o", str(output_dir), str(input_file)]
-        res = subprocess.run(cmd, capture_output=True, text=True)
-        if res.returncode == 0:
-            ran_demucs = True
+    with JOBS_LOCK:
+        JOBS[job_id] = {
+            "id": job_id,
+            "status": "queued",
+            "progress": 2,
+            "message": f"Queued for {engine.upper()} Neural AI separation...",
+            "filename": display_name,
+            "vocals_url": None,
+            "instrumental_url": None,
+            "engine": engine,
+            "engine_label": None,
+            "ai_used": None,
+            "error": None,
+            "created_at": datetime.now(),
+        }
 
-    if not ran_demucs:
-        # High-Fidelity Studio Separation Engine Fallback
-        stem_folder = output_dir / "htdemucs" / input_file.stem
-        stem_folder.mkdir(parents=True, exist_ok=True)
-        vocals_wav = stem_folder / "vocals.wav"
-        no_vocals_wav = stem_folder / "no_vocals.wav"
+    if async_mode:
+        threading.Thread(
+            target=_run_ai_separation_worker,
+            args=(job_id, job_dir, input_file, display_name, engine, start_sec, duration_sec, url, upload_id),
+            daemon=True,
+        ).start()
+        return jsonify({
+            "success": True,
+            "status": "queued",
+            "job_id": job_id,
+            "message": "AI separation started in background",
+        })
 
-        ffmpeg_bin = shutil.which("ffmpeg") or "/data/data/com.termux/files/usr/bin/ffmpeg"
-
-        # 1. Vocals (Formant extraction)
-        vocal_af = "highpass=f=80,lowpass=f=12000,stereotools=slev=0.15:mlev=1.65,equalizer=f=1000:width_type=o:width=1.5:g=3.5,equalizer=f=2800:width_type=o:width=1.5:g=4.0,equalizer=f=6000:width_type=o:width=1.5:g=2.5,dialoguenhance=original=0.35:enhance=2.8:voice=4,volume=2.2,alimiter=limit=0.96"
-        subprocess.run([ffmpeg_bin, "-y", "-i", str(input_file), "-af", vocal_af, str(vocals_wav)], capture_output=True)
-
-        # 2. No Vocals / Instrumental (Frequency-split bass preservation)
-        inst_af = "asplit=2[l][h];[l]lowpass=f=190,bass=g=4:f=100[low];[h]highpass=f=190,stereotools=mlev=0.03:slev=1.45,treble=g=2:f=8000[high];[low][high]amix=inputs=2:weights=1.15 1.0,alimiter=limit=0.96"
-        subprocess.run([ffmpeg_bin, "-y", "-i", str(input_file), "-af", inst_af, str(no_vocals_wav)], capture_output=True)
+    # Synchronous execution path (for external API callers / FastAPI parity)
+    _run_ai_separation_worker(job_id, job_dir, input_file, display_name, engine, start_sec, duration_sec, url, upload_id)
+    with JOBS_LOCK:
+        job = JOBS.get(job_id, {})
+    if job.get("status") != "finished":
+        return jsonify({"detail": job.get("error") or "AI separation failed"}), 500
 
     return jsonify({
         "status": "success",
         "job_id": job_id,
-        "filename": file.filename,
-        "vocals_url": f"/api/download/{job_id}/vocals",
-        "instrumental_url": f"/api/download/{job_id}/no_vocals"
+        "filename": job.get("filename"),
+        "vocals_url": job.get("vocals_url"),
+        "instrumental_url": job.get("instrumental_url"),
+        "engine": job.get("engine"),
+        "engine_label": job.get("engine_label"),
+        "ai_used": job.get("ai_used"),
+        "elapsed_sec": job.get("elapsed_sec"),
     })
 
 @app.route("/api/download/<job_id>/<stem>", methods=["GET"])
@@ -472,19 +631,21 @@ def api_download_demucs(job_id, stem):
     if not target_file:
         return jsonify({"detail": f"Stem '{stem}' not found"}), 404
 
+    is_preview = str(request.args.get("preview", "0")).lower() in ("1", "true", "yes")
     return send_file(
         str(target_file),
         mimetype="audio/wav",
-        as_attachment=True,
-        download_name=f"{job_id}_{stem_name}.wav"
+        as_attachment=not is_preview,
+        download_name=f"{job_id}_{stem_name}.wav",
+        conditional=True,
     )
 
 @app.route("/api/upload", methods=["POST"])
 def upload_audio():
-    if "file" not in request.files:
+    file = request.files.get("file") or request.files.get("audio_file")
+    if not file:
         return jsonify({"success": False, "error": "No file uploaded"}), 400
-    file = request.files["file"]
-    if not file or not file.filename:
+    if not file.filename:
         return jsonify({"success": False, "error": "Empty filename"}), 400
 
     ext = Path(file.filename).suffix.lower()
@@ -560,7 +721,11 @@ def health():
         "status": "online",
         "timestamp": datetime.now().isoformat(),
         "ffmpeg": ffmpeg_available,
-        "platform": sys.platform
+        "platform": sys.platform,
+        "ai_engines": {
+            "mdx_onnx": has_mdx_onnx(),
+            "demucs": has_demucs(),
+        }
     })
 
 @app.route("/api/info", methods=["POST"])
@@ -570,15 +735,29 @@ def get_info():
     if not url:
         return jsonify({"success": False, "error": "Please provide a valid URL"}), 400
 
+    single_track = bool(data.get("single_track", False))
     platform = detect_platform(url)
-    logger.info(f"Fetching metadata for [{platform}]: {url}")
+    logger.info(f"Fetching metadata for [{platform}]: {url} (single_track={single_track})")
+
+    is_watch_with_mix = bool(
+        re.search(r'(?:watch\?.*v=|youtu\.be/)', url, re.IGNORECASE)
+        and re.search(r'[?&]list=(?:RD|LL|WL|FL|UL)', url, re.IGNORECASE)
+    )
+    use_noplaylist = single_track or is_watch_with_mix
 
     ydl_opts = {
         "quiet": True,
         "no_warnings": True,
         "skip_download": True,
-        "extract_flat": False,
+        "noplaylist": use_noplaylist,
+        "extract_flat": "in_playlist",
+        "socket_timeout": 15,
+        "retries": 2,
+        "nocheckcertificate": True,
     }
+    node_bin = shutil.which("node") or ("/data/data/com.termux/files/usr/bin/node" if os.path.exists("/data/data/com.termux/files/usr/bin/node") else None)
+    if node_bin:
+        ydl_opts["js_runtimes"] = {"node": {"path": node_bin}}
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -594,12 +773,14 @@ def get_info():
         return jsonify({"success": False, "error": "No media found at this URL"}), 404
 
     # Playlist or multi-item detection
-    entries = meta.get("entries")
+    entries_raw = meta.get("entries")
+    entries = [e for e in entries_raw if isinstance(e, dict)] if entries_raw is not None else None
     if entries:
         is_playlist = True
         title = meta.get("title") or "Playlist / Collection"
-        thumbnail = meta.get("thumbnail") or (entries[0].get("thumbnail") if len(entries) > 0 else "")
-        duration = sum((e.get("duration") or 0) for e in entries if isinstance(e, dict))
+        first_thumbs = entries[0].get("thumbnails") or []
+        thumbnail = meta.get("thumbnail") or entries[0].get("thumbnail") or (first_thumbs[-1].get("url") if first_thumbs else "")
+        duration = sum((e.get("duration") or 0) for e in entries)
         author = meta.get("uploader") or meta.get("channel") or "Various"
         total_items = len(entries)
     else:
@@ -732,12 +913,28 @@ def run_download_task(job_id: str, url: str, options: dict):
                 JOBS[job_id]["progress"] = 99
                 JOBS[job_id]["message"] = "Processing / converting final media..."
 
+    is_watch_with_mix = bool(
+        url and re.search(r'(?:watch\?.*v=|youtu\.be/)', url, re.IGNORECASE)
+        and re.search(r'[?&]list=(?:RD|LL|WL|FL|UL)', url, re.IGNORECASE)
+    )
+    use_noplaylist = bool(
+        options.get("single_track")
+        or download_mode in ("8d", "16d")
+        or spatial_audio != "none"
+        or stem_filter != "none"
+        or is_watch_with_mix
+    )
+
     ydl_opts = {
         "outtmpl": str(job_folder / "%(title).80s.%(ext)s"),
         "progress_hooks": [progress_hook],
         "quiet": True,
         "no_warnings": True,
+        "noplaylist": use_noplaylist,
     }
+    node_bin = shutil.which("node") or ("/data/data/com.termux/files/usr/bin/node" if os.path.exists("/data/data/com.termux/files/usr/bin/node") else None)
+    if node_bin:
+        ydl_opts["js_runtimes"] = {"node": {"path": node_bin}}
 
     # 1. THUMBNAIL MODE
     if download_mode == "thumbnail":
