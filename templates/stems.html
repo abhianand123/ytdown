@@ -243,7 +243,7 @@
         <div class="flex items-center gap-2 nm-inset-sm p-1.5 self-start sm:self-auto">
           <button id="tab-url-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold active" onclick="switchSourceTab('url')">Web URL</button>
           <button id="tab-upload-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold" onclick="switchSourceTab('upload')">Upload File</button>
-          <button id="tab-demucs-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold text-purple-400" onclick="switchSourceTab('demucs')">🧠 Meta Demucs AI</button>
+          <button id="tab-demucs-btn" class="nm-btn px-3 py-1.5 text-xs font-semibold text-purple-400" onclick="switchSourceTab('demucs')">🧠 AI Stem Studio</button>
         </div>
       </div>
 
@@ -280,36 +280,81 @@
         </div>
       </div>
 
-      <!-- Demucs AI Input Deck -->
+      <!-- Neural AI Input Deck (UVR MDX-Net & Meta Demucs v4) -->
       <div id="demucs-input-section" class="space-y-4 hidden">
-        <div id="demucs-drop-zone" class="nm-inset-box p-8 text-center cursor-pointer hover:border-purple-500 transition-all border-2 border-dashed border-purple-500/30 rounded-xl">
-          <input type="file" id="demucs-file-input" accept=".mp3,.wav,.m4a,.flac" class="hidden">
-          <div class="space-y-2">
-            <div class="w-12 h-12 mx-auto rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+        <!-- URL Input inside AI Studio -->
+        <div class="nm-card-sm p-4 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label for="ai-url-input" class="text-xs font-bold text-purple-400">Option A: Paste YouTube / Music URL</label>
+            <button type="button" onclick="syncUrlToAi()" class="nm-btn px-2.5 py-1 text-[10px] font-mono text-[var(--color-text-muted)]">Use Link from Web URL Tab</button>
+          </div>
+          <input type="text" id="ai-url-input" placeholder="Paste YouTube, YouTube Music, or SoundCloud link for AI separation..." class="w-full text-xs sm:text-sm pl-4 pr-4 py-3" autocomplete="off">
+        </div>
+
+        <div id="demucs-drop-zone" class="nm-inset-box p-6 text-center cursor-pointer hover:border-purple-500 transition-all border-2 border-dashed border-purple-500/30 rounded-xl">
+          <input type="file" id="demucs-file-input" accept=".mp3,.wav,.m4a,.flac,.aac,.ogg" class="hidden">
+          <div class="space-y-1.5">
+            <div class="w-10 h-10 mx-auto rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
             </div>
-            <p id="demucs-file-label" class="text-xs sm:text-sm font-semibold">Select audio file for Meta Demucs AI (.mp3, .wav, .m4a, .flac)</p>
-            <p class="text-[11px] text-[var(--color-text-muted)] font-mono">HTDemucs 2-Stem Transformer • Max 100MB</p>
+            <p id="demucs-file-label" class="text-xs sm:text-sm font-semibold">Option B: Click or Drop Audio File (.mp3, .wav, .m4a, .flac)</p>
+            <p class="text-[11px] text-[var(--color-text-muted)] font-mono">Runs genuinely on Neural AI Backend • Max 100MB</p>
+          </div>
+        </div>
+
+        <!-- AI Model & Segment Options -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="nm-card-sm p-3.5 space-y-2">
+            <div class="text-[11px] font-mono uppercase text-[var(--color-text-muted)]">Neural AI Model</div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <button type="button" id="ai-eng-mdx" onclick="selectAiEngine('mdx_onnx')" class="nm-btn py-2 px-2.5 text-[11px] font-bold active text-purple-400">⚡ UVR MDX-Net</button>
+              <button type="button" id="ai-eng-demucs" onclick="selectAiEngine('htdemucs')" class="nm-btn py-2 px-2.5 text-[11px] font-bold">🧠 Demucs v4</button>
+            </div>
+            <p id="ai-engine-hint" class="text-[10px] text-[var(--color-text-muted)]">ONNX Runtime neural network (~4x faster on phone CPU).</p>
+          </div>
+
+          <div class="nm-card-sm p-3.5 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase text-[var(--color-text-muted)]">Length & Start</span>
+              <input type="text" id="ai-start-time" value="00:00" placeholder="00:00" class="w-16 text-center text-[11px] py-0.5">
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 text-xs">
+              <button type="button" id="ai-dur-30" onclick="selectAiDuration('30')" class="nm-btn py-1.5 text-[11px] active">30s Quick</button>
+              <button type="button" id="ai-dur-60" onclick="selectAiDuration('60')" class="nm-btn py-1.5 text-[11px]">60s Clip</button>
+              <button type="button" id="ai-dur-full" onclick="selectAiDuration('full')" class="nm-btn py-1.5 text-[11px]">Full Song</button>
+            </div>
+            <p class="text-[10px] text-[var(--color-text-muted)]">30s renders fast on phone; Full runs async safely (no 524 timeout).</p>
           </div>
         </div>
 
         <button id="demucs-submit-btn" onclick="submitDemucsSeparation()" class="nm-btn w-full py-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border border-purple-500/40 text-purple-400 hover:border-purple-400">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          <span id="demucs-submit-text">Separate Vocals & Instrumental (Meta Demucs AI)</span>
+          <span id="demucs-submit-text">Run Neural AI Stem Separation</span>
           <svg id="demucs-submit-spinner" class="animate-spin h-4 w-4 hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
         </button>
 
-        <!-- Demucs Loading / Progress State -->
-        <div id="demucs-progress-card" class="nm-card-sm p-4 hidden space-y-2 text-center border border-purple-500/20">
-          <div class="flex items-center justify-center gap-2 text-xs font-mono text-purple-400">
-            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-            <span>Demucs HTDemucs transformer is isolating stems...</span>
+        <!-- AI Async Progress State -->
+        <div id="demucs-progress-card" class="nm-card-sm p-4 hidden space-y-3 border border-purple-500/30">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-2 text-purple-400 font-bold">
+              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+              <span id="demucs-progress-status">Queued for Neural AI...</span>
+            </div>
+            <span id="demucs-progress-pct" class="font-bold text-purple-400">0%</span>
           </div>
-          <p class="text-[11px] text-[var(--color-text-muted)]">Deep neural network separation in progress. Please wait a few seconds...</p>
+          <div class="w-full bg-[var(--nm-surface-dark)] h-2.5 rounded-full overflow-hidden nm-inset-sm">
+            <div id="demucs-progress-bar" class="bg-purple-500 h-full transition-all duration-300" style="width: 2%"></div>
+          </div>
+          <p class="text-[11px] font-mono text-[var(--color-text-muted)] text-center" id="demucs-progress-sub">Async job active — zero timeout. Watch live CPU telemetry in 📊 Dashboard.</p>
         </div>
 
-        <!-- Demucs Dual Audio Results -->
+        <!-- AI Dual Audio Results -->
         <div id="demucs-results-deck" class="space-y-4 hidden">
+          <div class="flex items-center justify-between text-xs font-mono nm-inset-sm px-3 py-2 border border-emerald-500/20">
+            <span id="demucs-engine-badge" class="text-emerald-400 font-bold">✅ Separated by Neural AI</span>
+            <span id="demucs-elapsed-badge" class="text-[var(--color-text-muted)]">--</span>
+          </div>
+
           <!-- Vocals Player -->
           <div class="nm-card-sm p-4 space-y-2 border-l-4 border-cyan-400">
             <div class="flex items-center justify-between">
@@ -699,11 +744,60 @@
       }
     }
 
-    // Demucs AI Handling
+    // Demucs / Neural AI Handling (Async — Zero Cloudflare 524 Timeout)
     let demucsSelectedFile = null;
+    let selectedAiEngine = 'mdx_onnx';
+    let selectedAiDuration = '30';
+    let aiPollTimer = null;
+
     const demucsDropZone = document.getElementById('demucs-drop-zone');
     const demucsFileInput = document.getElementById('demucs-file-input');
     const demucsFileLabel = document.getElementById('demucs-file-label');
+
+    // Check backend health & AI availability on load
+    (async function checkAiHealth() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const data = await res.json();
+          const pill = document.getElementById('status-pill');
+          if (pill && data.ai_engines) {
+            if (data.ai_engines.mdx_onnx || data.ai_engines.demucs) {
+              pill.textContent = 'DSP + Neural AI Live 🧠';
+              pill.classList.add('text-emerald-400');
+            }
+          }
+        }
+      } catch (e) {}
+    })();
+
+    function syncUrlToAi() {
+      const mainUrl = document.getElementById('url-input').value.trim();
+      if (!mainUrl) {
+        alert('No URL entered in the Web URL tab yet.');
+        return;
+      }
+      document.getElementById('ai-url-input').value = mainUrl;
+    }
+
+    function selectAiEngine(eng) {
+      selectedAiEngine = eng;
+      document.getElementById('ai-eng-mdx')?.classList.toggle('active', eng === 'mdx_onnx');
+      document.getElementById('ai-eng-demucs')?.classList.toggle('active', eng === 'htdemucs');
+      const hint = document.getElementById('ai-engine-hint');
+      if (hint) {
+        hint.textContent = eng === 'mdx_onnx'
+          ? 'UVR MDX-Net ONNX neural model (~4x faster on phone CPU, crisp vocals).'
+          : 'Meta Demucs v4 HTDemucs neural transformer (deeper separation, slower on phone).';
+      }
+    }
+
+    function selectAiDuration(dur) {
+      selectedAiDuration = dur;
+      ['30', '60', 'full'].forEach(d => {
+        document.getElementById(`ai-dur-${d}`)?.classList.toggle('active', d === dur);
+      });
+    }
 
     if (demucsDropZone && demucsFileInput) {
       demucsDropZone.addEventListener('click', () => demucsFileInput.click());
@@ -725,58 +819,120 @@
     }
 
     async function submitDemucsSeparation() {
-      if (!demucsSelectedFile) {
-        alert('Please choose an audio file (.mp3, .wav, .m4a, .flac) for Demucs separation.');
+      const aiUrl = (document.getElementById('ai-url-input')?.value || '').trim() || document.getElementById('url-input').value.trim();
+      if (!demucsSelectedFile && !aiUrl && !currentUploadId) {
+        alert('Please select an audio file OR paste a music/YouTube URL first.');
         return;
+      }
+
+      if (aiPollTimer) {
+        clearInterval(aiPollTimer);
+        aiPollTimer = null;
       }
 
       const btn = document.getElementById('demucs-submit-btn');
       const btnText = document.getElementById('demucs-submit-text');
       const spinner = document.getElementById('demucs-submit-spinner');
       const progressCard = document.getElementById('demucs-progress-card');
+      const statusEl = document.getElementById('demucs-progress-status');
+      const pctEl = document.getElementById('demucs-progress-pct');
+      const barEl = document.getElementById('demucs-progress-bar');
       const resultsDeck = document.getElementById('demucs-results-deck');
 
       btn.disabled = true;
-      btnText.textContent = 'Processing with Demucs AI…';
+      btnText.textContent = 'Running Neural AI Separation…';
       spinner.classList.remove('hidden');
       progressCard.classList.remove('hidden');
       resultsDeck.classList.add('hidden');
+      barEl.style.width = '3%';
+      pctEl.textContent = '3%';
+      statusEl.textContent = 'Uploading & queuing AI job...';
 
       const formData = new FormData();
-      formData.append('file', demucsSelectedFile);
+      if (demucsSelectedFile) {
+        formData.append('file', demucsSelectedFile);
+      } else if (aiUrl) {
+        formData.append('url', aiUrl);
+      } else if (currentUploadId) {
+        formData.append('upload_id', currentUploadId);
+      }
+      formData.append('engine', selectedAiEngine);
+      formData.append('duration', selectedAiDuration);
+      formData.append('start_time', document.getElementById('ai-start-time')?.value.trim() || '00:00');
+      formData.append('async_mode', '1');
 
       try {
-        const res = await fetch('/api/separate', {
+        const res = await fetch('/api/separate_async', {
           method: 'POST',
           body: formData
         });
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({ detail: 'HTTP ' + res.status }));
-          throw new Error(errData.detail || 'Demucs separation failed');
+          throw new Error(errData.detail || errData.error || 'Failed to start AI separation');
         }
 
-        const data = await res.json();
+        const startData = await res.json();
+        const jobId = startData.job_id;
+        if (!jobId) throw new Error('Server did not return AI job ID');
 
-        // Connect audio players and download buttons
-        const vocalsPlayer = document.getElementById('demucs-vocals-player');
-        vocalsPlayer.src = data.vocals_url;
-        document.getElementById('demucs-vocals-dl').href = data.vocals_url;
+        const startTs = Date.now();
+        aiPollTimer = setInterval(async () => {
+          try {
+            const pRes = await fetch(`/api/status/${jobId}?t=${Date.now()}`);
+            if (!pRes.ok) return;
+            const pData = await pRes.json();
+            if (!pData.success || !pData.job) return;
 
-        const instPlayer = document.getElementById('demucs-inst-player');
-        instPlayer.src = data.instrumental_url;
-        document.getElementById('demucs-inst-dl').href = data.instrumental_url;
+            const job = pData.job;
+            const pct = job.progress || 5;
+            barEl.style.width = `${pct}%`;
+            pctEl.textContent = `${pct}%`;
+            statusEl.textContent = job.message || 'Processing Neural AI...';
+            const elapsedSec = Math.round((Date.now() - startTs) / 1000);
+            document.getElementById('demucs-progress-sub').textContent = `Elapsed: ${elapsedSec}s • Open 📊 Dashboard tab to watch phone CPU/GPU`;
 
-        progressCard.classList.add('hidden');
-        resultsDeck.classList.remove('hidden');
-        resultsDeck.scrollIntoView({ behavior: 'smooth' });
+            if (job.status === 'finished') {
+              clearInterval(aiPollTimer);
+              aiPollTimer = null;
+
+              const vocalsPlayer = document.getElementById('demucs-vocals-player');
+              vocalsPlayer.src = `${job.vocals_url}?preview=1&t=${Date.now()}`;
+              document.getElementById('demucs-vocals-dl').href = job.vocals_url;
+
+              const instPlayer = document.getElementById('demucs-inst-player');
+              instPlayer.src = `${job.instrumental_url}?preview=1&t=${Date.now()}`;
+              document.getElementById('demucs-inst-dl').href = job.instrumental_url;
+
+              document.getElementById('demucs-engine-badge').textContent = `✅ ${job.engine_label || 'Neural AI Separation'}`;
+              document.getElementById('demucs-elapsed-badge').textContent = `${job.elapsed_sec || elapsedSec}s`;
+
+              progressCard.classList.add('hidden');
+              resultsDeck.classList.remove('hidden');
+              resultsDeck.scrollIntoView({ behavior: 'smooth' });
+
+              btn.disabled = false;
+              btnText.textContent = 'Run Neural AI Stem Separation';
+              spinner.classList.add('hidden');
+            } else if (job.status === 'error') {
+              clearInterval(aiPollTimer);
+              aiPollTimer = null;
+              alert('AI Separation Error: ' + (job.error || 'Unknown error'));
+              progressCard.classList.add('hidden');
+              btn.disabled = false;
+              btnText.textContent = 'Run Neural AI Stem Separation';
+              spinner.classList.add('hidden');
+            }
+          } catch (pollErr) {
+            console.warn('AI poll warning:', pollErr);
+          }
+        }, 1200);
 
       } catch (err) {
-        alert('Demucs Error: ' + err.message);
+        alert('AI Error: ' + err.message);
         progressCard.classList.add('hidden');
-      } finally {
         btn.disabled = false;
-        btnText.textContent = 'Separate Vocals & Instrumental (Meta Demucs AI)';
+        btnText.textContent = 'Run Neural AI Stem Separation';
         spinner.classList.add('hidden');
       }
     }
@@ -807,7 +963,7 @@
       statusText.textContent = `Uploading ${file.name}...`;
 
       const formData = new FormData();
-      formData.append('audio_file', file);
+      formData.append('file', file);
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/upload', true);
@@ -870,10 +1026,13 @@
         const res = await fetch('/api/info', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({url})
+          body: JSON.stringify({url, single_track: true})
         });
 
-        if (!res.ok) throw new Error('Status ' + res.status);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || ('Status ' + res.status));
+        }
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Failed to inspect link');
 
@@ -1000,6 +1159,7 @@
         mode: 'audio',
         audio_codec: 'mp3',
         stem_filter: selectedStem,
+        single_track: true,
         is_preview: true,
         preview_duration: selectedDuration,
         start_time: startTime
@@ -1012,7 +1172,10 @@
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error('Status ' + res.status);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || ('Status ' + res.status));
+        }
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Failed to start audition');
 
@@ -1094,7 +1257,8 @@
         upload_id: currentUploadId,
         mode: 'audio',
         audio_codec: 'mp3',
-        stem_filter: selectedStem
+        stem_filter: selectedStem,
+        single_track: true
       };
 
       const renderBtn = document.getElementById('export-stem-btn');
@@ -1117,7 +1281,10 @@
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error('Status ' + res.status);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || ('Status ' + res.status));
+        }
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Server error');
 
