@@ -1,15 +1,15 @@
 import os
 import sys
 import time
-import re
+import shutil
 import subprocess
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Tuple
 
 class SystemTelemetry:
     def __init__(self):
         self.last_sample_time: float = 0.0
-        self.last_core_stats: Dict[str, tuple[float, float]] = {}
+        self.last_core_stats: Dict[str, Tuple[float, float]] = {}
         self.cached_device_info = self._detect_device_specs()
         # Initialize first CPU baseline
         self._sample_proc_stat()
@@ -49,7 +49,7 @@ class SystemTelemetry:
             "kernel": kernel
         }
 
-    def _sample_proc_stat(self) -> Dict[str, tuple[float, float]]:
+    def _sample_proc_stat(self) -> Dict[str, Tuple[float, float]]:
         cores = {}
         if os.path.exists("/proc/stat"):
             try:
@@ -60,9 +60,10 @@ class SystemTelemetry:
                             name = parts[0]
                             # fields: user, nice, system, idle, iowait, irq, softirq, steal
                             vals = [float(x) for x in parts[1:8]]
-                            idle = vals[3] + (vals[4] if len(vals) > 4 else 0.0)
-                            total = sum(vals)
-                            cores[name] = (idle, total)
+                            if len(vals) >= 4:
+                                idle = vals[3] + (vals[4] if len(vals) > 4 else 0.0)
+                                total = sum(vals)
+                                cores[name] = (idle, total)
             except Exception:
                 pass
         return cores
@@ -365,16 +366,21 @@ class SystemTelemetry:
                 )
                 if res.returncode == 0:
                     lines = res.stdout.strip().split("\n")[1:] # skip header
-                    for line in lines[:limit]:
+                    for line in lines:
+                        if len(proc_list) >= limit:
+                            break
                         parts = line.split(None, 4)
                         if len(parts) >= 5:
-                            proc_list.append({
-                                "pid": int(parts[0]),
-                                "user": parts[1],
-                                "cpu_percent": float(parts[2]),
-                                "mem_percent": float(parts[3]),
-                                "command": parts[4].strip()
-                            })
+                            try:
+                                proc_list.append({
+                                    "pid": int(parts[0]),
+                                    "user": parts[1],
+                                    "cpu_percent": float(parts[2]),
+                                    "mem_percent": float(parts[3]),
+                                    "command": parts[4].strip()
+                                })
+                            except ValueError:
+                                continue
             except Exception:
                 pass
         return proc_list
