@@ -303,6 +303,25 @@ async def download_stem(job_id: str, stem: str):
         filename=client_download_name
     )
 
+try:
+    from telemetry import system_telemetry
+except Exception:
+    system_telemetry = None
+
+@app.get("/api/system/stats")
+async def get_system_stats():
+    """Returns real-time phone / host CPU & GPU telemetry."""
+    if system_telemetry:
+        return system_telemetry.get_full_snapshot()
+    return {"error": "Telemetry module unavailable"}
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def serve_dashboard():
+    dashboard_path = BASE_DIR / "templates" / "dashboard.html"
+    if dashboard_path.exists():
+        return HTMLResponse(content=dashboard_path.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>Hardware Dashboard template not found</h1>", status_code=404)
+
 # Dedicated Modern Neumorphic UI for Demucs AI Separation
 @app.get("/", response_class=HTMLResponse)
 @app.get("/demucs", response_class=HTMLResponse)
