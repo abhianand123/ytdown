@@ -102,7 +102,7 @@ def check_tunnel_health(active_url):
         return False
     try:
         import requests
-        r = requests.get(f"{active_url}/api/health", timeout=8)
+        r = requests.get(f"{active_url}/api/health", timeout=15)
         return r.status_code == 200
     except Exception as e:
         logger.warning(f"Tunnel health ping check failed: {e}")
@@ -208,8 +208,8 @@ def main():
                 # Self-healing check: Verify the tunnel is reachable from the internet
                 if not check_tunnel_health(active_url):
                     fail_count += 1
-                    logger.warning(f"Public tunnel ping failed ({fail_count}/2)...")
-                    if fail_count >= 2:
+                    logger.warning(f"Public tunnel ping failed ({fail_count}/4)...")
+                    if fail_count >= 4:
                         logger.error("Tunnel is down or de-registered! Forcing auto-restart...")
                         break
                 else:
