@@ -576,11 +576,13 @@
           if (uvr.status === "ready") {
             const busyTag = uvr.busy ? " • Busy (1 job running)" : "";
             pill.textContent = `UVR5 Ready (${uvr.arch || "ARM64"})${busyTag}`;
-            pill.classList.remove("text-red-400");
+            pill.classList.remove("text-red-400", "text-amber-400");
             pill.classList.add("text-emerald-400");
           } else {
-            pill.textContent = "UVR5 Engine Offline";
+            pill.textContent = uvr.status === "starting" ? "UVR5 Starting..." : "UVR5 Standby (Auto-boots on run)";
+            pill.classList.remove("text-emerald-400");
             pill.classList.add("text-amber-400");
+            setTimeout(loadStatusAndModels, 6000);
           }
         }
       } catch (e) {
