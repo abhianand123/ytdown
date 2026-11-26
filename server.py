@@ -410,6 +410,128 @@ UVR5_JOBS_DIR.mkdir(parents=True, exist_ok=True)
 UVR5_MODELS_DIR = BASE_DIR / "models" / "uvr5"
 UVR5_MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
+_UVR5_BOOT_LOCK = threading.Lock()
+_UVR5_BOOTING = False
+
+
+def _is_uvr5_online(timeout: float = 1.5) -> bool:
+    try:
+        resp = requests.get(f"{UVR5_SERVICE_URL}/health", timeout=timeout)
+        return resp.ok
+    except Exception:
+        return False
+
+
+def _find_proot_distro():
+    return shutil.which("proot-distro") or (
+        "/data/data/com.termux/files/usr/bin/proot-distro"
+        if os.path.exists("/data/data/com.termux/files/usr/bin/proot-distro")
+        else None
+    )
+
+
+def _is_uvicorn_uvr5_proc_alive() -> bool:
+    """Checks /proc directly (no pgrep binary required) for a booting uvicorn uvr5_service process."""
+    try:
+        for p in Path("/proc").iterdir():
+            if not p.name.isdigit():
+                continue
+            try:
+                cmd = (p / "cmdline").read_bytes().replace(b"\x00", b" ").decode("utf-8", errors="ignore")
+                if "uvicorn uvr5_service:app" in cmd:
+                    return True
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return False
+
+
+def _ensure_uvr5_running(wait_ready: bool = True, timeout_sec: int = 90, progress_cb=None) -> bool:
+    """
+    Ensures the headless Debian UVR5 microservice (127.0.0.1:5005) is running.
+    Automatically launches and supervises proot-distro debian when running on Termux/Android.
+    """
+    global _UVR5_BOOTING
+    if _is_uvr5_online(timeout=1.5):
+        return True
+
+    proot_bin = _find_proot_distro()
+    if not proot_bin:
+        return False
+
+    with _UVR5_BOOT_LOCK:
+        if _is_uvr5_online(timeout=1.5):
+            return True
+
+        _UVR5_BOOTING = True
+        try:
+            already_starting = _is_uvicorn_uvr5_proc_alive()
+
+            if not already_starting:
+                logger.info("Auto-starting headless Debian UVR5 microservice on 127.0.0.1:5005...")
+                if progress_cb:
+                    progress_cb(12, "Booting Debian UVR5 AI engine (~20-40s)...")
+
+                env = dict(os.environ)
+                termux_prefix = "/data/data/com.termux/files/usr"
+                env["PATH"] = f"{termux_prefix}/bin:{env.get('PATH', '')}"
+                env.setdefault("HOME", "/data/data/com.termux/files/home")
+                env.setdefault("PREFIX", termux_prefix)
+
+                uvr5_log = BASE_DIR / "uvr5_service.log"
+                log_fh = open(uvr5_log, "a", encoding="utf-8", errors="ignore")
+                try:
+                    launch_cmd = (
+                        f"cd '{BASE_DIR}' && exec /opt/uvr5_venv/bin/uvicorn "
+                        "uvr5_service:app --host 127.0.0.1 --port 5005"
+                    )
+                    subprocess.Popen(
+                        [proot_bin, "login", "debian", "--", "bash", "-c", launch_cmd],
+                        cwd=str(BASE_DIR),
+                        env=env,
+                        stdin=subprocess.DEVNULL,
+                        stdout=log_fh,
+                        stderr=subprocess.STDOUT,
+                        start_new_session=True,
+                        close_fds=True,
+                    )
+                finally:
+                    log_fh.close()
+
+            if not wait_ready:
+                return _is_uvr5_online(timeout=1.5)
+
+            for elapsed in range(timeout_sec):
+                if _is_uvr5_online(timeout=2.0):
+                    logger.info(f"Debian UVR5 microservice online ({elapsed}s)")
+                    return True
+                if progress_cb and elapsed % 4 == 0:
+                    progress_cb(15, f"Booting Debian UVR5 AI engine ({elapsed}s)...")
+                time.sleep(1)
+
+            logger.warning("Timed out waiting for Debian UVR5 microservice startup.")
+            return False
+        except Exception as exc:
+            logger.error(f"Failed to launch Debian UVR5 microservice: {exc}")
+            return False
+        finally:
+            _UVR5_BOOTING = False
+
+
+def _uvr5_watchdog_worker():
+    """Keeps the Debian UVR5 microservice warm and restarts it automatically if stopped."""
+    while True:
+        try:
+            _ensure_uvr5_running(wait_ready=True, timeout_sec=90)
+        except Exception as exc:
+            logger.warning(f"UVR5 watchdog error: {exc}")
+        time.sleep(45)
+
+
+if _find_proot_distro():
+    threading.Thread(target=_uvr5_watchdog_worker, daemon=True).start()
+
 
 def _get_uvr5_health():
     try:
@@ -425,7 +547,7 @@ def _get_uvr5_health():
         return snap
     except Exception:
         return {
-            "status": "offline",
+            "status": "starting" if _UVR5_BOOTING else "offline",
             "separator_initialized": False,
             "default_model": UVR5_DEFAULT_MODEL,
             "models_dir": str(UVR5_MODELS_DIR),
@@ -522,13 +644,12 @@ def _run_uvr5_worker(
         update_progress(20, f"Dispatching to UVR5 engine ({model_name})...")
         result = None
 
-        # Prefer headless Debian UVR5 microservice when running
-        service_up = False
-        try:
-            hc = requests.get(f"{UVR5_SERVICE_URL}/health", timeout=2)
-            service_up = hc.ok
-        except Exception:
-            service_up = False
+        # Ensure Debian UVR5 microservice is up (auto-recovers if killed or rebooted)
+        service_up = _ensure_uvr5_running(
+            wait_ready=True,
+            timeout_sec=90,
+            progress_cb=update_progress,
+        )
 
         if service_up:
             update_progress(35, f"Separating via UVR5 Debian service ({model_name})...")
