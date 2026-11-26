@@ -108,14 +108,35 @@ def check_tunnel_health(active_url):
         logger.warning(f"Tunnel health ping check failed: {e}")
         return False
 
+def kill_cloudflared_only():
+    """Terminates only cloudflared and its termux-chroot proot wrapper without disturbing Debian proot services."""
+    import signal
+    my_pid = os.getpid()
+    try:
+        for entry in Path("/proc").iterdir():
+            if not entry.name.isdigit():
+                continue
+            pid = int(entry.name)
+            if pid == my_pid:
+                continue
+            try:
+                cmd = (entry / "cmdline").read_bytes().replace(b"\x00", b" ").decode("utf-8", errors="ignore")
+                if "cloudflared tunnel" in cmd:
+                    os.kill(pid, signal.SIGKILL)
+            except Exception:
+                continue
+    except Exception:
+        pass
+    os.system("killall -9 cloudflared 2>/dev/null")
+
 def run_tunnel_process(port):
     """Starts cloudflared with termux-chroot on Android or directly on PC."""
     is_android = "android" in sys.platform or os.path.exists("/data/data/com.termux")
     has_chroot = shutil.which("termux-chroot") is not None
 
-    # Kill any zombie instances first
+    # Kill only stale cloudflared instances (preserve proot-distro Debian UVR5 service)
     if is_android:
-        os.system("killall -9 proot cloudflared 2>/dev/null")
+        kill_cloudflared_only()
         time.sleep(1)
 
     if is_android and has_chroot:
@@ -183,7 +204,7 @@ def main():
             if not active_url:
                 logger.error("Failed to capture tunnel URL. Retrying in 5s...")
                 proc.kill()
-                os.system("killall -9 proot cloudflared 2>/dev/null")
+                kill_cloudflared_only()
                 time.sleep(5)
                 continue
 
@@ -220,18 +241,18 @@ def main():
                 proc.kill()
             except:
                 pass
-            os.system("killall -9 proot cloudflared 2>/dev/null")
+            kill_cloudflared_only()
             time.sleep(2)
 
         except KeyboardInterrupt:
             logger.info("Stopping Bridge Manager...")
             try: proc.kill()
             except: pass
-            os.system("killall -9 proot cloudflared 2>/dev/null")
+            kill_cloudflared_only()
             break
         except Exception as e:
             logger.error(f"Error in tunnel loop: {e}")
-            os.system("killall -9 proot cloudflared 2>/dev/null")
+            kill_cloudflared_only()
             time.sleep(5)
 
 if __name__ == "__main__":
