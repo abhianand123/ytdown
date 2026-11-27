@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hardware Telemetry Dashboard | Qualcomm Snapdragon & Adreno GPU</title>
-  <meta name="description" content="Real-time hardware performance monitor for Snapdragon SoC, Octa-Core CPU, Adreno GPU, RAM, Thermals, and Active Processes.">
+  <title>Hardware Telemetry Dashboard | OmniDownloader Studio</title>
+  <meta name="description" content="Real-time hardware performance monitor for CPU, GPU, RAM, Battery, and Active Processes.">
 
   <!-- Inter & JetBrains Mono Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -206,8 +206,8 @@
         <div class="flex items-center gap-2.5 flex-wrap">
           <span class="text-xs uppercase tracking-widest font-mono text-[var(--color-accent)] font-bold">Hardware Telemetry</span>
           <span class="text-xs font-mono text-[var(--color-text-dim)]">•</span>
-          <h1 id="device-model" class="text-base sm:text-lg font-extrabold tracking-tight">crDroid Treble (msm8953)</h1>
-          <span id="device-soc-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border border-[var(--color-accent)]">Snapdragon 625</span>
+          <h1 id="device-model" class="text-base sm:text-lg font-extrabold tracking-tight">System Host</h1>
+          <span id="device-soc-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border border-[var(--color-accent)]">Local Processor</span>
         </div>
         <p class="text-xs text-[var(--color-text-muted)] flex items-center gap-2 flex-wrap">
           <span>Kernel: <strong id="kernel-ver" class="font-mono text-[var(--color-text)]">4.9.319</strong></span>
@@ -251,8 +251,8 @@
           <div class="flex items-center gap-2">
             <span class="p-2 rounded-xl nm-inset-sm text-[var(--color-accent)] font-bold text-sm">⚡</span>
             <div>
-              <h2 class="text-sm font-bold tracking-tight">Qualcomm Kryo / Cortex-A53</h2>
-              <p class="text-[11px] text-[var(--color-text-muted)]">Octa-Core Cluster (8x 2.01 GHz)</p>
+              <h2 class="text-sm font-bold tracking-tight">System CPU Monitor</h2>
+              <p class="text-[11px] text-[var(--color-text-muted)]" id="cpu-cluster-subtitle">Multi-Core Processor Telemetry</p>
             </div>
           </div>
           <span id="cpu-total-badge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg nm-inset-sm text-[var(--color-accent)]">-- %</span>
@@ -277,7 +277,7 @@
         <div class="flex items-center justify-between text-xs font-mono text-[var(--color-text-muted)] nm-inset-sm p-2.5">
           <span>Freq: <strong id="cpu-freq-summary" class="text-[var(--color-text)]">-- MHz</strong></span>
           <span>•</span>
-          <span>Threads: <strong class="text-[var(--color-text)]">8 Cores Active</strong></span>
+          <span>Threads: <strong id="cpu-threads-count" class="text-[var(--color-text)]">-- Active</strong></span>
         </div>
       </div>
 
@@ -287,8 +287,8 @@
           <div class="flex items-center gap-2">
             <span class="p-2 rounded-xl nm-inset-sm text-amber-400 font-bold text-sm">🎮</span>
             <div>
-              <h2 id="gpu-model-name" class="text-sm font-bold tracking-tight">Qualcomm Adreno 506</h2>
-              <p class="text-[11px] text-[var(--color-text-muted)]">Hardware 3D Graphics Accelerator</p>
+              <h2 id="gpu-model-name" class="text-sm font-bold tracking-tight">System GPU</h2>
+              <p class="text-[11px] text-[var(--color-text-muted)]">Hardware Graphics Engine</p>
             </div>
           </div>
           <span id="gpu-total-badge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg nm-inset-sm text-amber-400">-- %</span>
@@ -354,7 +354,7 @@
             <span class="text-sm">🧩</span>
             <h2 class="text-sm font-bold tracking-tight">Per-Core CPU Load & Clock Frequencies</h2>
           </div>
-          <span class="text-[11px] font-mono text-[var(--color-text-muted)]">Cortex-A53 Octa-Core</span>
+          <span class="text-[11px] font-mono text-[var(--color-text-muted)]" id="cores-arch-tag">Multi-Core System</span>
         </div>
 
         <div id="cores-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -368,18 +368,18 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="text-sm">⚡</span>
-              <h2 class="text-sm font-bold tracking-tight">Adreno KGSL Clock Stepper</h2>
+              <h2 class="text-sm font-bold tracking-tight">GPU Engine &amp; Scaling</h2>
             </div>
-            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/30">Dynamic P-State</span>
+            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/30">Live Status</span>
           </div>
-          <p class="text-xs text-[var(--color-text-muted)]">
-            Active Adreno 506 frequency steps. Snapdragon GPU scales dynamically depending on rendering load.
+          <p class="text-xs text-[var(--color-text-muted)]" id="gpu-panel-desc">
+            Hardware graphics utilization and dynamic clock telemetry from host driver counters.
           </p>
 
           <div class="space-y-1.5">
             <div class="text-[11px] font-mono text-[var(--color-text-dim)] flex justify-between">
-              <span>DVFS STEPS</span>
-              <span id="active-step-indicator" class="text-amber-400 font-bold">320 MHz Active</span>
+              <span>ADAPTER / STATES</span>
+              <span id="active-step-indicator" class="text-amber-400 font-bold">Active</span>
             </div>
             <div id="gpu-steps-container" class="grid grid-cols-3 sm:grid-cols-4 gap-1.5 font-mono text-xs">
               <!-- Dynamically rendered frequency steps -->
@@ -389,16 +389,16 @@
 
         <div class="nm-inset-sm p-3 space-y-1 text-xs font-mono text-[var(--color-text-muted)] mt-2">
           <div class="flex justify-between">
-            <span>KGSL Sysfs:</span>
-            <span class="text-[var(--color-text)]">/sys/class/kgsl-3d0</span>
+            <span>Driver Source:</span>
+            <span class="text-[var(--color-text)]" id="gpu-driver-src">Host Telemetry</span>
           </div>
           <div class="flex justify-between">
             <span>Peak Clock:</span>
-            <span id="gpu-peak-clk" class="text-[var(--color-text)]">600 MHz</span>
+            <span id="gpu-peak-clk" class="text-[var(--color-text)]">Auto</span>
           </div>
           <div class="flex justify-between">
             <span>Power State:</span>
-            <span id="gpu-pwr-status" class="text-emerald-400 font-bold">DVFS Online</span>
+            <span id="gpu-pwr-status" class="text-emerald-400 font-bold">Online</span>
           </div>
         </div>
       </div>
@@ -434,7 +434,7 @@
         <!-- ZRAM / Swap -->
         <div class="nm-inset-sm p-3 flex items-center justify-between text-xs font-mono">
           <div>
-            <div class="text-[10px] text-[var(--color-text-dim)] uppercase">ZRAM Compressed Swap</div>
+            <div class="text-[10px] text-[var(--color-text-dim)] uppercase">Pagefile / Swap</div>
             <div id="swap-stats" class="text-[var(--color-text)] font-semibold mt-0.5">-- MB / -- MB</div>
           </div>
           <div id="swap-pct-badge" class="px-2 py-0.5 rounded-md bg-[var(--nm-surface)] text-xs text-[var(--color-text-muted)]">-- %</div>
@@ -509,7 +509,7 @@
 
     <!-- Footer -->
     <footer class="text-center text-xs text-[var(--color-text-dim)] py-4 font-mono">
-      Qualcomm Snapdragon 625 Adreno 506 Telemetry • Native Linux Kernel /sys nodes • OmniDownloader Studio
+      Real-Time System Hardware Telemetry • OmniDownloader Studio
     </footer>
 
   </div>
@@ -638,10 +638,12 @@
 
       // 1. Device Info
       if (data.device) {
-        document.getElementById('device-model').textContent = data.device.model || 'Qualcomm Device';
-        document.getElementById('device-soc-badge').textContent = data.device.soc || 'Qualcomm Snapdragon';
-        document.getElementById('kernel-ver').textContent = data.device.kernel || '--';
+        document.getElementById('device-model').textContent = data.device.model || 'System Host';
+        document.getElementById('device-soc-badge').textContent = data.device.soc || 'Host Processor';
+        document.getElementById('kernel-ver').textContent = data.device.platform || data.device.kernel || '--';
         document.getElementById('device-uptime').textContent = data.device.uptime_formatted || '--';
+        const tc = document.getElementById('cpu-threads-count');
+        if (tc && data.device.cores_count) tc.textContent = data.device.cores_count + ' Logical Cores';
       }
 
       // 2. CPU Overall
@@ -652,11 +654,17 @@
         setSvgGauge('cpu-gauge-circle', cpuPct);
 
         // SoC Temp
-        const temp = data.cpu.temperature_c || 0.0;
-        document.getElementById('soc-temp').textContent = temp.toFixed(1) + ' °C';
-        if (temp > 65) document.getElementById('soc-temp').className = 'text-xs font-mono font-bold text-rose-500';
-        else if (temp > 48) document.getElementById('soc-temp').className = 'text-xs font-mono font-bold text-amber-400';
-        else document.getElementById('soc-temp').className = 'text-xs font-mono font-bold text-emerald-400';
+        const tempEl = document.getElementById('soc-temp');
+        if (data.cpu.temperature_c == null) {
+          tempEl.textContent = 'N/A';
+          tempEl.className = 'text-xs font-mono font-bold text-[var(--color-text-muted)]';
+        } else {
+          const temp = data.cpu.temperature_c;
+          tempEl.textContent = temp.toFixed(1) + ' °C';
+          if (temp > 75) tempEl.className = 'text-xs font-mono font-bold text-rose-500';
+          else if (temp > 55) tempEl.className = 'text-xs font-mono font-bold text-amber-400';
+          else tempEl.className = 'text-xs font-mono font-bold text-emerald-400';
+        }
 
         // Load Avg
         if (data.cpu.load_average) {
@@ -670,7 +678,7 @@
           let activeCoresCount = 0;
 
           grid.innerHTML = data.cpu.cores.map(c => {
-            if (c.online) {
+            if (c.online && c.cur_mhz) {
               avgFreq += c.cur_mhz;
               activeCoresCount++;
             }
@@ -681,14 +689,14 @@
               <div class="nm-inset-sm p-2.5 flex flex-col justify-between space-y-1.5">
                 <div class="flex items-center justify-between text-[11px] font-mono">
                   <span class="font-bold">Core ${c.core}</span>
-                  <span class="text-[9px] uppercase px-1.5 py-0.2 rounded font-semibold ${c.cluster === 'big' ? 'text-amber-400 bg-amber-400/10' : 'text-cyan-400 bg-cyan-400/10'}">${c.cluster}</span>
+                  <span class="text-[9px] uppercase px-1.5 py-0.2 rounded font-semibold text-cyan-400 bg-cyan-400/10">${c.cluster || 'CPU'}</span>
                 </div>
                 <div class="w-full h-1.5 rounded-full nm-inset-box overflow-hidden">
                   <div class="core-bar h-full ${barColor}" style="width: ${pct}%"></div>
                 </div>
                 <div class="flex items-center justify-between text-[10px] font-mono text-[var(--color-text-dim)]">
                   <span class="font-bold text-[var(--color-text)]">${pct.toFixed(0)}%</span>
-                  <span>${c.cur_mhz ? c.cur_mhz + ' MHz' : 'Offline'}</span>
+                  <span>${c.cur_mhz ? c.cur_mhz + ' MHz' : 'Active'}</span>
                 </div>
               </div>
             `;
@@ -705,31 +713,34 @@
         document.getElementById('chart-cpu-now').textContent = cpuPct.toFixed(1) + '%';
       }
 
-      // 3. Adreno GPU
+      // 3. System GPU
       if (data.gpu) {
         const gpuPct = data.gpu.usage_percent || 0.0;
-        document.getElementById('gpu-model-name').textContent = data.gpu.model || 'Qualcomm Adreno 506';
+        document.getElementById('gpu-model-name').textContent = data.gpu.model || 'System GPU';
         document.getElementById('gpu-total-percent').innerHTML = gpuPct.toFixed(1) + '<span class="text-lg text-[var(--color-text-muted)]">%</span>';
         document.getElementById('gpu-total-badge').textContent = gpuPct.toFixed(1) + ' %';
         setSvgGauge('gpu-gauge-circle', gpuPct);
 
-        document.getElementById('gpu-clock-val').textContent = (data.gpu.clock_mhz || 0) + ' MHz';
-        document.getElementById('gpu-state-text').textContent = data.gpu.is_active ? 'Rendering / Active' : 'Power-Save Idle';
-        document.getElementById('gpu-peak-clk').textContent = (data.gpu.max_clock_mhz || 600) + ' MHz';
-        document.getElementById('active-step-indicator').textContent = (data.gpu.clock_mhz || 0) + ' MHz Active';
+        document.getElementById('gpu-clock-val').textContent = data.gpu.clock_mhz ? (data.gpu.clock_mhz + ' MHz') : 'Auto';
+        document.getElementById('gpu-state-text').textContent = data.gpu.is_active ? 'Rendering / Active' : 'Low-Load Idle';
+        document.getElementById('gpu-peak-clk').textContent = data.gpu.max_clock_mhz ? (data.gpu.max_clock_mhz + ' MHz') : 'Driver Managed';
+        document.getElementById('active-step-indicator').textContent = data.gpu.clock_mhz ? (data.gpu.clock_mhz + ' MHz Active') : (gpuPct.toFixed(1) + '% 3D Engine');
 
-        // Frequency Step Pills
-        const freqs = data.gpu.available_freqs_mhz || [133, 216, 320, 400, 510, 560, 600];
+        const freqs = data.gpu.available_freqs_mhz || [];
         const currentMhz = data.gpu.clock_mhz || 0;
         const stepsContainer = document.getElementById('gpu-steps-container');
-        stepsContainer.innerHTML = freqs.map(f => {
-          const isActive = (f === currentMhz);
-          return `
-            <div class="p-1.5 rounded-lg text-center transition-all ${isActive ? 'bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-400/20' : 'nm-inset-sm text-[var(--color-text-dim)]'}">
-              ${f}M
-            </div>
-          `;
-        }).join('');
+        if (freqs.length > 0) {
+          stepsContainer.innerHTML = freqs.map(f => {
+            const isActive = (f === currentMhz);
+            return `
+              <div class="p-1.5 rounded-lg text-center transition-all ${isActive ? 'bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-400/20' : 'nm-inset-sm text-[var(--color-text-dim)]'}">
+                ${f}M
+              </div>
+            `;
+          }).join('');
+        } else {
+          stepsContainer.innerHTML = `<div class="col-span-full p-2 rounded-lg nm-inset-sm text-center text-[var(--color-text-muted)]">Windows PDH 3D Engine Tracking</div>`;
+        }
 
         // Push GPU to Rolling Chart
         gpuHistory.shift();
@@ -766,12 +777,12 @@
 
       // 5. Battery & Power
       if (data.battery) {
-        const cap = data.battery.capacity_percent || 0;
+        const cap = data.battery.capacity_percent ?? 100;
         document.getElementById('battery-level').textContent = cap + ' %';
         document.getElementById('bat-capacity-text').textContent = cap + '%';
-        document.getElementById('bat-voltage').textContent = (data.battery.voltage_v || 4.0).toFixed(2) + ' V';
-        document.getElementById('bat-current').textContent = (data.battery.current_ma || 0) + ' mA';
-        document.getElementById('bat-temp').textContent = (data.battery.temperature_c || 25).toFixed(1) + ' °C';
+        document.getElementById('bat-voltage').textContent = data.battery.voltage_v != null ? (data.battery.voltage_v.toFixed(2) + ' V') : 'N/A';
+        document.getElementById('bat-current').textContent = data.battery.current_ma != null ? (data.battery.current_ma + ' mA') : 'N/A';
+        document.getElementById('bat-temp').textContent = data.battery.temperature_c != null ? (data.battery.temperature_c.toFixed(1) + ' °C') : 'N/A';
 
         const isCharging = data.battery.is_charging;
         document.getElementById('battery-icon').textContent = isCharging ? '⚡' : '🔋';
