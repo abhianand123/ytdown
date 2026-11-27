@@ -17,10 +17,27 @@ import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta
 
-# Ensure Termux bin directories are in PATH when executed via root / su
+# Ensure Termux / WinGet FFmpeg directories are in PATH across desktop and mobile hosts
 termux_bin = "/data/data/com.termux/files/usr/bin"
 if os.path.isdir(termux_bin) and termux_bin not in os.environ.get("PATH", ""):
     os.environ["PATH"] = f"{termux_bin}:{os.environ.get('PATH', '')}"
+if os.name == "nt":
+    local_app = os.environ.get("LOCALAPPDATA", "")
+    win_extra = []
+    if local_app:
+        winget_links = Path(local_app) / "Microsoft" / "WinGet" / "Links"
+        if winget_links.is_dir():
+            win_extra.append(str(winget_links))
+        winget_pkgs = Path(local_app) / "Microsoft" / "WinGet" / "Packages"
+        if winget_pkgs.is_dir():
+            for ff_dir in winget_pkgs.glob("Gyan.FFmpeg*/ffmpeg*/bin"):
+                if ff_dir.is_dir():
+                    win_extra.append(str(ff_dir))
+    cur_path = os.environ.get("PATH", "")
+    for d in win_extra:
+        if d not in cur_path:
+            cur_path = f"{d};{cur_path}"
+    os.environ["PATH"] = cur_path
 
 from flask import Flask, request, jsonify, render_template, send_file, Response
 import yt_dlp
@@ -31,7 +48,7 @@ UVR5_DEFAULT_MODEL = "UVR-MDX-NET-Inst_HQ_3.onnx"
 UVR5_MODELS_CATALOG = [
     {
         "filename": "UVR-MDX-NET-Inst_HQ_3.onnx",
-        "label": "UVR-MDX-NET Inst HQ 3 (Default • Fast ARM64)",
+        "label": "UVR-MDX-NET Inst HQ 3 (Default • Fast CPU)",
         "arch": "MDX-Net ONNX",
         "approx_size_mb": 64,
         "recommended": True,
@@ -533,26 +550,37 @@ if _find_proot_distro():
     threading.Thread(target=_uvr5_watchdog_worker, daemon=True).start()
 
 
+def _get_local_uvr5_module():
+    """Imports local uvr5_service module cleanly for in-process laptop execution."""
+    try:
+        import uvr5_service as uvr5_mod
+        return uvr5_mod
+    except Exception:
+        return None
+
+
 def _get_uvr5_health():
     try:
-        resp = requests.get(f"{UVR5_SERVICE_URL}/health", timeout=1.5)
+        resp = requests.get(f"{UVR5_SERVICE_URL}/health", timeout=0.8)
         if resp.ok:
             return resp.json()
     except Exception:
         pass
-    try:
-        from uvr5_service import uvr5_service
-        snap = uvr5_service.status_snapshot()
+    uvr5_mod = _get_local_uvr5_module()
+    if uvr5_mod is not None:
+        import platform
+        snap = uvr5_mod.uvr5_service.status_snapshot()
         snap["mode"] = "in_process"
+        snap["ffmpeg"] = bool(shutil.which("ffmpeg"))
+        snap["arch"] = platform.machine() or sys.platform
         return snap
-    except Exception:
-        return {
-            "status": "starting" if _UVR5_BOOTING else "offline",
-            "separator_initialized": False,
-            "default_model": UVR5_DEFAULT_MODEL,
-            "models_dir": str(UVR5_MODELS_DIR),
-            "service_url": UVR5_SERVICE_URL,
-        }
+    return {
+        "status": "starting" if _UVR5_BOOTING else "offline",
+        "separator_initialized": False,
+        "default_model": UVR5_DEFAULT_MODEL,
+        "models_dir": str(UVR5_MODELS_DIR),
+        "service_url": UVR5_SERVICE_URL,
+    }
 
 
 def _acquire_audio_for_uvr5(job_dir: Path, url: str = "", upload_id: str = "", uploaded_file=None, progress_cb=None):
@@ -725,13 +753,35 @@ def _run_uvr5_worker(
 @app.route("/api/uvr5/models", methods=["GET"])
 def api_uvr5_models():
     try:
-        resp = requests.get(f"{UVR5_SERVICE_URL}/models", timeout=2)
+        resp = requests.get(f"{UVR5_SERVICE_URL}/models", timeout=0.8)
         if resp.ok:
             data = resp.json()
             data["service_online"] = True
             return jsonify(data)
     except Exception:
         pass
+
+    uvr5_mod = _get_local_uvr5_module()
+    if uvr5_mod is not None:
+        svc = uvr5_mod.uvr5_service
+        local_models = []
+        for key, info in uvr5_mod.UVR5_MODELS.items():
+            cached_path = svc.models_dir / key
+            local_models.append({
+                **info,
+                "is_default": key == svc.default_model,
+                "cached": cached_path.is_file() and cached_path.stat().st_size > 0,
+            })
+        return jsonify({
+            "service_online": True,
+            "mode": "in_process",
+            "default_model": svc.default_model,
+            "loaded_model": svc._loaded_model,
+            "models_dir": str(svc.models_dir),
+            "segment_size": svc.segment_size,
+            "batch_size": svc.batch_size,
+            "models": local_models,
+        })
 
     fallback_models = []
     for item in UVR5_MODELS_CATALOG:
@@ -1565,11 +1615,27 @@ def download_file(job_id):
     return response
 
 
+def _init_inprocess_uvr5_on_laptop():
+    if _find_proot_distro():
+        return
+    uvr5_mod = _get_local_uvr5_module()
+    if uvr5_mod is not None:
+        try:
+            uvr5_mod.uvr5_service.init_separator(preload_default=False)
+        except Exception as exc:
+            logger.warning(f"Local UVR5 init deferred: {exc}")
+
+
 if __name__ == "__main__":
+    host = os.environ.get("HOST", "127.0.0.1" if os.name == "nt" else "0.0.0.0")
     port = int(os.environ.get("PORT", 5000))
+    if not _find_proot_distro():
+        threading.Thread(target=_init_inprocess_uvr5_on_laptop, daemon=True).start()
     print("\n" + "="*60)
-    print("  🚀 OmniDownloader Server Started")
+    print("  🚀 OmniDownloader Studio Started")
     print(f"  📡 Local Access   : http://localhost:{port}")
-    print(f"  🌐 Network Access : http://0.0.0.0:{port}")
+    print(f"  🎚️ Stems / UVR5   : http://localhost:{port}/stems")
+    print(f"  🎧 8D Spatial     : http://localhost:{port}/8d")
+    print(f"  📊 Telemetry      : http://localhost:{port}/dashboard")
     print("="*60 + "\n")
-    app.run(host="0.0.0.0", port=port, threaded=True)
+    app.run(host=host, port=port, threaded=True)
