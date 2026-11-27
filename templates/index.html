@@ -333,7 +333,7 @@
     <div id="offline-banner" class="hidden p-4 nm-card border-l-4 border-amber-500 text-[var(--color-text-primary)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <div class="flex items-center gap-2">
         <svg aria-hidden="true" class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-        <span><strong>Phone Connection Notice:</strong> Server may have reconnected or rotated tunnel URL.</span>
+        <span><strong>Server Connection Notice:</strong> Local server stopped or URL rotated.</span>
       </div>
       <a href="https://abhianand123.github.io/ytdown/" class="nm-btn px-4 py-2 text-xs flex-shrink-0 text-[var(--color-accent)] font-semibold">
         <span class="whitespace-nowrap">Reconnect via Permanent Link</span>
@@ -712,7 +712,7 @@
   <footer class="w-full border-t border-[var(--color-header-border)] py-4 text-center text-xs text-[var(--color-text-dim)] bg-[var(--nm-surface)]">
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
       <div>Universal Media Extraction Console · Neumorphic Hardware Soft UI</div>
-      <div>Runs on Windows, macOS, Linux, and Android Termux</div>
+      <div>Runs locally on Windows, macOS, and Linux</div>
     </div>
   </footer>
 
@@ -956,7 +956,7 @@
 
         if (!res.ok) {
           if (res.status === 530 || res.status === 502 || res.status === 504) {
-            throw new Error("Phone server is unreachable (HTTP " + res.status + "). Check that Termux is running on your phone.");
+            throw new Error("Server is unreachable (HTTP " + res.status + "). Check that the local server is running.");
           }
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData.error || ("Server error HTTP " + res.status));
@@ -1098,7 +1098,7 @@
 
         if (!res.ok) {
           if (res.status === 530 || res.status === 502 || res.status === 504) {
-            throw new Error("Phone server is unreachable (HTTP " + res.status + "). Please make sure your phone is connected to Wi-Fi and Termux is running with wake-lock held.");
+            throw new Error("Server is unreachable (HTTP " + res.status + "). Make sure the local server is running.");
           }
           const errText = await res.text();
           throw new Error("Server error (" + res.status + ")");
