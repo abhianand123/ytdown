@@ -13,6 +13,7 @@ import gc
 import inspect
 import logging
 import os
+import platform
 import shutil
 import subprocess
 import threading
@@ -599,7 +600,7 @@ async def _run_queued_job(
 async def health() -> Dict[str, Any]:
     snap = uvr5_service.status_snapshot()
     snap["ffmpeg"] = bool(shutil.which("ffmpeg"))
-    snap["arch"] = os.uname().machine if hasattr(os, "uname") else "unknown"
+    snap["arch"] = platform.machine() or (os.uname().machine if hasattr(os, "uname") else "unknown")
     return snap
 
 
