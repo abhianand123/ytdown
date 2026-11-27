@@ -123,8 +123,8 @@
       Permanent Gateway
     </div>
     <div class="loader" id="spinner"></div>
-    <h1 id="headline">Connecting to Phone Server</h1>
-    <p id="subtext">Resolving live tunnel from your Android device...</p>
+    <h1 id="headline">Connecting to OmniDownloader</h1>
+    <p id="subtext">Resolving active session URL...</p>
 
     <div class="status-box" id="status-box" style="display: none;">
       <div class="status-label">Active Tunnel</div>
@@ -136,17 +136,17 @@
       <a id="launch-8d-btn" href="#" class="btn-8d">🎧 Launch 8D / 16D Spatial Audio Studio</a>
       <a id="launch-dash-btn" href="#" class="btn-secondary">📊 Hardware CPU & GPU Telemetry Dashboard</a>
       <a id="launch-btn" href="#" class="btn-primary">🎬 Launch Universal Video Downloader</a>
-      <a id="wifi-btn" href="http://192.168.1.13:5000" class="btn-secondary">On Home Wi-Fi? Open Local IP (192.168.1.13:5000)</a>
+      <a id="wifi-btn" href="http://localhost:5000" class="btn-secondary">Running Locally? Open http://localhost:5000</a>
     </div>
 
     <p class="note">
-      Bookmark this permanent link! Your phone automatically updates this page whenever it reboots or changes networks.
+      Optional remote bridge page when you start OmniDownloader with public tunnel enabled.
     </p>
   </div>
 
   <script>
     const GITHUB_REPO = "abhianand123/ytdown";
-    const LOCAL_IP = "http://192.168.1.13:5000";
+    const LOCAL_IP = "http://localhost:5000";
 
     const headline = document.getElementById('headline');
     const subtext = document.getElementById('subtext');
@@ -222,14 +222,14 @@
     async function connect() {
       attemptCount++;
       subtext.textContent = attemptCount > 1 
-        ? `Re-verifying phone connection (Attempt ${attemptCount})...` 
+        ? `Re-verifying server connection (Attempt ${attemptCount})...` 
         : "Fetching active tunnel credentials...";
 
       const tunnelUrl = await fetchLatestUrl();
 
       if (!tunnelUrl) {
-        headline.textContent = "Waiting for Phone Server";
-        subtext.textContent = "Phone server has not published a tunnel yet. Retrying in 4s...";
+        headline.textContent = "Waiting for OmniDownloader Server";
+        subtext.textContent = "No active tunnel published yet. Retrying in 4s...";
         actionButtons.style.display = 'flex';
         setTimeout(connect, 4000);
         return;
@@ -250,7 +250,7 @@
 
       if (isAlive) {
         spinner.style.borderTopColor = "#10b981";
-        headline.textContent = "Phone Server Online!";
+        headline.textContent = "Server Online!";
         
         const q = window.location.search + window.location.hash;
         let targetDestination = tunnelUrl;
@@ -264,8 +264,8 @@
           window.location.replace(targetDestination);
         }, 500);
       } else {
-        headline.textContent = "Phone is Reconnecting";
-        subtext.textContent = `Tunnel registered, but phone is still establishing connection. Auto-retrying in 3s...`;
+        headline.textContent = "Server Reconnecting";
+        subtext.textContent = `Tunnel registered, but server is still starting. Auto-retrying in 3s...`;
         setTimeout(connect, 3000);
       }
     }
